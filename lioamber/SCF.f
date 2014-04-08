@@ -175,9 +175,10 @@ c test ---------------------------------------------------------
 c
 c Diagonalization of S matrix, after this is not needed anymore
 c
-       docholesky=.true.
-       call g2g_timer_start('cholesky')
+       docholesky=.false.
        IF (docholesky) THEN
+
+         call g2g_timer_start('cholesky')
          PRINT*,'DOING CHOLESKY'
          ALLOCATE(MatrixVec(MM))
          DO iii=1,MM
@@ -208,6 +209,7 @@ c
 
          DEALLOCATE(MatrixVec)
          PRINT*,'CHOLESKY DONE'
+         call g2g_timer_stop('cholesky')
        ELSE
 
 
@@ -256,7 +258,6 @@ c        write(56,*) RMM(M15+1)
 
         ENDIF                   
 
-       call g2g_timer_stop('cholesky')
 
 c
 c CASE OF NO STARTING GUESS PROVIDED, 1 E FOCK MATRIX USED
@@ -965,6 +966,38 @@ c
  309  continue
 c
  307   continue
+
+
+
+! TESTING Q
+ 
+!        do j=1,M
+!          do k=1,j
+!            if (j.eq.k) then
+!              rho(j,k)=RMM(j+(M2-k)*(k-1)/2)
+!            else
+!              rho(j,k)=(RMM(j+(M2-k)*(k-1)/2))/2
+!            endif
+!          enddo
+!          do k=j+1,M
+!            rho(j,k)=RMM(k+(M2-j)*(j-1)/2)/2
+!          enddo
+!        enddo
+ 
+!        call matmulnano(fock,X,rho1,M)
+!        fock=rho1 ! RHO1 es borrador
+ 
+ 
+!        DO iii=M15,M15+MM-1
+!          WRITE(666,*) RMM(iii)
+!        ENDDO
+!        CALL intQalt(RMM(M15),X,rho,fock,Xtrans,M)
+!        DO iii=M15,M15+MM-1
+!          WRITE(668,*) RMM(iii)
+!        ENDDO
+ 
+
+
 c
 c
 c
@@ -1102,7 +1135,7 @@ c
  346  format(2x,4(f10.6,2x))
   682  format(2x,f15.10)
   88  format(5(2x,f8.5))
-  45  format(E14.6E4)
+  45  format(E14.6E3)
   91  format(F14.7,4x,F14.7)
 c
       call g2g_timer_stop('SCF')
