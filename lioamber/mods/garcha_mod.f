@@ -1,3 +1,4 @@
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
        module garcha_mod
 
        implicit real*8 (a-h,o-z)
@@ -78,6 +79,7 @@ c      common /cav/ a01,epsilon1,field1,exter1,Fx1,Fy1,Fz1
 c
 c      common /index/ ii,iid
 c
+c
       Data Num /1,3,6,10/
       dimension jatom(2,100),coef(100),dist(100,3),distt(100)
       integer ndis,nsteps
@@ -92,6 +94,12 @@ c
       real*8     rmax, rmaxs
       real*8, dimension (:), ALLOCATABLE :: cool
       real*4, dimension (:), ALLOCATABLE :: cools
-c      parameter rmintsol=16.0D0
+c     parameter rmintsol=16.0D0
 
+!------------------------------------------------------------------------------!
+! FFR ADDED:
+       REAL*8,ALLOCATABLE :: DSX(:,:,:),DSY(:,:,:),DSZ(:,:,:)
+
+!------------------------------------------------------------------------------!
       end module garcha_mod
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!

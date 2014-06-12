@@ -203,7 +203,7 @@ c
 !
 !----------------------------------------------------------!
        ALLOCATE(Y(M,M),Ytrans(M,M),Xfran(M,M),Xtrans(M,M))
-       docholesky=.TRUE.
+       docholesky=.FALSE.
        dolowdin=.FALSE.
 !       IF (.FALSE.) WRITE(*,*) 'Cholesky is: ',docholesky
 !       IF (.FALSE.) WRITE(*,*) 'Lowdin is: ',dolowdin
@@ -267,8 +267,8 @@ c           write(56,*) RMM(M15+1)
 
          do i=1,M
          do j=1,M
-           Xtrans(i,j)=X(j,i)
            Ytrans(i,j)=Y(j,i)
+           Xtrans(i,j)=X(j,i)   
          enddo
          enddo
 c-----------------------------------------------------------
@@ -572,6 +572,7 @@ c#######OJO, SAQUE EL -1########
          do j=1,M
            do k=1,j
          FP_PFv(j+(M2-k)*(k-1)/2)=FP_PF(j,k)
+           PRINT*,j,k,fock(j,k),rho(j,k)
            enddo
          enddo
 c----------Acumulamos en las columnas de FP_PFm los sucesivos conmutadores----------
@@ -770,6 +771,8 @@ c----------Cálculo de parámetro optimo para DGELS-------------------
 
 
 c-----Resuelve la ecuación A*X = B. (EMAT*ci=bcoef). La solución la escribe en bcoef------
+!      PRINT*,'-------------------------------------'
+!      PRINT*,EMAT
       CALL DGELS( 'No transpose',ndiist+1, ndiist+1, 1, EMAT, ndiist+1,
      > bcoef, ndiist+1, WORK, LWORK, INFO )
 
@@ -798,7 +801,7 @@ c
          WRITE(6,520) fockaux(4,:)
          WRITE(6,*) '---------------------'
        ENDIF
-!       CALL basechange(M,Y,fockaux,Ytrans)
+       CALL basechange(M,Y,fockaux,Ytrans)
 !##########################################################!
 
       do i=1,MM
@@ -937,7 +940,7 @@ c 995   continue
 !----------------------------------------------------------!
          CALL spunpack('L',M,RMM(M1),rhoaux)
          CALL fixrho(M,rhoaux)
-         CALL basechange(M,Ytrans,rhoaux,Y)
+!         CALL basechange(M,Ytrans,rhoaux,Y)
          IF (.FALSE.) THEN
            WRITE(6,*) 'Rhoaux:'
            WRITE(6,520) rhoaux(1,:)
@@ -1101,8 +1104,8 @@ c--------------------------------------------------------------
        IF (docholesky) CALL 
      >    test_cholesky(natom,M,M15,fockaux,Xtrans,Xfran,rhoaux)
 !
-       IF (dolowdin) CALL
-     >    test_lowdin(natom,M,fockaux,Xfran,rhoaux,eigvec,eigval)
+!       IF (dolowdin) CALL
+!     >    test_lowdin(natom,M,fockaux,Xfran,rhoaux,eigvec,eigval)
 !
 !##########################################################!
 

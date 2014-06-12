@@ -1,4 +1,4 @@
-
+c SCF subroutine ----------------------------------
 c DIRECT VERSION
 c Calls all integrals generator subroutines : 1 el integrals,
 c 2 el integrals, exchange fitting , so it gets S matrix, F matrix
@@ -10,8 +10,8 @@ c---------------------------------------------------
        use garcha_mod
 c      use qmmm_module, only : qmmm_struct, qmmm_nml
 c
-       implicit real*8 (a-h,o-z)
-       integer:: l
+      implicit real*8 (a-h,o-z)
+      integer:: l
        dimension q(natom),work(1000)
        REAL*8 , intent(inout)  :: dipxyz(3) 
        real*8, dimension (:,:), ALLOCATABLE ::xnano,znano
@@ -25,21 +25,12 @@ c       dimension d(natom,natom)
        logical  hagodiis,alloqueo, ematalloc
 c       REAL*8 , intent(in)  :: qmcoords(3,natom)
 c       REAL*8 , intent(in)  :: clcoords(4,nsolin)
+        INTEGER :: ErrID,iii,jjj
+        LOGICAL :: docholesky
+        REAL*8,ALLOCATABLE :: MatrixVec(:),TestMatrix(:)
 
-!--------------------------------------------------------------------!
-!      FFR VARS:
-       INTEGER :: ErrID,iii,jjj,kkk,ndir
-       LOGICAL :: docholesky,dolowdin
-       REAL*8  :: fscratch
-       REAL*8,ALLOCATABLE :: 
-     >   fockaux(:,:),rhoaux(:,:),SMaux(:,:),
-     >   rmmaux(:),QM(:,:),rhoaux2(:,:),rhoaux3(:,:),
-     >   eigvec(:,:),eigval(:),Xfran(:,:)
-!--------------------------------------------------------------------!
-
-
-       call g2g_timer_start('SCF')
-       just_int3n = .false.
+      call g2g_timer_start('SCF')
+      just_int3n = .false.
        alloqueo = .true.
        ematalloc=.false.
        hagodiis=.false.
@@ -51,77 +42,65 @@ c Pointers
 c
 c chequeo -----------
 c
-       Ndens=1
+      Ndens=1
 c---------------------
 c       write(*,*) 'M=',M
        allocate (znano(M,M),xnano(M,M))
        
        npas=npas+1       
-       E=0.0D0
-       E1=0.0D0
-       En=0.0D0
-       E2=0.0D0
-       Es=0.0D0
+      E=0.0D0
+      E1=0.0D0
+      En=0.0D0
+      E2=0.0D0
+      Es=0.0D0
       
-       ngeo=ngeo+1
+      ngeo=ngeo+1
 
-       sq2=sqrt(2.D0)
-       MM=M*(M+1)/2 
-       MM2=M**2
-       MMd=Md*(Md+1)/2
-       Md2=2*Md
-       M2=2*M
+      sq2=sqrt(2.D0)
+      MM=M*(M+1)/2 
+      MM2=M**2
+      MMd=Md*(Md+1)/2
+      Md2=2*Md
+      M2=2*M
 
 c first P
-       M1=1
+      M1=1
 c now Pnew
-       M3=M1+MM
+      M3=M1+MM
 c now S, F also uses the same position after S was used
-       M5=M3+MM
+      M5=M3+MM
 c now G
-       M7=M5+MM
+      M7=M5+MM
 c now Gm
-       M9=M7+MMd
+      M9=M7+MMd
 c now H
-       M11=M9+MMd
+      M11=M9+MMd
 c W ( eigenvalues ), also this space is used in least squares
-       M13=M11+MM
+      M13=M11+MM
 c aux ( vector for ESSl)
-       M15=M13+M
+      M15=M13+M
 c Least squares
-       M17=M15+MM
+      M17=M15+MM
 c vectors of MO
-       M18=M17+MMd
+      M18=M17+MMd
 c weights (in case of using option )
-       M19=M18+M*NCO
+      M19=M18+M*NCO
 c
 * RAM storage of two-electron integrals (if MEMO=T)
-       M20 = M19 + natom*50*Nang   
+      M20 = M19 + natom*50*Nang   
 c
-       Nel=2*NCO+Nunp
+      Nel=2*NCO+Nunp
 c
 
-
-!----------------------------------------------------------!
-! VARIABLE ALLOCATION - FFR
-!
-       ALLOCATE(DSX(M,M,natom),DSY(M,M,natom),DSZ(M,M,natom))
-       ALLOCATE(rhoaux(M,M),fockaux(M,M),SMaux(M,M))
-       ALLOCATE(rhoaux2(M,M),rhoaux3(M,M))
-       ALLOCATE(rmmaux(MM),QM(M,M))
-       ALLOCATE(eigvec(M,M),eigval(M))
-!
-!--------------------------------------------------------------------!
-
-       allocate(rmm5(MM),rmm13(m),rmm15(mm))
+      allocate(rmm5(MM),rmm13(m),rmm15(mm))
 cc
            
-       good=1.00D0
-       niter=0
-       D1=1.D0
-       D2=1.D0
-       DAMP0=GOLD
-       DAMP=DAMP0
+      good=1.00D0
+      niter=0
+      D1=1.D0
+      D2=1.D0
+      DAMP0=GOLD
+      DAMP=DAMP0
 
 c
        Qc=0.0D0
@@ -129,7 +108,7 @@ c
        Qc=Qc+Iz(i)
  99    continue
        Qc=Qc-Nel
-       Qc2=Qc**2
+      Qc2=Qc**2
 
 C----------------------------------------
 c Para hacer lineal la integral de 2 electrone con lista de vecinos. Nano
@@ -188,109 +167,96 @@ c        write(84,346) old1(i),old2(i),old3(i),RMM(i)
          endif
 c
 c test ---------------------------------------------------------
-       E1=0.D0
-       do k=1,MM
-         E1=E1+RMM(k)*RMM(M11+k-1)
-       enddo
+         E1=0.D0
+        do 302 k=1,MM
+ 302     E1=E1+RMM(k)*RMM(M11+k-1)
+
 
 c
 c Diagonalization of S matrix, after this is not needed anymore
 c
-!##########################################################!
-! FFR - NEW FORCE
-!
-!    Diferent ways of diagonalizing S.
-!
-!----------------------------------------------------------!
-       ALLOCATE(Y(M,M),Ytrans(M,M),Xfran(M,M),Xtrans(M,M))
-       docholesky=.TRUE.
-       dolowdin=.FALSE.
-!       IF (.FALSE.) WRITE(*,*) 'Cholesky is: ',docholesky
-!       IF (.FALSE.) WRITE(*,*) 'Lowdin is: ',dolowdin
-!       CALL spunpack('L',M,RMM(M5),SMaux)
-
+       docholesky=.true.
+       call g2g_timer_start('cholesky')
        IF (docholesky) THEN
-         CALL g2g_timer_start('cholesky')
-         CALL cholesky_sdiag(M,RMM(M5),Y,Xtrans,Ytrans,Xfran)
-         CALL g2g_timer_stop('cholesky')
+         PRINT*,'DOING CHOLESKY'
+         ALLOCATE(MatrixVec(MM))
+         DO iii=1,MM
+           MatrixVec(iii)=RMM(M5+iii-1)
+         ENDDO
 
+         CALL DPPTRF('L',M,MatrixVec,ErrID)
+         PRINT*,ErrID
+         ALLOCATE(Y(M,M),Ytrans(M,M))
+         DO iii=1,M;DO jjj=1,M
+           Y(iii,jjj)=0
+           IF (jjj.LE.iii) THEN
+             Y(iii,jjj)=MatrixVec(iii+(2*M-jjj)*(jjj-1)/2)
+           ENDIF
+           Ytrans(jjj,iii)=Y(iii,jjj)
+         ENDDO;ENDDO
 
-       ELSE IF (dolowdin) THEN
-         CALL g2g_timer_start('lowdin')
-         CALL lowdin_sdiag
-     >        (M,RMM(M5),Xfran,Xtrans,Y,Ytrans,eigvec,eigval)
-         CALL g2g_timer_stop('lowdin')
+         CALL DTPTRI('L','N',M,MatrixVec,ErrID)
+         PRINT*,ErrID
+         ALLOCATE(Xtrans(M,M))
+         DO iii=1,M;DO jjj=1,M
+           Xtrans(iii,jjj)=0
+           IF (jjj.LE.iii) THEN
+             Xtrans(iii,jjj)=MatrixVec(iii+(2*M-jjj)*(jjj-1)/2)
+           ENDIF
+           X(jjj,iii)=Xtrans(iii,jjj)
+         ENDDO;ENDDO
 
-
+         DEALLOCATE(MatrixVec)
+         PRINT*,'CHOLESKY DONE'
        ELSE
-!      ...
-!
-!----------------------------------------------------------!
-!
-c----------------------------------------------------------c
-c ESSL OPTION
-c
-         do i=1,MM
-           rmm5(i)=RMM(M5+i-1)
-c           write(56,*) RMM(M15+1)
-         enddo
+
+
+c ESSL OPTION ------------------------------------------
+        do i=1,MM
+         rmm5(i)=RMM(M5+i-1)
+c        write(56,*) RMM(M15+1)
+        enddo
 #ifdef essl
-         call DSPEV(1,RMM(M5),RMM(M13),X,M,M,RMM(M15),M2)
+        call DSPEV(1,RMM(M5),RMM(M13),X,M,M,RMM(M15),M2)
 #endif
-c----------------------------------------------------------c
-c LAPACK OPTION
 c
+c LAPACK OPTION -----------------------------------------
 #ifdef pack
-         call dspev('V','L',M,RMM5,RMM13,X,M,RMM15,info)
+       call dspev('V','L',M,RMM5,RMM13,X,M,RMM15,info)
 #endif
 c-----------------------------------------------------------
+c 
 c LINEAR DEPENDENCY ELIMINATION
+         allocate (Y(M,M),Ytrans(M,M),Xtrans(M,M))
 c
          do i=1,MM
-           RMM(M5+i-1)=rmm5(i)
-c           write(56,*) RMM(M15+1)
+         RMM(M5+i-1)=rmm5(i)
+c        write(56,*) RMM(M15+1)
          enddo
 
-         do 10 j=1,M
-           RMM(M13+j-1)=rmm13(j)
-           if (RMM(M13+j-1).lt.1.0D-06) then
-             write(*,*) 'LINEAR DEPENDENCY DETECTED'
-             do 11 i=1,M
-             X(i,j)=0.0D0
- 11          Y(i,j)=0.0D0
-           else
-             do 12 i=1,M
-             X(i,j)=X(i,j)/sqrt(RMM(M13+j-1))
- 12          Y(i,j)=X(i,j)*(RMM(M13+j-1))
-           endif
+        do 10 j=1,M
+         RMM(M13+j-1)=rmm13(j)
+          if (RMM(M13+j-1).lt.1.0D-06) then
+          write(*,*) 'LINEAR DEPENDENCY DETECTED'
+         do 11 i=1,M
+         X(i,j)=0.0D0
+ 11      Y(i,j)=0.0D0
+          else
+         do 12 i=1,M
+         X(i,j)=X(i,j)/sqrt(RMM(M13+j-1))
+ 12      Y(i,j)=X(i,j)*(RMM(M13+j-1))
+         endif
  10      continue
-
          do i=1,M
-         do j=1,M
-           Xtrans(i,j)=X(j,i)
-           Ytrans(i,j)=Y(j,i)
+            do j=1,M
+            Ytrans(i,j)=Y(j,i)
+            Xtrans(i,j)=X(j,i)   
+            enddo
          enddo
-         enddo
-c-----------------------------------------------------------
-c
-       ENDIF
-!
-       IF ((docholesky).OR.(dolowdin)) THEN
-         DO iii=1,M
-         DO jjj=1,M
-           X(iii,jjj)=Xfran(iii,jjj)
-         ENDDO
-         ENDDO
-       ELSE
-         DO iii=1,M
-         DO jjj=1,M
-           Xfran(iii,jjj)=X(iii,jjj)
-         ENDDO
-         ENDDO
-       ENDIF
-!
-!##########################################################!
 
+        ENDIF                   
+
+       call g2g_timer_stop('cholesky')
 
 c
 c CASE OF NO STARTING GUESS PROVIDED, 1 E FOCK MATRIX USED
@@ -520,21 +486,8 @@ c
         enddo
 
 
-!##########################################################!
-! FFR - PROOF IT WORKS
-!----------------------------------------------------------!
-        IF (.FALSE.) THEN
-          CALL spunpack('L',M,RMM(M1),rhoaux)
-          CALL fixrho(M,rhoaux)
-          WRITE(6,*) 'Rho sacado normal menos rho con mi codigo:'
-          WRITE(6,*) rho-rhoaux
-          WRITE(6,*) '---------------------'
-        ENDIF
-!##########################################################!
-!        fock en base OA (FFR)
-          call matmulnano(fock,X,rho1,M)
+         call matmulnano(fock,X,rho1,M)
           fock=rho1                     ! RHO1 lo uso como scratch
-!        fock en base ON (FFR)
 
 
 
@@ -770,9 +723,9 @@ c----------Cálculo de parámetro optimo para DGELS-------------------
 
 
 c-----Resuelve la ecuación A*X = B. (EMAT*ci=bcoef). La solución la escribe en bcoef------
+
       CALL DGELS( 'No transpose',ndiist+1, ndiist+1, 1, EMAT, ndiist+1,
      > bcoef, ndiist+1, WORK, LWORK, INFO )
-
 
 c--------Construccion de la "nueva" matriz de fock como cl de las anteriores--------------
 c--------Eventualmente se puede probar con la matriz densidad-----------------------------
@@ -784,23 +737,6 @@ c
          suma(i)=suma(i)+bcoef(j)*fockm(i,jnuevo)
          enddo
       enddo
-
-!##########################################################!
-! FFR - NEW FORCE
-!    Copy fock matrix.
-!----------------------------------------------------------!
-       CALL spunpack('L',M,suma,fockaux)
-       IF (.FALSE.) THEN
-         WRITE(6,*) 'Fockaux:'
-         WRITE(6,520) fockaux(1,:)
-         WRITE(6,520) fockaux(2,:)
-         WRITE(6,520) fockaux(3,:)
-         WRITE(6,520) fockaux(4,:)
-         WRITE(6,*) '---------------------'
-       ENDIF
-!       CALL basechange(M,Y,fockaux,Ytrans)
-!##########################################################!
-
       do i=1,MM
       RMM(M5+i-1)=suma(i)
       enddo
@@ -930,31 +866,6 @@ c
  999   continue
 c 995   continue
 
-
-!##########################################################!
-! FFR - NEW FORCE
-!    Copy rho matrix
-!----------------------------------------------------------!
-         CALL spunpack('L',M,RMM(M1),rhoaux)
-         CALL fixrho(M,rhoaux)
-         CALL basechange(M,Ytrans,rhoaux,Y)
-         IF (.FALSE.) THEN
-           WRITE(6,*) 'Rhoaux:'
-           WRITE(6,520) rhoaux(1,:)
-           WRITE(6,520) rhoaux(2,:)
-           WRITE(6,520) rhoaux(3,:)
-           WRITE(6,520) rhoaux(4,:)
-           WRITE(6,*) '---------------------'
-         ENDIF
-
-!         CALL basechange(M,X,rhoaux,Xtrans)
-!         rhoaux3=MATMUL(rhoaux,rhoaux2)
-!         rhoaux=3*rhoaux2-2*rhoaux3
-!         rhoaux=rhoaux*0.5
-!##########################################################!
-
-
-
       if (niter.ge.NMAX) then
        write(6,*) 'NO CONVERGENCE AT ',NMAX,' ITERATIONS'
         noconverge=noconverge + 1
@@ -1035,79 +946,25 @@ c--------------------------------------------------------------
        else
        E=E-Ex
        endif
-
-!----------------------------------------------------------!
-! Calculation of energy weighted density matrix
-!
-       kk=0
-       DO j=1,M
-       DO i=j,M
-         kk=kk+1
-         RMM(M15+kk-1)=0.D0
-
-         if (i.eq.j) then
-           ff=2.D0
-         else
-           ff=4.D0
-         endif
-
-         DO k=1,NCO
-           RMM(M15+kk-1)=RMM(M15+kk-1)-
-     >     RMM(M13+k-1)*ff*X(i,M2+k)*X(j,M2+k)
-         ENDDO
-
-       ENDDO
-       ENDDO
-!
-!----------------------------------------------------------!
-
-!##########################################################!
-! FFR - NEW FORCE
-!    Copy Energy Weighted Density Matrix in Q
-!----------------------------------------------------------!
-       DO jjj=1,M
-       DO iii=jjj,M
-         QM(iii,jjj)=0.0d0
-         QM(jjj,iii)=0.0d0
-         kkk=iii+(2*M-jjj)*(jjj-1)/2
-         QM(iii,jjj)=QM(iii,jjj)+RMM(M15+kkk-1)/2
-         QM(jjj,iii)=QM(jjj,iii)+RMM(M15+kkk-1)/2
-       ENDDO
-       ENDDO
-
-       IF (.FALSE.) THEN
-         WRITE(6,*) 'QM:'
-         WRITE(6,520) QM(1,:)
-         WRITE(6,520) QM(2,:)
-         WRITE(6,520) QM(3,:)
-         WRITE(6,520) QM(4,:)
-         WRITE(6,*) '---------------------'
-       ENDIF
-
-!##########################################################!
-
-
-!##########################################################!
-! FFR - NEW FORCE
-!
-!    Codes for testing the implementation of new ways
-!    of calculating the force.
-!    Diferent ways of calculating the force.
-!
-!----------------------------------------------------------!
-       IF (.TRUE.) CALL 
-     >    test_intSG(natom,M,QM)
-!
-       IF (docholesky) CALL 
-     >    test_cholesky(natom,M,M15,fockaux,Xtrans,Xfran,rhoaux)
-!
-       IF (dolowdin) CALL
-     >    test_lowdin(natom,M,fockaux,Xfran,rhoaux,eigvec,eigval)
-!
-!##########################################################!
-
-
-
+c calculation of energy weighted density matrix
+c
+      kk=0
+      do 307 j=1,M
+      do 307 i=j,M
+      kk=kk+1
+      RMM(M15+kk-1)=0.D0
+c
+      if(i.eq.j) then
+       ff=2.D0
+      else
+       ff=4.D0
+      endif
+c
+      do 309 k=1,NCO
+       RMM(M15+kk-1)=RMM(M15+kk-1)-RMM(M13+k-1)*ff*X(i,M2+k)*X(j,M2+k)
+ 309  continue
+c
+ 307   continue
 c
 c
 c
@@ -1181,13 +1038,13 @@ c
 c--------------------------------------------------------------
 c outputs final  MO ---------------------
 
-       rewind 88
-       do 420 l=1,M
-       do 420 n=1,M
+      rewind 88
+      do 420 l=1,M
+      do 420 n=1,M
             
  420   X(indexii(l),M+n)=X(l,M2+n)
 c
-       do 225 l=1,M
+      do 225 l=1,M
  225   write(88,400) (X(l,M+n),n=1,NCO)
 c-------------------------------------------------
 c writes down MO coefficients and orbital energies
@@ -1210,39 +1067,17 @@ c      endif
        deallocate (Y,Ytrans,Xtrans,fock,fockm,rho,FP_PF,FP_PFv,FP_PFm,
      > znano,EMAT, bcoef, suma,rho1)
        endif
-       deallocate(xnano,rmm5,rmm13,rmm15)
-       deallocate(kkind,kkinds)
-       deallocate(cool,cools)
-!----------------------------------------------------------!
-! DEALLOCATION OF VARIABLES:
-       DEALLOCATE(rhoaux2,rhoaux3)
-       DEALLOCATE(Xfran)
-       DEALLOCATE(eigvec,eigval)
-       DEALLOCATE(rmmaux,QM)
-       DEALLOCATE(rhoaux,fockaux,SMaux)
-       DEALLOCATE(DSX,DSY,DSZ)
+       deallocate (xnano,rmm5,rmm13,rmm15)
 
-
-     
+         deallocate (kkind,kkinds)
+         deallocate(cool,cools)
+      
 c       E=E*627.509391D0 
 
-!----------------------------------------------------------!
-! TDDFT CALL:
        if(timedep.eq.1) then
-         call TD()
+       call TD()
        endif
-
-
-!----------------------------------------------------------!
-       call g2g_timer_stop('SCF')
-
-
-!------------------------------------------------------------------------------!
- 766  FORMAT(I4,I4,E20.12,E20.12)
- 767  FORMAT(4(3X,E12.5))
- 520  FORMAT(4(E15.8,2x))
- 768  FORMAT(3(1X,I3),3(2X,F14.7))
-
+c
  500  format('SCF TIME ',I6,' sec')
  450  format ('SCF ENERGY = ',F19.12)
  400  format(4(E14.7E2,2x))
@@ -1256,7 +1091,7 @@ c       E=E*627.509391D0
  770  format('ATOM #',4x,'ATOM TYPE',4x,'POPULATION')
  850  format('MOLECULAR ORBITAL #',2x,I3,3x,'ORBITAL ENERGY ',F14.7)
  851  format('MOLECULAR ORBITAL #',2x,I3,3x,'ORBITAL ENERGY ',F14.7,
-     >       '(NON OCC.)')
+     >    '(NON OCC.)')
  900  format(3(F15.9,2x),2x,F15.9)
  777  format(4(F8.4,2x))
  778  format('C',2x,3(F8.4,2x))
@@ -1265,10 +1100,12 @@ c       E=E*627.509391D0
  556  format ('evar',2x,(7(f10.5,2x)))
  345  format(2x,I2,2x,3(f10.6,2x))
  346  format(2x,4(f10.6,2x))
- 682  format(2x,f15.10)
+  682  format(2x,f15.10)
   88  format(5(2x,f8.5))
-  45  format(E14.6E3)
+  45  format(E14.6E4)
   91  format(F14.7,4x,F14.7)
-!------------------------------------------------------------------------------!
-       return;end subroutine
-!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+c
+      call g2g_timer_stop('SCF')
+       return
+       end
+C  -------------------------                                            

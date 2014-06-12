@@ -1,4 +1,4 @@
-
+c SCF subroutine ----------------------------------
 c DIRECT VERSION
 c Calls all integrals generator subroutines : 1 el integrals,
 c 2 el integrals, exchange fitting , so it gets S matrix, F matrix
@@ -18,7 +18,7 @@ c
        real*8, dimension (:), ALLOCATABLE :: rmm5,rmm15,rmm13,
      >   bcoef, suma, FP_PFv
        real*8, dimension (:,:), allocatable :: fock,fockm,rho,FP_PF,
-     >   FP_PFm,EMAT,Y,Ytrans,Xtrans,rho1,EMAT2
+     >   FP_PFm,EMAT,Y,Ytrans,Xfran,Xtrans,rho1,EMAT2
 c
        integer ndiist
 c       dimension d(natom,natom)
@@ -34,7 +34,7 @@ c       REAL*8 , intent(in)  :: clcoords(4,nsolin)
        REAL*8,ALLOCATABLE :: 
      >   fockaux(:,:),rhoaux(:,:),SMaux(:,:),
      >   rmmaux(:),QM(:,:),rhoaux2(:,:),rhoaux3(:,:),
-     >   eigvec(:,:),eigval(:),Xfran(:,:)
+     >   eigvec(:,:),eigval(:)
 !--------------------------------------------------------------------!
 
 
@@ -101,21 +101,21 @@ c
        Nel=2*NCO+Nunp
 c
 
-
-!----------------------------------------------------------!
-! VARIABLE ALLOCATION - FFR
+!--------------------------------------------------------------------!
+! VARIABLE ALLOCATION (FFR):
 !
        ALLOCATE(DSX(M,M,natom),DSY(M,M,natom),DSZ(M,M,natom))
        ALLOCATE(rhoaux(M,M),fockaux(M,M),SMaux(M,M))
        ALLOCATE(rhoaux2(M,M),rhoaux3(M,M))
        ALLOCATE(rmmaux(MM),QM(M,M))
        ALLOCATE(eigvec(M,M),eigval(M))
+
+       ALLOCATE(rmm5(MM),rmm13(m),rmm15(mm))
 !
 !--------------------------------------------------------------------!
 
-       allocate(rmm5(MM),rmm13(m),rmm15(mm))
-cc
-           
+
+
        good=1.00D0
        niter=0
        D1=1.D0
@@ -130,6 +130,7 @@ c
  99    continue
        Qc=Qc-Nel
        Qc2=Qc**2
+
 
 C----------------------------------------
 c Para hacer lineal la integral de 2 electrone con lista de vecinos. Nano
@@ -193,9 +194,11 @@ c test ---------------------------------------------------------
          E1=E1+RMM(k)*RMM(M11+k-1)
        enddo
 
+
 c
-c Diagonalization of S matrix, after this is not needed anymore
+c Diagonalization of S matrix, after this, S is not needed anymore
 c
+
 !##########################################################!
 ! FFR - NEW FORCE
 !
@@ -203,7 +206,7 @@ c
 !
 !----------------------------------------------------------!
        ALLOCATE(Y(M,M),Ytrans(M,M),Xfran(M,M),Xtrans(M,M))
-       docholesky=.TRUE.
+       docholesky=.FALSE.
        dolowdin=.FALSE.
 !       IF (.FALSE.) WRITE(*,*) 'Cholesky is: ',docholesky
 !       IF (.FALSE.) WRITE(*,*) 'Lowdin is: ',dolowdin
@@ -214,81 +217,73 @@ c
          CALL cholesky_sdiag(M,RMM(M5),Y,Xtrans,Ytrans,Xfran)
          CALL g2g_timer_stop('cholesky')
 
-
        ELSE IF (dolowdin) THEN
          CALL g2g_timer_start('lowdin')
          CALL lowdin_sdiag
      >        (M,RMM(M5),Xfran,Xtrans,Y,Ytrans,eigvec,eigval)
          CALL g2g_timer_stop('lowdin')
 
-
        ELSE
 !      ...
 !
-!----------------------------------------------------------!
-!
+!##########################################################!
+
+
 c----------------------------------------------------------c
-c ESSL OPTION
-c
+c        ESSL OPTION
          do i=1,MM
            rmm5(i)=RMM(M5+i-1)
 c           write(56,*) RMM(M15+1)
          enddo
-#ifdef essl
-         call DSPEV(1,RMM(M5),RMM(M13),X,M,M,RMM(M15),M2)
-#endif
+#        ifdef essl
+           call DSPEV(1,RMM(M5),RMM(M13),X,M,M,RMM(M15),M2)
+#        endif
+c        LAPACK OPTION
+#        ifdef pack
+           call dspev('V','L',M,RMM5,RMM13,X,M,RMM15,info)
+#        endif
+c        END OPTIONS
 c----------------------------------------------------------c
-c LAPACK OPTION
-c
-#ifdef pack
-         call dspev('V','L',M,RMM5,RMM13,X,M,RMM15,info)
-#endif
-c-----------------------------------------------------------
-c LINEAR DEPENDENCY ELIMINATION
-c
+c        LINEAR DEPENDENCY ELIMINATION
+
          do i=1,MM
            RMM(M5+i-1)=rmm5(i)
 c           write(56,*) RMM(M15+1)
          enddo
 
-         do 10 j=1,M
+         do j=1,M
            RMM(M13+j-1)=rmm13(j)
            if (RMM(M13+j-1).lt.1.0D-06) then
              write(*,*) 'LINEAR DEPENDENCY DETECTED'
-             do 11 i=1,M
-             X(i,j)=0.0D0
- 11          Y(i,j)=0.0D0
+             do i=1,M
+               X(i,j)=0.0D0
+               Y(i,j)=0.0D0
+             enddo
            else
-             do 12 i=1,M
-             X(i,j)=X(i,j)/sqrt(RMM(M13+j-1))
- 12          Y(i,j)=X(i,j)*(RMM(M13+j-1))
+             do i=1,M
+               X(i,j)=X(i,j)/sqrt(RMM(M13+j-1))
+               Y(i,j)=X(i,j)*(RMM(M13+j-1))
+             enddo
            endif
- 10      continue
+         enddo
 
          do i=1,M
-         do j=1,M
-           Xtrans(i,j)=X(j,i)
-           Ytrans(i,j)=Y(j,i)
+            do j=1,M
+              Ytrans(i,j)=Y(j,i)
+              Xtrans(i,j)=X(j,i)   
+            enddo
          enddo
-         enddo
-c-----------------------------------------------------------
-c
-       ENDIF
-!
-       IF ((docholesky).OR.(dolowdin)) THEN
+c----------------------------------------------------------c
+       ENDIF                   
+
+!##########################################################!
+! FFR
+!----------------------------------------------------------!
          DO iii=1,M
          DO jjj=1,M
            X(iii,jjj)=Xfran(iii,jjj)
          ENDDO
          ENDDO
-       ELSE
-         DO iii=1,M
-         DO jjj=1,M
-           Xfran(iii,jjj)=X(iii,jjj)
-         ENDDO
-         ENDDO
-       ENDIF
-!
 !##########################################################!
 
 
@@ -496,10 +491,25 @@ c
 c
              enddo
         enddo
+!##########################################################!
+! FFR - PROOF IT WORKS
+!----------------------------------------------------------!
+        IF (.FALSE.) THEN
+          CALL spunpack('L',M,RMM(M1),rhoaux)
+          CALL fixrho(M,rhoaux)
+          WRITE(6,*) 'Rho sacado normal menos rho con mi codigo:'
+          WRITE(6,*) rho-rhoaux
+          WRITE(6,*) '---------------------'
+        ENDIF
+!##########################################################!
 
 
-         call matmulnano(rho,Y,rho1,M)
+
+
+          call matmulnano(rho,Y,rho1,M)
           rho=rho1
+
+
 
 c 
 c------------Ahora tenemos rho transformado en la base ON y en forma cuadrada-----------------------------
@@ -518,24 +528,14 @@ c
 c
         enddo
         enddo
+  
 
-
-!##########################################################!
-! FFR - PROOF IT WORKS
-!----------------------------------------------------------!
-        IF (.FALSE.) THEN
-          CALL spunpack('L',M,RMM(M1),rhoaux)
-          CALL fixrho(M,rhoaux)
-          WRITE(6,*) 'Rho sacado normal menos rho con mi codigo:'
-          WRITE(6,*) rho-rhoaux
-          WRITE(6,*) '---------------------'
-        ENDIF
 !##########################################################!
 !        fock en base OA (FFR)
-          call matmulnano(fock,X,rho1,M)
-          fock=rho1                     ! RHO1 lo uso como scratch
+         call matmulnano(fock,X,rho1,M)
+         fock=rho1      !! RHO1 lo uso como scratch
 !        fock en base ON (FFR)
-
+!##########################################################!
 
 
 c--------------En este punto ya tenemos F transformada en base de ON y en su forma cuadrada-----
@@ -770,9 +770,9 @@ c----------Cálculo de parámetro optimo para DGELS-------------------
 
 
 c-----Resuelve la ecuación A*X = B. (EMAT*ci=bcoef). La solución la escribe en bcoef------
+
       CALL DGELS( 'No transpose',ndiist+1, ndiist+1, 1, EMAT, ndiist+1,
      > bcoef, ndiist+1, WORK, LWORK, INFO )
-
 
 c--------Construccion de la "nueva" matriz de fock como cl de las anteriores--------------
 c--------Eventualmente se puede probar con la matriz densidad-----------------------------
@@ -780,7 +780,7 @@ c--------Eventualmente se puede probar con la matriz densidad-------------------
 c       
       do j=1,ndiist
           jnuevo=j+(ndiis-ndiist)
-         do i=1,MM
+          do i=1,MM
          suma(i)=suma(i)+bcoef(j)*fockm(i,jnuevo)
          enddo
       enddo
@@ -798,8 +798,10 @@ c
          WRITE(6,520) fockaux(4,:)
          WRITE(6,*) '---------------------'
        ENDIF
-!       CALL basechange(M,Y,fockaux,Ytrans)
+       CALL basechange(M,Y,fockaux,Ytrans)
 !##########################################################!
+
+
 
       do i=1,MM
       RMM(M5+i-1)=suma(i)
@@ -930,14 +932,13 @@ c
  999   continue
 c 995   continue
 
-
 !##########################################################!
 ! FFR - NEW FORCE
 !    Copy rho matrix
 !----------------------------------------------------------!
          CALL spunpack('L',M,RMM(M1),rhoaux)
          CALL fixrho(M,rhoaux)
-         CALL basechange(M,Ytrans,rhoaux,Y)
+!         CALL basechange(M,Ytrans,rhoaux,Y)
          IF (.FALSE.) THEN
            WRITE(6,*) 'Rhoaux:'
            WRITE(6,520) rhoaux(1,:)
@@ -954,32 +955,28 @@ c 995   continue
 !##########################################################!
 
 
+       if (niter.ge.NMAX) then
+         write(6,*) 'NO CONVERGENCE AT ',NMAX,' ITERATIONS'
+         noconverge=noconverge + 1
+         converge=0
+c        goto 995
+       else
+         write(6,*) 'CONVERGED AT',niter,'ITERATIONS'
+         noconverge = 0
+         converge=converge+1
+       endif
 
-      if (niter.ge.NMAX) then
-       write(6,*) 'NO CONVERGENCE AT ',NMAX,' ITERATIONS'
-        noconverge=noconverge + 1
-        converge=0
-c       goto 995
-        else
-        write(6,*) 'CONVERGED AT',niter,'ITERATIONS'
-        noconverge = 0
-        converge=converge+1
-      endif
-
-        old3=old2
-
-        old2=old1
+       old3=old2
+       old2=old1
 c        write(*,*) 'good final',good
 
        do i=1,MM
-
          old1(i)=RMM(i)
        enddo
 
-
-        if(noconverge.gt.4) then 
-        write(6,*)  'stop fon not convergion 4 times'
-       stop
+       if(noconverge.gt.4) then 
+         write(6,*)  'stop fon not convergion 4 times'
+         stop
        endif
 
 
@@ -1036,6 +1033,7 @@ c--------------------------------------------------------------
        E=E-Ex
        endif
 
+
 !----------------------------------------------------------!
 ! Calculation of energy weighted density matrix
 !
@@ -1085,8 +1083,10 @@ c--------------------------------------------------------------
        ENDIF
 
 !##########################################################!
-
-
+!
+!
+!
+!
 !##########################################################!
 ! FFR - NEW FORCE
 !
@@ -1095,7 +1095,7 @@ c--------------------------------------------------------------
 !    Diferent ways of calculating the force.
 !
 !----------------------------------------------------------!
-       IF (.TRUE.) CALL 
+       IF (.FALSE.) CALL 
      >    test_intSG(natom,M,QM)
 !
        IF (docholesky) CALL 
@@ -1107,9 +1107,6 @@ c--------------------------------------------------------------
 !##########################################################!
 
 
-
-c
-c
 c
 c      if (nopt.eq.1) then
 c
@@ -1180,39 +1177,51 @@ c        endif
 c
 c--------------------------------------------------------------
 c outputs final  MO ---------------------
-
        rewind 88
        do 420 l=1,M
        do 420 n=1,M
             
  420   X(indexii(l),M+n)=X(l,M2+n)
-c
+
        do 225 l=1,M
  225   write(88,400) (X(l,M+n),n=1,NCO)
 c-------------------------------------------------
 c writes down MO coefficients and orbital energies
        if(1.gt.2) then
-        write(29,*) 'ORBITAL COEFFICIENTS eh AND ENERGIES, CLOSED SHELL'
-       do n=1,NCO
-        write(29,850) n,RMM(M13+n-1)
-        write(29,400) (X(l,M+n),l=1,M)
-       enddo
-       do n=NCO+1,M
-        write(29,851) n,RMM(M13+n-1)
-        write(29,400) (X(l,M+n),l=1,M)
-       enddo
-       close(29)
+         write(29,*) 'ORBITAL COEFFICIENTS eh AND ENERGIES,
+     >                CLOSED SHELL'
+         do n=1,NCO
+           write(29,850) n,RMM(M13+n-1)
+           write(29,400) (X(l,M+n),l=1,M)
+         enddo
+         do n=NCO+1,M
+           write(29,851) n,RMM(M13+n-1)
+           write(29,400) (X(l,M+n),l=1,M)
+         enddo
+         close(29)
        endif
-c
+
+
 c-------------------------------------------------
 c      endif
        if(DIIS) then
-       deallocate (Y,Ytrans,Xtrans,fock,fockm,rho,FP_PF,FP_PFv,FP_PFm,
-     > znano,EMAT, bcoef, suma,rho1)
+         deallocate(Y,Ytrans,Xtrans,fock,fockm,rho)
+         deallocate(FP_PF,FP_PFv,FP_PFm,znano,EMAT,bcoef,suma,rho1)
        endif
+
        deallocate(xnano,rmm5,rmm13,rmm15)
        deallocate(kkind,kkinds)
        deallocate(cool,cools)
+c       E=E*627.509391D0 
+
+
+!----------------------------------------------------------!
+! TDDFT CALL:
+       if(timedep.eq.1) then
+         call TD()
+       endif
+
+
 !----------------------------------------------------------!
 ! DEALLOCATION OF VARIABLES:
        DEALLOCATE(rhoaux2,rhoaux3)
@@ -1223,26 +1232,12 @@ c      endif
        DEALLOCATE(DSX,DSY,DSZ)
 
 
-     
-c       E=E*627.509391D0 
-
-!----------------------------------------------------------!
-! TDDFT CALL:
-       if(timedep.eq.1) then
-         call TD()
-       endif
-
-
 !----------------------------------------------------------!
        call g2g_timer_stop('SCF')
 
 
-!------------------------------------------------------------------------------!
- 766  FORMAT(I4,I4,E20.12,E20.12)
- 767  FORMAT(4(3X,E12.5))
- 520  FORMAT(4(E15.8,2x))
- 768  FORMAT(3(1X,I3),3(2X,F14.7))
 
+!------------------------------------------------------------------------------!
  500  format('SCF TIME ',I6,' sec')
  450  format ('SCF ENERGY = ',F19.12)
  400  format(4(E14.7E2,2x))
@@ -1253,10 +1248,14 @@ c       E=E*627.509391D0
  620  format(F14.7,4x,F14.7,4x,F14.7)
  625  format(F14.7)
  760  format(I3,9x,I3,6x,F10.4)
+ 766  FORMAT(I4,I4,E20.12,E20.12)
+ 767  FORMAT(4(3X,E12.5))
+ 520  FORMAT(4(E15.8,2x))
+ 768  FORMAT(3(1X,I3),3(2X,F14.7))
  770  format('ATOM #',4x,'ATOM TYPE',4x,'POPULATION')
  850  format('MOLECULAR ORBITAL #',2x,I3,3x,'ORBITAL ENERGY ',F14.7)
- 851  format('MOLECULAR ORBITAL #',2x,I3,3x,'ORBITAL ENERGY ',F14.7,
-     >       '(NON OCC.)')
+ 851  format('MOLECULAR ORBITAL #',2x,I3,3x,
+     >       'ORBITAL ENERGY ',F14.7,'(NON OCC.)')
  900  format(3(F15.9,2x),2x,F15.9)
  777  format(4(F8.4,2x))
  778  format('C',2x,3(F8.4,2x))

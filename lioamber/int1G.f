@@ -92,9 +92,9 @@ c Nuclear Repulsion part ------------------------------------------
 c
       do 52 i=1,natom
 c
-       ff(i,1)=0.D0
-       ff(i,2)=0.D0
-       ff(i,3)=0.D0
+!       ff(i,1)=0.D0
+!       ff(i,2)=0.D0
+!       ff(i,3)=0.D0
       do 53 j=1,i-1
        tt=Iz(i)*Iz(j)/d(i,j)**1.5D0
 
