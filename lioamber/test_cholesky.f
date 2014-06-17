@@ -25,6 +25,7 @@
 !
 !
        IF (dotest(1)) THEN
+         CALL g2g_timer_start('cholesky-test1')
          OPEN(UNIT=501,FILE='ffcholmano.dat')
 
          CALL calcDSM(Force)
@@ -53,12 +54,14 @@
            WRITE(501,*) Force(iat,1),Force(iat,2),Force(iat,3)
          ENDDO
          CLOSE(UNIT=501)
+         CALL g2g_timer_stop('cholesky-test1')
        ENDIF
 !
 !----------------------------------------------------------!
 ! FFR-Q: LA OTRA PROPAGACION VIA CODIGO VIEJO
 !
        IF (dolast) THEN
+         CALL g2g_timer_start('cholesky-test2')
          OPEN(UNIT=501,FILE='ffcholcode.dat')
 
          DO kk=1,NV
@@ -79,6 +82,7 @@
          ENDDO
 
          CLOSE(UNIT=501)
+         CALL g2g_timer_stop('cholesky-test2')
        ENDIF
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
        RETURN;END SUBROUTINE

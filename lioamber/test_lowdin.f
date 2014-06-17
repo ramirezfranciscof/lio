@@ -23,6 +23,7 @@
 ! FFR-Q: LODWIN PASO A PASO
 !
        IF (dotest(1)) THEN
+         CALL g2g_timer_start('lowdin-test1')
          OPEN(UNIT=501,FILE='fflowdin.dat')
          CALL calcDSM(Force)
          Force=0.0d0
@@ -51,6 +52,7 @@
          ENDDO
 
          CLOSE(UNIT=501)
+         CALL g2g_timer_stop('lowdin-test1')
        ENDIF
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!

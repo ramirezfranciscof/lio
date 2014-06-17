@@ -798,7 +798,7 @@ c
          WRITE(6,520) fockaux(4,:)
          WRITE(6,*) '---------------------'
        ENDIF
-!       CALL basechange(M,Y,fockaux,Ytrans)
+!       CALL MatrixTransform(M,Y,fockaux,Ytrans)
 !##########################################################!
 
       do i=1,MM
@@ -937,7 +937,7 @@ c 995   continue
 !----------------------------------------------------------!
          CALL spunpack('L',M,RMM(M1),rhoaux)
          CALL fixrho(M,rhoaux)
-         CALL basechange(M,Ytrans,rhoaux,Y)
+         CALL MatrixTransform(M,Ytrans,rhoaux,Y)
          IF (.FALSE.) THEN
            WRITE(6,*) 'Rhoaux:'
            WRITE(6,520) rhoaux(1,:)
@@ -947,7 +947,7 @@ c 995   continue
            WRITE(6,*) '---------------------'
          ENDIF
 
-!         CALL basechange(M,X,rhoaux,Xtrans)
+!         CALL MatrixTransform(M,X,rhoaux,Xtrans)
 !         rhoaux3=MATMUL(rhoaux,rhoaux2)
 !         rhoaux=3*rhoaux2-2*rhoaux3
 !         rhoaux=rhoaux*0.5

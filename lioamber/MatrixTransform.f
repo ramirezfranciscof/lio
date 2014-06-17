@@ -1,5 +1,5 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-       SUBROUTINE basechange(NM,Cdir,Matrix,Cinv)
+       SUBROUTINE MatrixTransform(NM,Cdir,Matrix,Cinv)
 !------------------------------------------------------------------------------!
 !
 ! This subroutine changes the expression of the input

@@ -28,6 +28,7 @@
 !
 !------------------------------------------------------------------------------!
 !
+       CALL g2g_timer_start('cholesky-in')
        NV=NM*(NM+1)/2
        ALLOCATE(SMcpy(NV))
        SMcpy = SMvec
@@ -53,5 +54,6 @@
        ENDDO
 
        DEALLOCATE(SMcpy)
+       CALL g2g_timer_stop('cholesky-in')
        RETURN;END SUBROUTINE
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
