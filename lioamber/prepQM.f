@@ -43,7 +43,7 @@
            ENDDO
            ENDIF
          ENDDO
-         QM(aa,bb)=suma
+         QM(aa,bb)=-suma
 
        ENDDO
        ENDDO

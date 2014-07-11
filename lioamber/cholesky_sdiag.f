@@ -37,9 +37,14 @@
        U     = 0.0d0
        Ui    = 0.0d0
 
+       
+       CALL g2g_timer_start('DPPTRF')
        CALL DPPTRF   ('L',NM,SMcpy,ErrID)
+       CALL g2g_timer_stop('DPPTRF')
        CALL spunpack ('L',NM,SMcpy,L)
+       CALL g2g_timer_start('DTPTRI')
        CALL DTPTRI   ('L','N',NM,SMcpy,ErrID)
+       CALL g2g_timer_stop('DTPTRI')
        CALL spunpack ('L',NM,SMcpy,Li)
 
        DO ii=1,NM

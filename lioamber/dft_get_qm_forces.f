@@ -24,19 +24,26 @@ c       use qmmm_module, only : qmmm_struct
 !
        allocate(ff(natom,3))
        ff=0
+!       WRITE(6,*) "-----------------------------------"
+!       WRITE(6,*) "FORCES:"
 !
        call g2g_timer_start('int1G')
        call int1G(ff)
        call g2g_timer_stop('int1G')
+!       WRITE(6,666) 'hola int1g',ff(1,:)
 !
        call g2g_timer_start('intSG')
        call intSG(ff)
        call g2g_timer_stop('intSG')
-c       write(77,*) ff
+!       WRITE(6,666) 'hola intSG',ff(1,:)
 !
        call g2g_timer_start('int3G')
        call int3G(ff,.true.)
        call g2g_timer_stop('int3G')
+!       WRITE(6,666) 'hola int3G',ff(1,:)
+!       WRITE(6,*) "-----------------------------------"
+       ff=0 ! SOLO PARA DEBUG
+
 !
 c       factor=627.509391D0/0.5291772108D0
        factor=1.D0
@@ -48,5 +55,6 @@ c       factor=627.509391D0/0.5291772108D0
 !
 !------------------------------------------------------------------------------!
        deallocate (ff)
+ 666   FORMAT(A,3(2X,E15.5))
        end subroutine dft_get_qm_forces
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!

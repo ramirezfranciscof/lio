@@ -1,3 +1,4 @@
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
       subroutine init_lio_amber(natomin,Izin,nclatom,charge
      > , basis_i, output_i, fcoord_i, fmulliken_i, frestart_i
      > , frestartin_i, verbose_i, OPEN_i, NMAX_i, NUNP_i, VCINP_i
@@ -5,8 +6,12 @@
      > , writexyz_i, intsoldouble_i, DIIS_i, ndiis_i, dgtrig_i, Iexch_i
      > , integ_i, DENS_i , IGRID_i, IGRID2_i , timedep_i , tdstep_i 
      > , ntdstep_i, field_i, exter_i, a0_i, epsilon_i, Fx_i
-     > , Fy_i, Fz_i, NBCH_i, propagator_i, writedens_i, tdrestart_i)
-
+!----------------------------------------------------------!
+! FFR: AGREGA DT => MODIFICAR AMBER!!
+!     > , Fy_i, Fz_i, NBCH_i, propagator_i, writedens_i, tdrestart_i)
+     > , Fy_i, Fz_i, NBCH_i, propagator_i, writedens_i, tdrestart_i
+     > , dt_i)
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
       use garcha_mod
 c      use qmmm_module, only : qmmm_struct,qmmm_nml
       implicit real*8 (a-h,o-z)
@@ -69,6 +74,8 @@ c      include 'param'
        integer :: propagator_i
        logical :: writedens_i
        logical :: tdrestart_i
+       real*8  :: dt_i
+
 
 
        basis= basis_i
@@ -112,6 +119,7 @@ c      include 'param'
        propagator=propagator_i
        writedens=writedens_i
        tdrestart=tdrestart_i
+       dt=dt_i/2.419E-5
 
 
 c      parameter (norbit=800,Ngrid=0)
@@ -205,6 +213,11 @@ c       write(*,*) natom,ntatom,ngDyn,ngdDyn,ng2,ngd0
 c--------------------------------------------------------
       call drive(ng2,ngDyn,ngdDyn)
 c        write(*,*) 'Lio init amber'
+!------------------------------------------------------------------------------!
+! FFR: ALLOCATEO VARIABLES MIAS
+       istep=0
+       ALLOCATE(FockMat(M,M),RhoMat(M,M))
 
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
       end
-c---------------------------------------------------------------------
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
