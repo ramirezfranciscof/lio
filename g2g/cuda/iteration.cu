@@ -266,9 +266,10 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
   /* compute RMM */
   timers.rmm.start_and_sync();
   if (compute_rmm) {
-    threads = dim3(group_m, group_m);
     threadBlock = dim3(RMM_BLOCK_SIZE_XY, RMM_BLOCK_SIZE_XY);
-    threadGrid = divUp(threads, threadBlock);
+    uint blocksPerRow = divUp(group_m, RMM_BLOCK_SIZE_XY);
+    // Only use enough blocks for lower triangle
+    threadGrid = dim3(blocksPerRow*(blocksPerRow+1)/2);
 
     CudaMatrix<scalar_type> rmm_output_gpu(COALESCED_DIMENSION(group_m), group_m);
     gpu_update_rmm<<<threadGrid, threadBlock>>>(
