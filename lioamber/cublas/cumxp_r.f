@@ -1,4 +1,4 @@
-            subroutine cumxp(A,devPtrX,C,M)
+            subroutine cumxp_r(A,devPtrX,C,M)
 !!!!!!!!  Hace C=Bt*(A*B) para matrices cuadradas
       implicit none
       integer sizeof_complex

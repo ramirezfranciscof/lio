@@ -5,7 +5,6 @@
       integer*8 devPtrP
       integer*8 devPtrF
       integer*8 devPtrC
-
       parameter(sizeof_real=8)
       integer,intent(in) :: M
       REAL*8 , intent(in) :: P(M,M)
@@ -53,7 +52,7 @@
       call CUBLAS_DGEMM ('N','N',M,M,M,alpha,devPtrF
      > ,M ,devPtrP,M, beta, devPtrC,M)
       beta=(-1.00000000000,0.00000000000)
-      call CUBLAS_CGEMM ('CUBLAS_OP_N','CUBLAS_OP_N',M,M,M,alpha,devPtrP
+      call CUBLAS_DGEMM ('CUBLAS_OP_N','CUBLAS_OP_N',M,M,M,alpha,devPtrP
      > ,M ,devPtrF,M, beta, devPtrC,M)      
       stat = CUBLAS_GET_MATRIX(M, M, sizeof_real, devPtrC, M, c, M )
       if (stat.NE.0) then
