@@ -6,6 +6,9 @@ GARCHA_SRCS=$(wildcard *.f)
 MOD_OBJ=$(MOD_SRCS:%.f=%.o) 
 GARCHA_OBJ=$(MOD_OBJ) $(COMMON_SRCS:%.f=%.o) $(GARCHA_SRCS:%.f=%.o)
 
+CUBLAS_SRC=$(wildcard cublas/*.f)
+CUBLAS_OBJ=$(CUBLAS_SRC:%.f=%.o)
+
 # flags
 ifeq ($(profile),1)
   PROFILE  = -pg
@@ -118,3 +121,6 @@ obj/garcha_g2g_obj/%.o: %.f
 
 fortran.o: $(CUDA_HOME)/src/fortran.c
 	icc -fPIC -DCUBLAS_INTEL_FORTRAN -O3 -c $< -o $@ -I$(CUDA_HOME)/include
+
+obj/garcha_g2g_obj/%.o: cublas/%.f
+	ifort  -o $@ $(CFLAGS) $(G2G_CFLAGS) $<
