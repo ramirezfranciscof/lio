@@ -7,7 +7,7 @@ MOD_OBJ=$(MOD_SRCS:%.f=%.o)
 GARCHA_OBJ=$(MOD_OBJ) $(COMMON_SRCS:%.f=%.o) $(GARCHA_SRCS:%.f=%.o)
 
 CUBLAS_SRC=$(wildcard cublas/*.f)
-CUBLAS_OBJ=$(CUBLAS_SRC:%.f=%.o)
+CUBLAS_OBJ=$(CUBLAS_SRC:cublas/%.f=obj/garcha_g2g_obj/%.o)
 
 # flags
 ifeq ($(profile),1)
@@ -62,8 +62,8 @@ all: dirs liblio-g2g.so
 dirs:
 	mkdir -p obj/garcha_g2g_obj/mods obj/garcha_g2g_obj/
 
-liblio-g2g.so: dirs $(GARCHA_OBJ:%.o=obj/garcha_g2g_obj/%.o) fortran.o
-	ifort -shared -fPIC -o $@ $(GARCHA_OBJ:%.o=obj/garcha_g2g_obj/%.o) fortran.o $(LIBS)
+liblio-g2g.so: dirs $(GARCHA_OBJ:%.o=obj/garcha_g2g_obj/%.o) $(CUBLAS_OBJ) fortran.o
+	ifort -shared -fPIC -o $@ $(GARCHA_OBJ:%.o=obj/garcha_g2g_obj/%.o) $(CUBLAS_OBJ) fortran.o $(LIBS)
 
 
 ## Targets: clean ##
