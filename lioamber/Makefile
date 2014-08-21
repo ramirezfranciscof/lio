@@ -6,9 +6,6 @@ GARCHA_SRCS=$(wildcard *.f)
 MOD_OBJ=$(MOD_SRCS:%.f=%.o) 
 GARCHA_OBJ=$(MOD_OBJ) $(COMMON_SRCS:%.f=%.o) $(GARCHA_SRCS:%.f=%.o)
 
-CUBLAS_SRC=$(wildcard cublas/*.f)
-CUBLAS_OBJ=$(CUBLAS_SRC:cublas/%.f=obj/garcha_g2g_obj/%.o)
-
 # flags
 ifeq ($(profile),1)
   PROFILE  = -pg
@@ -35,7 +32,7 @@ CFLAGS   = -g -mp1 -ip -O3 -c -cpp  $(DEFINE) $(PROFILE)
 CFLAGS2  = -g -O1 -c -cpp  $(DEFINE) $(PROFILE)
 CFLAGS3  = -g -O3 -c -cpp -parallel   $(DEFINE) $(PROFILE)
 CPPFLAGS = -P -traditional-cpp 
-LIBS= -L../g2g -lg2g -lstdc++ -L$(MKLROOT)/lib/intel64 -L$(CUDA_HOME)/src/ -I$(MKLROOT)/include $(PROFILE)  -lmkl_lapack95_lp64 -Wl,--start-group -lmkl_intel_lp64\
+LIBS= -L../g2g -lg2g -lstdc++ -L$(MKLROOT)/lib/intel64 -I$(MKLROOT)/include $(PROFILE)  -lmkl_lapack95_lp64 -Wl,--start-group -lmkl_intel_lp64\
      -lmkl_intel_thread -lmkl_core -Wl,--end-group -liomp5 -lpthread -lm -Wl,-rpath='$$ORIGIN/' -Wl,-rpath='$$ORIGIN/../g2g' 
 #eliminada   -lmkl_solver_lp64 
 
@@ -55,6 +52,17 @@ ifeq ($(ultima_g2g),1)
 	CFLAGS2 += -DULTIMA_G2G
 endif
 
+CUBLAS_SRC=$(wildcard cublas/*.f)
+CUBLAS_OBJ=
+FORTRAN_WRAPPER=
+ifeq ($(cublas),1)
+	CUBLAS_OBJ=$(CUBLAS_SRC:cublas/%.f=obj/garcha_g2g_obj/%.o)
+	CFLAGS += -DCUBLAS  
+	CFLAGS2 += -DCUBLAS
+	CFLAGS3 += -DCUBLAS
+	FORTRAN_WRAPPER = fortran.o
+endif
+
 ## Targets: make ##
 
 all: dirs liblio-g2g.so 
@@ -62,8 +70,8 @@ all: dirs liblio-g2g.so
 dirs:
 	mkdir -p obj/garcha_g2g_obj/mods obj/garcha_g2g_obj/
 
-liblio-g2g.so: dirs $(GARCHA_OBJ:%.o=obj/garcha_g2g_obj/%.o) $(CUBLAS_OBJ) fortran.o
-	ifort -shared -fPIC -o $@ $(GARCHA_OBJ:%.o=obj/garcha_g2g_obj/%.o) $(CUBLAS_OBJ) fortran.o $(LIBS)
+liblio-g2g.so: dirs $(GARCHA_OBJ:%.o=obj/garcha_g2g_obj/%.o) $(CUBLAS_OBJ) $(FORTRAN_WRAPPER)
+	ifort -shared -fPIC -o $@ $(GARCHA_OBJ:%.o=obj/garcha_g2g_obj/%.o) $(CUBLAS_OBJ) $(FORTRAN_WRAPPER) $(LIBS)
 
 
 ## Targets: clean ##
