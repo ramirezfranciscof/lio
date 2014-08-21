@@ -68,7 +68,7 @@ liblio-g2g.so: dirs $(GARCHA_OBJ:%.o=obj/garcha_g2g_obj/%.o) $(CUBLAS_OBJ) fortr
 
 ## Targets: clean ##
 clean:
-	rm -rf obj
+	rm -rf obj fortran.o
 	rm -rf libgarcha-g2g.so liblio-g2g.so
 
 
