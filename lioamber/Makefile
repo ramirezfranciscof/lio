@@ -60,9 +60,8 @@ ifeq ($(cublas),1)
 	CFLAGS += -DCUBLAS  
 	CFLAGS2 += -DCUBLAS
 	CFLAGS3 += -DCUBLAS
-	FORTRAN_WRAPPER = fortran.o
+	FORTRAN_WRAPPER = obj/fortran.o
 endif
-
 ## Targets: make ##
 
 all: dirs liblio-g2g.so 
@@ -127,8 +126,13 @@ obj/garcha_g2g_obj/intsol.o: intsol.f
 obj/garcha_g2g_obj/%.o: %.f
 	ifort -o $@ $(CFLAGS) $(G2G_CFLAGS) $<
 
-fortran.o: $(CUDA_HOME)/src/fortran.c
-	icc -fPIC -DCUBLAS_INTEL_FORTRAN -O3 -c $< -o $@ -I$(CUDA_HOME)/include
+obj/fortran.o: $(CUDA_HOME)/src/fortran.c
+	icc -fPIC -DCUBLAS_GFORTRAN -O3 -c $< -o $@ -I$(CUDA_HOME)/include
+
 
 obj/garcha_g2g_obj/%.o: cublas/%.f
 	ifort  -o $@ $(CFLAGS) $(G2G_CFLAGS) $<
+
+#ifeq ($(cublas),1)
+#	icc -fPIC -DCUBLAS_GFORTRAN -O3 -c $(CUDA_HOME)/src/fortran.c -o ../lioamber/obj/libfortran.so -I$(CUDA_HOME)/include/
+#endif
