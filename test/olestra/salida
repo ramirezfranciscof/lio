@@ -1,0 +1,69 @@
+ &LIO
+ NATOM   =         453,
+ NSOL    =           0,
+ CHARGE  =           0,
+ OPEN    = F,
+ NMAX    =          20,
+ NUNP    =           0,
+ VCINP   = T,
+ FRESTARTIN      = restart.in          ,
+ GOLD    =   60.0000000000000     ,
+ TOLD    =  1.000000000000000E-006,
+ RMAX    =   16.0000000000000     ,
+ RMAXS   =   5.00000000000000     ,
+ PREDCOEF        = F,
+ IDIP    =           1,
+ WRITEXYZ        = T,
+ INTSOLDOUBLE    = T,
+ DIIS    = T,
+ NDIIS   =          30,
+ DGTRIG  =   100.000000000000     ,
+ IEXCH   =           9,
+ INTEG   = T,
+ DENS    = T,
+ IGRID   =           2,
+ IGRID2  =           2,
+ TIMEDEP =           0,
+ TDSTEP  =  2.000000000000000E-003,
+ NTDSTEP =           0,
+ PROPAGATOR      =           1,
+ NBCH    =          10,
+ FIELD   = F,
+ A0      =   1000.00000000000     ,
+ EPSILON =   1.00000000000000     ,
+ EXTER   = F,
+ FX      =  5.000000074505806E-002,
+ FY      =  5.000000074505806E-002,
+ FZ      =  5.000000074505806E-002,
+ TDRESTART       = F,
+ WRITEDENS       = T
+ /
+<====== Initializing G2G ======>GPU Device used: Tesla K40c
+Kernels: gpu
+ NCO=         683
+         453         453        9060        9060          20          20
+ JOB STARTED NOW
+lun ago 25 21:52:25 ART 2014
+basis set corresponding to Z  26 was not used
+basis set corresponding to Z   7 was not used
+ en drive        2131        7062         683
+<======= GPU Code Initialization ========>
+atoms: 453
+max atoms: 453
+number of gaussians: 9060
+do_forces: false
+s: 1081 p: 350 d: 0
+m: 2131 nco: 683
+<====== read_options ========>
+energy_all_iterations true
+little_cube_size 8
+max_function_exponent 8
+min_points_per_cube 1
+sphere_radius 0.6
+free_global_memory 0.8
+ drive terminando
+ M=        2131
+ M=        2131
+ DOING CHOLESKY
+           0
+           0

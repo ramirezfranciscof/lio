@@ -1,0 +1,12 @@
+&lio
+ nsol=0
+ natom=453
+ charge=0
+ nmax=20
+ndiis=30
+diis=t
+vcinp=t
+gold=60
+IGRID=2
+IGRID2=2
+&end
