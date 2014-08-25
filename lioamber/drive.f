@@ -893,7 +893,6 @@ c       write(*,*) 'estoooo',ngpru, ngDyn, ng0, natom
      > M18, M5, NCO, nopt, Iexch,
      > e_, e_2, e3, wang, wang2, wang3)
 
-
 c      if (parsearch) then
 c        call g2g_reload_atom_positions(igrid2)
 c        call g2g_solve_groups(1, E, 0)
@@ -1002,10 +1001,10 @@ c---------------------------------------------------
 c---------------------------------------------------
        deallocate(X,XX)
        allocate(X(M,3*M),XX(Md,Md))
-       allocate(old1(MM))
-
-       allocate(old2(MM))
-       allocate(old3(MM))
+c       allocate(old1(MM))
+      write(*,*) 'drive terminando'
+c       allocate(old2(MM))
+c       allocate(old3(MM))
 
  100  format (A8)
  200  format ('basis set corresponding to Z ',I3,' was not used')

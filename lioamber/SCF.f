@@ -50,7 +50,6 @@ c chequeo -----------
 c
       Ndens=1
 c---------------------
-c       write(*,*) 'M=',M
       allocate (znano(M,M),xnano(M,M))
        
       npas=npas+1       
@@ -145,6 +144,8 @@ c Para hacer lineal la integral de 2 electrone con lista de vecinos. Nano
         nnpd(nuc(iikk))=iikk
       enddo
 
+       write(*,*) 'M=',M
+       write(*,*) 'M=',M
       call g2g_reload_atom_positions(igrid2)
 
       if (predcoef.and.npas.gt.3) then
@@ -291,6 +292,7 @@ c          write(56,*) RMM(M15+1)
 c
 c CASE OF NO STARTING GUESS PROVIDED, 1 E FOCK MATRIX USED
 c
+         call g2g_timer_start('initial gess')
       if((.not.ATRHO).and.(.not.VCINP).and.primera) then
         primera=.false.
         do i=1,M
@@ -390,6 +392,7 @@ c
 c
       endif
 
+         call g2g_timer_stop('initial gess')
 
 c End of Starting guess (No MO , AO known)-------------------------------
 c
@@ -561,7 +564,7 @@ c----------Acumulamos en las columnas de FP_PFm los sucesivos conmutadores------
       endif
 c
 c-------------Decidiendo cual critero de convergencia usar-----------
-        if (niter.gt.2.and.(DIIS)) then
+        if (niter.gt.20.and.(DIIS)) then
           hagodiis=.true.
         endif
 
@@ -760,15 +763,6 @@ c--------Eventualmente se puede probar con la matriz densidad-------------------
           call g2g_timer_stop('diis')
         endif
       endif
-c-------nano tratando de usar magma
-      fock=0
-      do j=1,M
-        do k=1,j
-         i=j+(M2-k)*(k-1)/2
-         fock(j,k)=RMM(M5+i-1)
-        enddo
-      enddo
-c---------------------
   
        call g2g_timer_start('dspev')
 c ESSL OPTION ---------------------------------------------------
@@ -779,6 +773,17 @@ c
 c LAPACK OPTION -----------------------------------------
 #ifdef pack
 #ifdef magma
+c-------nano tratando de usar magma
+        if(.not.allocated) allocate (fock(M,M))        
+
+      fock=0
+      do j=1,M
+        do k=1,j
+         i=j+(M2-k)*(k-1)/2
+         fock(j,k)=RMM(M5+i-1)
+        enddo
+      enddo
+c---------------------
        LWORK=-1
       call magmaf_dsyevd('V','L',M,fock,M,RMM(M13),WORK,LWORK
      > ,IWORK,LWORK,info)
@@ -943,14 +948,14 @@ c
         converge=converge+1
       endif
 
-      old3=old2
+c      old3=old2
 
-      old2=old1
+c      old2=old1
 c        write(*,*) 'good final',good
 
-      do i=1,MM
-        old1(i)=RMM(i)
-      enddo
+c      do i=1,MM
+c        old1(i)=RMM(i)
+c      enddo
 
       if(noconverge.gt.4) then 
         write(6,*)  'stop fon not convergion 4 times'
@@ -979,9 +984,7 @@ c       call g2g_timer_start('exchnum')
        call exchnum(NORM,natom,r,Iz,Nuc,M,ncont,nshell,c,a,RMM,
      >              M18,NCO,Exc,nopt)
 #else
-       call g2g_new_grid(igrid)
        call g2g_solve_groups(1, Exc, 0)
-c       write(*,*) 'g2g-Exc',Exc
 #endif
 #else
 #ifdef ULTIMA_G2G

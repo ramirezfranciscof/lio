@@ -38,7 +38,7 @@ void Partition::regenerate(void)
 
     // Determina el exponente minimo para cada tipo de atomo.
     // uno por elemento de la tabla periodica.
-    vector<double> min_exps(120, numeric_limits<double>::max());
+    vector<double> min_exps(520, numeric_limits<double>::max());
     for (uint i = 0; i < fortran_vars.m; i++)
     {
         uint contractions = fortran_vars.contractions(i);

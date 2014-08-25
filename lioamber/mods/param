@@ -17,12 +17,12 @@ c
 
 
 
-      parameter (ntq=200,ntc=50000,nss=1)
+      parameter (ntq=600,ntc=5,nss=1)
       parameter (nt=ntq+nss*ntc)
-      parameter (ng0=40,ng=ntq*ng0,nl=7)
-      parameter (ngd0=40,ngd=ntq*ngd0)
+      parameter (ng0=20,ng=ntq*ng0,nl=7)
+      parameter (ngd0=20,ngd=ntq*ngd0)
       parameter (ntqss=ntq+nss)
-      parameter (norbit=800,Ngrid=0)
+      parameter (norbit=100,Ngrid=0)
 
 c !!!!!!! Actualizar en gpu/cuda/excnum.cu !!!!!
 c FORTRAN_MAX_ATOMS = nt
