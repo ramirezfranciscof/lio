@@ -5,7 +5,7 @@
 !
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-       use garcha_mod,only:Fx,Fy,Fz,a0,natom,Iz,NCO,NUNP,epsilon,istep
+       use garcha_mod,only:Fx,Fy,Fz,a0,natom,Iz,NCO,NUNP,epsilon,nstep
        implicit none
        real*8,intent(out) :: Energy
 
@@ -39,7 +39,7 @@
        dipy=0.0d0
        dipz=0.0d0
        call dip(dipx,dipy,dipz)
-       gausscurve=exp(-alpha*(real(istep-mstep))**2)
+       gausscurve=exp(-alpha*(real(nstep-mstep))**2)
        fldx=fx*gausscurve
        fldy=fy*gausscurve
        fldz=fz*gausscurve
@@ -49,7 +49,13 @@
 ! MODIFY FOCK AND CALCULATE ENERGY
 !----------------------------------------------------------!
        call dip2(g,fldx,fldy,fldz)
-       term1=((-1.0d0)*(Fx*dipx+Fy*dipy+Fz*dipz)*g)/factor
+       PRINT*
+       PRINT*,Fx,Fy,Fz
+       PRINT*,Fldx,Fldy,Fldz
+       PRINT*,dipx,dipy,dipz
+       PRINT*,g,factor,Qc2,a0,epsilon
+       PRINT*
+       term1=((-1.0d0)*(Fldx*dipx+Fldy*dipy+Fldz*dipz)*g)/factor
        term2=((-0.5d0)*(1.0d0-1.0d0/epsilon)*Qc2)/a0
        Energy=term1+term2
 !

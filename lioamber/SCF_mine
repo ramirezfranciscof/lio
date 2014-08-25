@@ -214,7 +214,7 @@ c
 
        IF (docholesky) THEN
          CALL spunpack('L',M,RMM(M5),SMaux)
-         CALL sdiag_cholesky(M,SMaux,Y,Xtrans,Ytrans,Xfran)
+         CALL cholesky_sdiag(M,RMM(M5),Y,Xtrans,Ytrans,Xfran)
 
 
        ELSE IF (dolowdin) THEN
@@ -466,7 +466,7 @@ c
 c now, we know S matrix, and F matrix, and E for a given P
 c 1) diagonalize S, get X=U s^(-1/2)
 c 2) get U F Ut
-!c 3) diagonalize F
+c 3) diagonalize F
 c 4) get vec ( coeff) ---->  P new
 c 5) iterate
 c call diagonalization routine for S , get after U s^(-1/2)
@@ -1078,10 +1078,11 @@ c--------------------------------------------------------------
 
 
 !##########################################################!
-!##########################################################!
 ! EXTRA TEST
-       call conmut(RhoAux,FockAux,Matrix,M)
-       write(779,*) Matrix
+       IF (.FALSE.) THEN
+         call conmut(RhoAux,FockAux,Matrix,M)
+         write(779,*) Matrix
+       ENDIF
 
 !##########################################################!
 ! FFR - NEW FORCE
@@ -1096,11 +1097,13 @@ c--------------------------------------------------------------
 !
        IF (docholesky) CALL 
      >    test_cholesky(natom,M,M15,fockaux,Xtrans,Xfran,rhoaux)
+       IF (docholesky) CALL rmm_exc_qmm(M,Xfran,rhoaux,fockaux,Xtrans)
+
 !
 !       IF (dolowdin) CALL
 !     >    test_lowdin(natom,M,fockaux,Xfran,rhoaux,eigvec,eigval)
 !
-         CALL prepQMM(M,RMM(M15),Xfran,Rhoaux,Fockaux,Xtrans)
+!         CALL prepQMM(M,RMM(M15),Xfran,Rhoaux,Fockaux,Xtrans)
 !##########################################################!
 
 
@@ -1205,6 +1208,7 @@ c writes down MO coefficients and orbital energies
 
 !##########################################################!
 ! EXTRA TEST
+       if (.false.) then
        call conmut(RhoAux,FockAux,Matrix,M)
        write(801,*) Matrix
 
@@ -1227,6 +1231,7 @@ c writes down MO coefficients and orbital energies
 
        call conmut(rhoaux2,rhoaux3,Matrix,M)
        write(804,*) Matrix
+       endif
 !##########################################################!
 
 c-------------------------------------------------

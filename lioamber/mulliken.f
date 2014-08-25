@@ -1,5 +1,5 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-       SUBROUTINE MullikenPop(OutID)
+       SUBROUTINE mulliken(OutID)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 !
 !
@@ -19,7 +19,8 @@
 !
 ! SETUP
 !----------------------------------------------------------!
-       call g2g_timer_start('MullikenPop')
+       PRINT*,'AVER'
+       call g2g_timer_start('mulliken')
        call int1(Energy)
        allocate(q(natom))
        do ii=1,natom
@@ -57,18 +58,17 @@
 !----------------------------------------------------------!
        write(OutID,300)
        write(OutID,200) 'MULLIKEN POPULATION ANALYSIS'
-       write(OutID,200) ''
+       write(OutID,200)
        write(OutID,201) 'ATOM #','ATOM TYPE','POPULATION'
        do ii=1,natom
          write(OutID,202) ii,Iz(ii),q(ii)
        enddo
-       write(OutID,200) ''
-!       write(OutID,300)
+       write(OutID,200)
 !
 ! ROUTINE EXIT
 !----------------------------------------------------------!
        deallocate(q)
-       call g2g_timer_stop('MullikenPop')
+       call g2g_timer_stop('mulliken')
 !
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!

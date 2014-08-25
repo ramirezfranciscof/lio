@@ -83,7 +83,7 @@ c
       Data Num /1,3,6,10/
       dimension jatom(2,100),coef(100),dist(100,3),distt(100)
       integer ndis,nsteps
-      real*8 kjar,xini,xfinal   
+      real*8 kjar,xini,xfinal
 
       integer, dimension(:), ALLOCATABLE :: natomc,nnps,nnpp,nnpd,nns
       integer, dimension(:), ALLOCATABLE :: nnd,nnp
@@ -100,7 +100,7 @@ c     parameter rmintsol=16.0D0
 ! FFR ADDED:
 !
        REAL*8  :: dt
-       INTEGER :: istep
+       INTEGER :: nstep
 !
        REAL*8,ALLOCATABLE    :: DSX(:,:,:),DSY(:,:,:),DSZ(:,:,:)
        REAL*8,ALLOCATABLE    :: FockMat(:,:)

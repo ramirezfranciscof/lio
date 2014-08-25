@@ -9,11 +9,6 @@
 ! ffr_setup_F(Ecoul_o,Exc_o,Eelec_o,Efld_o)
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-!
-!
-!
-!
-!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
        SUBROUTINE ffr_reset_mem()
        use garcha_mod, only:kkind,kkinds,cool,cools
        implicit none
@@ -24,19 +19,12 @@
        if (allocated(cools))  deallocate(cools)
        RETURN;END SUBROUTINE
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-!
-!
-!
-!
-!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
        SUBROUTINE ffr_setup_S(Enn_o,Esve_o,Esvn_o)
        use garcha_mod, only:nsol
        implicit none
        real*8                      :: Enn,Esve,Esvn
        real*8,intent(out),optional :: Enn_o,Esve_o,Esvn_o
-!
 !------------------------------------------------------------------------------!
-!
        call ffr_reset_mem()
        Enn =0.0d0
        Esve=0.0d0
@@ -55,20 +43,13 @@
        if (present(Esvn_o)) Esvn_o=Esvn
        RETURN;END SUBROUTINE
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-!
-!
-!
-!
-!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
        SUBROUTINE ffr_setup_F(Ecoul_o,Exc_o,Eelec_o,Efld_o)
        use garcha_mod, only:RMM,M,Md,field
        implicit none
        real*8,intent(out),optional :: Ecoul_o,Exc_o,Eelec_o,Efld_o
        real*8                      :: Ecoul,Exc,Eelec,Efld
        integer                     :: MM,M11,kk
-!
 !------------------------------------------------------------------------------!
-!
        MM=M*(M+1)/2
        M11=1+3*MM+Md*(Md+1)
        Ecoul = 0.0d0

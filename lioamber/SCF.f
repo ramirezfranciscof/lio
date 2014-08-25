@@ -213,7 +213,7 @@ c
 !       IF (.FALSE.) WRITE(*,*) 'Lowdin is: ',dolowdin
 
        IF (docholesky) THEN
-!         CALL spunpack('L',M,RMM(M5),SMaux)
+         CALL spunpack('L',M,RMM(M5),SMaux)
          CALL cholesky_sdiag(M,RMM(M5),Y,Xtrans,Ytrans,Xfran)
 
 
@@ -1078,10 +1078,11 @@ c--------------------------------------------------------------
 
 
 !##########################################################!
-!##########################################################!
 ! EXTRA TEST
-!       call conmut(RhoAux,FockAux,Matrix,M)
-!       write(779,*) Matrix
+       IF (.FALSE.) THEN
+         call conmut(RhoAux,FockAux,Matrix,M)
+         write(779,*) Matrix
+       ENDIF
 
 !##########################################################!
 ! FFR - NEW FORCE
@@ -1096,6 +1097,8 @@ c--------------------------------------------------------------
 !
        IF (docholesky) CALL 
      >    test_cholesky(natom,M,M15,fockaux,Xtrans,Xfran,rhoaux)
+       IF (docholesky) CALL rmm_exc_qmm(M,Xfran,rhoaux,fockaux,Xtrans)
+
 !
 !       IF (dolowdin) CALL
 !     >    test_lowdin(natom,M,fockaux,Xfran,rhoaux,eigvec,eigval)

@@ -8,53 +8,67 @@
 !
 ! Note that the forces will be minus this derivative;
 ! that needs to be considered by the calling routine.
+! (a more suitable name for this subroutine would have
+! been "dft_get_qm_Ederivatives").
+!
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+       USE garcha_mod,ONLY:natom
+       IMPLICIT NONE
+       REAL*8,INTENT(INOUT)              :: dxyzqm(3,natom)
+       REAL*8,DIMENSION(:,:),ALLOCATABLE :: force_total,force_contrib
+       REAL*8                            :: factor
+       INTEGER                           :: ii,jj
+!------------------------------------------------------------------------------!
+       allocate(force_total(natom,3),force_contrib(natom,3))
+       open(unit=200,file='forces_check.dat',position="append")
+       force_total=0.0d0
+!      !------------------------------------------------------------!
+       call g2g_timer_start('int1G')
+       force_contrib=0.0d0
+       call int1G(force_contrib)
+       force_total=force_total+force_contrib
+!       call print_forceset(200,natom,force_contrib,'F1G:')
+       call g2g_timer_stop('int1G')
+!      !------------------------------------------------------------!
+       call g2g_timer_start('intSG')
+       force_contrib=0.0d0
+       call intSG(force_contrib)
+       force_total=force_total+force_contrib
+       call print_forceset(200,natom,force_contrib,'FSG:')
+       call g2g_timer_stop('intSG')
+!      !------------------------------------------------------------!
+       call g2g_timer_start('int3G')
+       force_contrib=0.0d0
+       call int3G(force_contrib,.true.)
+       force_total=force_total+force_contrib
+!       call print_forceset(200,natom,force_contrib,'F3G:')
+       call g2g_timer_stop('int3G')
+!      !------------------------------------------------------------!
+       factor=1.0d0
+c       factor=627.509391D0/0.5291772108D0
+       do ii=1,natom;do jj=1,3
+         dxyzqm(jj,ii)=force_total(ii,jj)*factor
+       enddo;enddo
+!      !------------------------------------------------------------!
+       close(200)
+       deallocate(force_total,force_contrib)
+       return;end subroutine dft_get_qm_forces
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+!
 !
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-       USE garcha_mod, ONLY:natom
-c       use qmmm_module, only : qmmm_struct
-       IMPLICIT NONE
-
-       REAL*8,INTENT(INOUT)              :: dxyzqm(3,natom)
-       REAL*8,DIMENSION(:,:),ALLOCATABLE :: ff
-       REAL*8                            :: ftot(3),factor
-       INTEGER                           :: ii,jj
-!
+       subroutine print_forceset(nunit,natoms,force,descript)
+       integer,intent(in) :: nunit,natoms
+       real*8,intent(in)  :: force(natoms,3)
+       character(len=4)   :: descript
+       integer            :: ii,jj
 !------------------------------------------------------------------------------!
-!
-       allocate(ff(natom,3))
-       ff=0
-!       WRITE(6,*) "-----------------------------------"
-!       WRITE(6,*) "FORCES:"
-!
-       call g2g_timer_start('int1G')
-       call int1G(ff)
-       call g2g_timer_stop('int1G')
-!       WRITE(6,666) 'hola int1g',ff(1,:)
-!
-       call g2g_timer_start('intSG')
-       call intSG(ff)
-       call g2g_timer_stop('intSG')
-!       WRITE(6,666) 'hola intSG',ff(1,:)
-!
-       call g2g_timer_start('int3G')
-       call int3G(ff,.true.)
-       call g2g_timer_stop('int3G')
-!       WRITE(6,666) 'hola int3G',ff(1,:)
-!       WRITE(6,*) "-----------------------------------"
-       ff=0 ! SOLO PARA DEBUG
-
-!
-c       factor=627.509391D0/0.5291772108D0
-       factor=1.D0
-       do ii=1,natom 
-       do jj=1,3
-         dxyzqm(jj,ii)=ff(ii,jj)*factor
+       do ii=1,natoms
+       write(nunit,200) descript,ii,(force(ii,jj),jj=1,3)
        enddo
-       enddo
-!
-!------------------------------------------------------------------------------!
-       deallocate (ff)
- 666   FORMAT(A,3(2X,E15.5))
-       end subroutine dft_get_qm_forces
+       write(nunit,'(A)')
+     > '------------------------------------------------------------'
+ 200   format(1X,A4,1X,I2,3(2X,E15.7),1X)
+       return;end subroutine
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!

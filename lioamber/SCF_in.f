@@ -41,6 +41,7 @@ c           write(87,*) i, j , r(i,j)
 ! FFR: PUENTEO TRUCHO
 !       call SCF(E,dipxyz)
        call LiouvilleVN(E,dipxyz)
+!       call Ehrenfest(E,dipxyz)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 
 
