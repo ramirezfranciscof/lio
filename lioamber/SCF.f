@@ -937,6 +937,7 @@ c-------------------------------------------------------------------
         write(6,*) 'NO CONVERGENCE AT ',NMAX,' ITERATIONS'
         noconverge=noconverge + 1
         converge=0
+        call write_struct()
       else
         write(6,*) 'CONVERGED AT',niter,'ITERATIONS'
         noconverge = 0

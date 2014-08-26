@@ -10,7 +10,7 @@ c      use qmmm_module, only : qmmm_struct
 
       allocate(ff(natom,3))
       ff=0
-      
+      if(noconverge.eq.0) then 
       call g2g_timer_start('int1G')
       call int1G(ff)
       call g2g_timer_stop('int1G')
@@ -25,6 +25,7 @@ c         write(77,*) ff
       call g2g_timer_stop('int3G')
 
 c        factor=627.509391D0/0.5291772108D0
+      endif
       factor=1.D0
       do i=1,natom 
         do j=1,3
