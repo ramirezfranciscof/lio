@@ -47,7 +47,8 @@ c           write(87,*) i, j , r(i,j)
        endif
        ENDIF
 
-       call LiouvilleVN(E,dipxyz)
+       call SCF(E,dipxyz)
+!       call LiouvilleVN(E,dipxyz)
 !       call Ehrenfest(E,dipxyz)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 

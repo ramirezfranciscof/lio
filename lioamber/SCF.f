@@ -224,6 +224,8 @@ c
 #ifdef magma
         PRINT*,'DOING CHOLESKY'
 
+        ALLOCATE(Xfran(M,M))
+        ALLOCATE(Lmat(M,M),Linv(M,M),Umat(M,M),Uinv(M,M))
         ALLOCATE(Y(M,M),Ytrans(M,M))
         DO iii=1,M;DO jjj=1,M
           Y(iii,jjj)=0
@@ -255,6 +257,8 @@ c
 
         CALL DPPTRF('L',M,MatrixVec,ErrID)
         PRINT*,ErrID
+        ALLOCATE(Xfran(M,M))
+        ALLOCATE(Lmat(M,M),Linv(M,M),Umat(M,M),Uinv(M,M))
         ALLOCATE(Y(M,M),Ytrans(M,M))
         DO iii=1,M;DO jjj=1,M
           Y(iii,jjj)=0
