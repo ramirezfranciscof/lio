@@ -39,7 +39,14 @@ c           write(87,*) i, j , r(i,j)
 
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 ! FFR: PUENTEO TRUCHO
-!       call SCF(E,dipxyz)
+       IF (.FALSE.) THEN
+       if(OPEN) then
+         call SCFOP(E,dipxyz) 
+       else
+         call SCF(E,dipxyz)
+       endif
+       ENDIF
+
        call LiouvilleVN(E,dipxyz)
 !       call Ehrenfest(E,dipxyz)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
@@ -47,5 +54,5 @@ c           write(87,*) i, j , r(i,j)
 
  345   format(2x,I2,2x,3(f10.6,2x))
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-       return;end
+       return;end subroutine
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!

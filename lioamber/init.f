@@ -42,17 +42,16 @@ c
 c para version en memoria
        ng2=5*ngDyn*(ngDyn+1)/2+3*ngdDyn*(ngdDyn+1)/2+
      >     ngDyn+ngDyn*norbit+Ngrid
+       write(*,*) 'ng2 en init',ng2,ngDyn,ngdDyn,norbit,Ngrid
 
-c      write(*,*) 'ng2 en init',ng2,ngdyn,ngddyn
-
-      allocate(X(ngDyn,ng3),XX(ngdDyn,ngdDyn))
-      allocate(RMM(ng2),RMM1(ng2),RMM2(ng2),RMM3(ng2))
-      allocate (c(ngnu,nl),a(ngnu,nl),Nuc(ngnu),ncont(ngnu)
+       allocate(X(ngDyn,ng3),XX(ngdDyn,ngdDyn))
+       allocate(RMM(ng2),RMM1(ng2),RMM2(ng2),RMM3(ng2))
+       allocate (c(ngnu,nl),a(ngnu,nl),Nuc(ngnu),ncont(ngnu)
      > ,cx(ngdnu,nl),ax(ngdnu,nl),Nucx(ngdnu),ncontx(ngdnu)
      > ,cd(ngdnu,nl),ad(ngdnu,nl),Nucd(ngdnu),ncontd(ngdnu)
      > ,indexii(ngnu),indexiid(ngdnu))
 
-      allocate (r(ntatom,3),v(ntatom,3),rqm(natom,3),Em(ntatom)
+       allocate (r(ntatom,3),v(ntatom,3),rqm(natom,3),Em(ntatom)
      > ,Rm(ntatom),pc(ntatom),Iz(natom),nnat(ntatom),af(natom*ngd0)
      > ,B(natom*ngd0,3))
       allocate(d(natom,natom))

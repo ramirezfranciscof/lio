@@ -3,14 +3,18 @@ MOD_SRCS=$(wildcard mods/*.f)
 # COMMON_SRCS=$(wildcard *.f)
 GARCHA_SRCS=$(wildcard *.f)
 
-MOD_OBJ=$(MOD_SRCS:%.f=%.o) 
+MOD_OBJ=$(MOD_SRCS:%.f=%.o)
 GARCHA_OBJ=$(MOD_OBJ) $(COMMON_SRCS:%.f=%.o) $(GARCHA_SRCS:%.f=%.o)
 
 # flags
+ifeq ($(print), 1)
+        DEFINE += -DPRINT_MATRICES
+endif
+
 ifeq ($(profile),1)
   PROFILE  = -pg
 else
-  PROFILE  =  
+  PROFILE  =
 endif
 
 ifeq ($(cpu_recompute),0)
@@ -27,8 +31,7 @@ else
   NVCCFLAGS += -DFULL_DOUBLE=0
 endif
 
-DEFINE   = -Dpack -fPIC
-
+DEFINE   += -Dpack -fPIC
 #CFLAGS   = -g -mp1 -ip -O3 -c -cpp  $(DEFINE) $(PROFILE)
 #CFLAGS2  = -g -O1 -c -cpp  $(DEFINE) $(PROFILE)
 #CFLAGS3  = -g -O3 -c -cpp -parallel   $(DEFINE) $(PROFILE)
@@ -39,9 +42,14 @@ CFLAGS2  = -g -O1 -c -cpp  $(DEFINE) $(PROFILE)
 CFLAGS3  = -g -O0 -c -cpp -parallel   $(DEFINE) $(PROFILE)
 CPPFLAGS = -P -traditional-cpp
 
-LIBS=-L/usr/lib -L/usr/lib64 -L../g2g -lg2g -lstdc++ -L$(MKLROOT)/lib/intel64 -I$(MKLROOT)/include $(PROFILE)  -lmkl_lapack95_lp64 -Wl,--start-group -lmkl_intel_lp64\
+LIBS=-L/usr/lib -L/usr/lib64 -L../g2g -lg2g -lstdc++ -L$(MKLROOT)/lib/intel64 -I$(MKLROOT)/include $(PROFILE)  -lmkl_lapack95_lp64 -Wl,--start-group -lmkl_intel_lp64 \
      -lmkl_intel_thread -lmkl_core -Wl,--end-group -liomp5 -lpthread -lm -Wl,-rpath='$$ORIGIN/' -Wl,-rpath='$$ORIGIN/../g2g' 
 #eliminada   -lmkl_solver_lp64 
+
+ifeq ($(magma),1)
+	DEFINE   += -Dmagma
+	LIBS     += -L$(MAGMAROOT)/lib -lmagma
+endif
 
 # directories
 G2G_CFLAGS=-DG2G
@@ -61,7 +69,7 @@ endif
 
 ## Targets: make ##
 
-all: dirs liblio-g2g.so 
+all: dirs liblio-g2g.so
 
 dirs:
 	mkdir -p obj/garcha_g2g_obj/mods obj/garcha_g2g_obj/

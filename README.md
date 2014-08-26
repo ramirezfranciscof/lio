@@ -1,7 +1,7 @@
 LIO Project
 
 Lio is a Quantum Mechanical software based on Density Functional Theory (DFT) and real time-time dependent Density Functiona Theory (TD-DFT).
-The most computer consumer parts are ported to use the graphical prossesors who suport CUDA.
+The most computer consumer parts are ported to use the graphical processors who suport CUDA.
 
 REQUIREMENTS
 ============
@@ -13,12 +13,13 @@ NVIDIA CUDA (even for compiling CPU version).
 COMPILATION
 ===========
 
-Enter g2g folder, and makefile there.
-G2G Compilation options, call following to make command, for example: make cuda=1
+G2G Compilation options, call following to make command, for example: make sm20=1 
 
 -dbg: enable debugging information
 
 -cpu: enable the compilation to test the optimized routines for GPU cards in CPU (not recommended, only to compare running the same code in CPU and GPU).
+
+-openmp: enable the compilation of the cpu code with openmp paralellism to use multiple cpu cores.
 
 -time: enables the timers to obtain detailed timing information from different parts of the program.
 
