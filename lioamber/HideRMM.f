@@ -1,6 +1,6 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 !  HideRMM
-!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+!------------------------------------------------------------------------------!
 !
 ! For easy access to the matrixes in RMM vector
 ! rmm_get_rho(M,RhoMat)
@@ -13,17 +13,18 @@
 ! rmm_put_qmm(M,QMat)
 ! rmm_exc_qmm(M,Uinv,Rho,Fock,Linv)
 !
-!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-!
-!
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+! Rho - The Density Matrix
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 !
-! When taken out of RMM packed storage (SP), rho matrix has doubled
-! elements in non diagonal positions. This subroutine fixes that.
-! When taken out of RMM packed storage (SP), rho matrix has doubled
-! elements in non diagonal positions. So before packing rho, one has
-! to mess it up.
+! In the RMM vector, Rho is stored in packed storage but
+! each non diagonal position has dobule the real value.
+! So before putting a density matrix in RMM, non diagonal
+! positions need to be x2 (messrho) and when taking it
+! out of RMM, the non diagonal positions need to be
+! divided by two (fixrho).
+!
 !
 !------------------------------------------------------------------------------!
        SUBROUTINE rmm_get_rho(M,RhoMat)
@@ -92,11 +93,20 @@
        return;end subroutine
 
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-
+!
+!
+!
 !
 !
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+! Fock, S and Energy
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+!
+! These subroutines take and put matrixes in the spaces
+! of RMM that are reserved for S and Fock matrixes.
+! Additionally, it includes one subroutine for the
+! re-calculation of energy.
 !
 !
 !------------------------------------------------------------------------------!
@@ -152,9 +162,23 @@
 !
 !
 !
+!
+!
+!
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+! QMM
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+! 
+! Subroutine to configure the matrix that is used to
+! calculate forces in intSG. SCF sets the matrix Q that
+! is referenced in Szabo, page 441 (or an analagous one)
+! This subrutines substitutes it for one apropriate for
+! the calculation of the forces in the case of excited
+! electronic states, according to what is indicated in
 !
+! JCP 114, 9758 (2001); doi: 10.1063/1.1372182
 !
+! for the case of cholesky diagonalization of S.
 !
 !------------------------------------------------------------------------------!
        SUBROUTINE rmm_put_qmm(M,QMat)
