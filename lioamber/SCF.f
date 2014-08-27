@@ -29,7 +29,7 @@ c       REAL*8 , intent(in)  :: clcoords(4,nsolin)
         LOGICAL :: docholesky
         REAL*8,ALLOCATABLE :: MatrixVec(:),TestMatrix(:)
 !! CUBLAS
-#ifdef cublas
+#ifdef CUBLAS
         integer sizeof_real
         parameter(sizeof_real=8)
         integer stat
@@ -264,12 +264,15 @@ c        write(56,*) RMM(M15+1)
             Xtrans(i,j)=X(j,i)   
             enddo
          enddo
-
-        ENDIF                   
-
+        ENDIF
+        do i=1,M
+           do j=1,M 
+              xmm(i,j)=x(i,j)                  
+           enddo
+        enddo
        call g2g_timer_stop('cholesky')
 !! CUBLAS ---------------------------------------------------------------------!
-#ifdef cublas
+#ifdef CUBLAS
             stat = CUBLAS_ALLOC(M*M, sizeof_real, devPtrX)
             stat = CUBLAS_ALLOC(M*M, sizeof_real, devPtrY)
             if (stat.NE.0) then
@@ -491,7 +494,7 @@ c
 c
              enddo
         enddo
-#ifdef cublas
+#ifdef CUBLAS
            call g2g_timer_start('cumatmul')
            call cumxtf(rho,devPtrY,rho,M)
            call cumfx(rho,devPtrY,rho,M)
@@ -524,7 +527,7 @@ c
         enddo
 
 
-#ifdef cublas
+#ifdef CUBLAS
             call cumxtf(fock,devPtrX,fock,M)
             call cumfx(fock,DevPtrX,fock,M)
 #else
@@ -561,7 +564,7 @@ c--rho(j,k) y fock(j,k) son las matrices densidad y de fock respect (forma cuadr
 
 c---------Calculo de conmutadores [F,P]-------------------------------------------
  
-#ifdef cublas
+#ifdef CUBLAS
          call cuconmut_r(fock,rho,FP_PF,M)
 #else
          call conmut(fock,rho,FP_PF,M)
@@ -661,7 +664,7 @@ c
                  fock(k,j)=RMM(M5+k+(M2-j)*(j-1)/2-1)
               enddo
             enddo
-#ifdef cublas
+#ifdef CUBLAS
             call cumxtf(fock,devPtrX,fock,M)
             call cumfx(fock,DevPtrX,fock,M)
 #else
@@ -749,7 +752,7 @@ c-------Escribimos en xnano y znano dos conmutadores de distintas iteraciones---
                      znano(i,j)=FP_PFm(j+(M2-i)*(i-1)/2,kknueva)
                    enddo
                 enddo
-#ifdef cublas
+#ifdef CUBLAS
                    call cumatmul_r(xnano,znano,rho1,M)
 #else
                    call matmuldiag(xnano,znano,rho1,M)
@@ -842,24 +845,23 @@ c LAPACK OPTION -----------------------------------------
 
 c-----------------------------------------------------------
 c
-c diagonalization now
-c
 c
 c new coefficients
        do i=1,M
-       do k=1,M
-           xnano(i,k)=X(k,i)
+          do k=1,M
+             xnano(i,k)=X(i,M+k)
+          enddo
        enddo
-       enddo
-c
-       do 50 i=1,M
-       do 50 j=1,M
-c
-        X(i,M2+j)=0.D0
-       do 52 k=1,M
-  52    X(i,M2+j)=X(i,M2+j)+xnano(k,i)*X(k,M+j)
-  50    continue
- 
+#ifdef CUBLAS
+       call cumxp_r(xnano,devPtrX,xnano,M)
+#else
+       xnano=matmul(xmm,xnano)
+#endif
+       do i=1,M
+          do j=1,M
+             X(i,M2+j)=xnano(i,j)
+          enddo
+       enddo 
        call g2g_timer_stop('coeff') 
        call g2g_timer_start('otras cosas')
 c
@@ -959,7 +961,7 @@ c       goto 995
         noconverge = 0
         converge=converge+1
       endif
-#ifdef cublas
+#ifdef CUBLAS
          call CUBLAS_FREE ( devPtrX )
          call CUBLAS_FREE ( devPtrY )
 #endif

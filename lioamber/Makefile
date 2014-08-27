@@ -27,6 +27,7 @@ else
   NVCCFLAGS += -DFULL_DOUBLE=0
 endif
 
+
 DEFINE   = -Dpack -fPIC   
 CFLAGS   = -g -mp1 -ip -O3 -c -cpp  $(DEFINE) $(PROFILE)
 CFLAGS2  = -g -O1 -c -cpp  $(DEFINE) $(PROFILE)
@@ -62,6 +63,12 @@ ifeq ($(cublas),1)
 	CFLAGS3 += -DCUBLAS
 	FORTRAN_WRAPPER = obj/fortran.o
 endif
+ifeq ($(td_simple),1)
+	CFLAGS += -DTD_SIMPLE
+	CFLAGS2 += -DTD_SIMPLE
+	CFLAGS3 += -DTD_SIMPLE
+endif
+
 ## Targets: make ##
 
 all: dirs liblio-g2g.so 

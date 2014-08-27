@@ -1,13 +1,20 @@
             subroutine conmutc(A,B,C,M)
+!========================================================================!
 !!!!!!!!  Hace C=A*B-B*A
+!------------------------------------------------------------------------!
        REAL*8 , intent(inout)  :: A(M,M)
-       COMPLEX*8 , intent(inout) :: B(M,M), C(M,M)
        logical ta, tb
-
+       INTEGER :: M
+#ifdef TD_SIMPLE
+       COMPLEX*8 , intent(inout) :: B(M,M), C(M,M)
        COMPLEX*8, dimension (:,:), ALLOCATABLE :: scratch,scratch1,
      > scratch2
-       INTEGER :: M
-
+#else
+       COMPLEX*16 , intent(inout) :: B(M,M), C(M,M)
+       COMPLEX*16, dimension (:,:), ALLOCATABLE :: scratch,scratch1,
+     > scratch2
+#endif
+!------------------------------------------------------------------------!
        allocate (scratch(M,M),scratch1(M,M),scratch2(M,M))
         do i=1,M
         do j=1,M
@@ -22,14 +29,11 @@
          enddo
         enddo
         enddo
-
-
         do i=1,M
         do j=1,M
          scratch(i,j)=B(j,i)
         enddo
         enddo
-
          scratch2=0
          C=0
         do i=1,M
@@ -40,14 +44,9 @@
         C(i,j)= scratch1(i,j)-scratch2(i,j)
         enddo
         enddo
-         
-
-
-
+!-----------------------------------------------------------------------!
        deallocate (scratch,scratch1,scratch2)
        return
- 
-
        end
 
 

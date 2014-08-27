@@ -34,11 +34,17 @@ c       USE latom
      >   xnano2,xmm,xtrans,ytrans,Y,fock,
      >   F1a,F1b
        real*8, dimension (:,:), ALLOCATABLE :: elmu
+       DIMENSION q(natom)
+       REAL*8,dimension(:),ALLOCATABLE :: factorial
+#ifdef TD_SIMPLE
        COMPLEX*8 :: Im,Ix
        COMPLEX*8,ALLOCATABLE,DIMENSION(:,:) ::
      >   rho,rhonew,rhold,xnano,rho1
-       DIMENSION q(natom)
-       REAL*8,dimension(:),ALLOCATABLE :: factorial
+#else
+       COMPLEX*16 :: Im,Ix
+       COMPLEX*16,ALLOCATABLE,DIMENSION(:,:) ::
+     >   rho,rhonew,rhold,xnano,rho1
+#endif
 !!------------------------------------!!
 !! FFR ADD
        INTEGER ::
@@ -46,7 +52,7 @@ c       USE latom
        REAL*8 ::
      >   dt_magnus,dt_lpfrg
 !! CUBLAS
-#ifdef cublas
+#ifdef CUBLAS
       integer sizeof_real
       parameter(sizeof_real=8)
       integer stat
@@ -63,11 +69,19 @@ c       USE latom
        just_int3n = false
        ALLOCATE(factorial(NBCH))
 !!------------------------------------!!
+#ifdef CUBLAS
+       write(*,*) 'USING CUBLAS'
+#endif
+#ifdef TD_SIMPLE
+        write(*,*) 'simple presition complex'
+#else
+        write(*,*) 'double presition complex'
+#endif
        if(propagator.eq.2) then
           dt_magnus=tdstep
           dt_lpfrg=tdstep*0.10D0
           factorial(1)=1.0D0
-#ifdef cublas
+#ifdef CUBLAS
           DO ii=1,NBCH
              factorial(ii)=1.0D0/ii
           ENDDO
@@ -309,7 +323,7 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
                enddo
             enddo
 !! CUBLAS ---------------------------------------------------------------------!
-#ifdef cublas
+#ifdef CUBLAS
             stat = CUBLAS_ALLOC(M*M, sizeof_real, devPtrX)
             stat = CUBLAS_ALLOC(M*M, sizeof_real, devPtrY)
             if (stat.NE.0) then
@@ -333,7 +347,7 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
 !       write(*,*) 'fz =', fz
 !------------------------------------------------------------------------------!
 ! Rho is transformed to the orthonormal basis
-#ifdef cublas
+#ifdef CUBLAS
            call g2g_timer_start('cumatmul')
            call cumxtp(rho,devPtrY,rho,M)
            call cumpx(rho,devPtrY,rho,M)
@@ -424,7 +438,7 @@ c ELECTRIC FIELD CASE - Type=gaussian (ON)
                  fock(k,j)=RMM(M5+k+(M2-j)*(j-1)/2-1)
               enddo
             enddo
-#ifdef cublas
+#ifdef CUBLAS
             call cumxtf(fock,devPtrX,fock,M)
             call cumfx(fock,DevPtrX,fock,M)
 #else
@@ -493,7 +507,7 @@ c             rhold=rhold-(tdstep*Im*(matmul(rho,fock)))
 c           endif
 c using conmutc
               if(istep.eq.1) then
-#ifdef cublas
+#ifdef CUBLAS
                call cuconmut(fock,rho,rhold,M)
                 rhold=rho+dt_lpfrg*(Im*rhold)
 #else
@@ -509,7 +523,7 @@ c           rhonew=rhonew+(tdstep*Im*(matmul(rho,fock)))
 c--------------------------------------c
 ! using conmutc:
                call g2g_timer_start('Verlet')
-#ifdef cublas
+#ifdef CUBLAS
                call cuconmut(fock,rho,rhonew,M)
                rhonew=rhold-dt_lpfrg*(Im*rhonew)
 #else
@@ -526,7 +540,7 @@ c Density update (rhold-->rho, rho-->rhonew)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 ! DENSITY MATRIX PROPAGATION USING MAGNUS ALGORITHM
                  write(*,*) 'Magnus'
-#ifdef cublas
+#ifdef CUBLAS
                 call g2g_timer_start('cupredictor')
                 call cupredictor(F1a,F1b,fock,rho,devPtrX,factorial,
      > fxx,fyy,fzz,g)
@@ -540,7 +554,7 @@ c Density update (rhold-->rho, rho-->rhonew)
                 call predictor(F1a,F1b,fock,rho,Xtrans,factorial)
                 call g2g_timer_stop('predictor')
                 call g2g_timer_start('magnus')
-                 call magnus(fock,rho,rhonew,M,NBCH,dt_magnus,factorial)
+                call magnus(fock,rho,rhonew,M,NBCH,dt_magnus,factorial)
                 call g2g_timer_stop('magnus')
 #endif
                  F1a=F1b
@@ -554,7 +568,7 @@ c Here we transform the density to the atomic orbital basis and take the real pa
 c can be descarted since for a basis set of purely real functions the fock matrix is real and symetric and depends only on 
 c the real part of the complex density matrix. (This won't be true in the case of hybrid functionals)
 c with matmul:
-#ifdef cublas
+#ifdef CUBLAS
              call g2g_timer_start('cumatmul')
              call cumxp(rho,devPtrX,rho1,M)
              call cumpxt(rho1,devPtrX,rho1,M)
@@ -647,7 +661,7 @@ c      write(*,*) 'Coulomb E',E2-Ex,Ex
  995   continue
 c
 c
-#ifdef cublas
+#ifdef CUBLAS
          call CUBLAS_FREE ( devPtrX )
          call CUBLAS_FREE ( devPtrY )
 #endif

@@ -9,18 +9,11 @@
        IMPLICIT NONE
        INTEGER,INTENT(IN)                   :: M,N
        REAL*8,INTENT(IN)                    :: Fock(M,M),dt
-       COMPLEX*8,INTENT(INOUT)              :: RhoOld(M,M)
-       COMPLEX*8,INTENT(OUT)                :: RhoNew(M,M)
-       
-       COMPLEX*8,ALLOCATABLE,DIMENSION(:,:) :: Omega1
        INTEGER                              :: ii,stat
-       INTEGER, PARAMETER :: sizeof_complex=8
        EXTERNAL CUBLAS_INIT, CUBLAS_SET_MATRIX, CUBLAS_GET_MATRIX
        EXTERNAL CUBLAS_SHUTDOWN, CUBLAS_ALLOC,CUBLAS_CGEMM
        EXTERNAL CUBLAS_CAXPY 
        INTEGER CUBLAS_ALLOC, CUBLAS_SET_MATRIX, CUBLAS_GET_MATRIX
-       INTEGER CUBLAS_CGEMM,CUBLAS_CAXPY,CUBLAS_INIT
-       COMPLEX*8 alpha,beta
        INTEGER*8 devPOmega
        INTEGER*8 devPPrev
        INTEGER*8 devPNext
@@ -28,8 +21,24 @@
        INTEGER*8 devPScratch
        INTEGER i,j
        REAL*4 Fact
-       COMPLEX*8,PARAMETER :: icmplx=CMPLX(0.0D0,1.0D0)
        REAL*8, INTENT(IN)                   :: factorial(N)
+#ifdef TD_SIMPLE
+       COMPLEX*8 alpha,beta
+       COMPLEX*8,ALLOCATABLE,DIMENSION(:,:) :: Omega1
+       COMPLEX*8,INTENT(INOUT)              :: RhoOld(M,M)
+       COMPLEX*8,INTENT(OUT)                :: RhoNew(M,M)
+       COMPLEX*8,PARAMETER :: icmplx=CMPLX(0.0D0,1.0D0)
+       INTEGER, PARAMETER :: sizeof_complex=8
+       INTEGER CUBLAS_CGEMM,CUBLAS_CAXPY,CUBLAS_INIT
+#else
+       COMPLEX*16 alpha,beta
+       COMPLEX*16,ALLOCATABLE,DIMENSION(:,:) :: Omega1
+       COMPLEX*16,INTENT(INOUT)              :: RhoOld(M,M)
+       COMPLEX*16,INTENT(OUT)                :: RhoNew(M,M)
+       COMPLEX*16,PARAMETER :: icmplx=CMPLX(0.0D0,1.0D0)
+       INTEGER, PARAMETER :: sizeof_complex=16
+       INTEGER CUBLAS_ZGEMM,CUBLAS_ZAXPY,CUBLAS_INIT
+#endif
 !------------------------------------------------------------------------------!
        ALLOCATE(Omega1(M,M))
       stat=CUBLAS_INIT()
@@ -45,9 +54,6 @@
        enddo
        enddo
 !------------------------------------------------------------------------------!
-!=======================================!
-!       write(1000,*), Omega1
-!=======================================!
        stat= CUBLAS_ALLOC(M*M, sizeof_complex, devPOmega)
        stat= CUBLAS_ALLOC(M*M, sizeof_complex, devPPrev)
        stat= CUBLAS_ALLOC(M*M, sizeof_complex, devPNext)
@@ -78,12 +84,13 @@
       endif
 !=======================================!
 ! Density matrix propagation
+#ifdef TD_SIMPLE
        Rhonew=RhoOld
        alpha=(1.0D0,0.0D0)
        DO ii=1,N
          Fact=factorial(ii)
-         alpha=CMPLX(Fact,0.0E0)
-         beta=(0.0E0,0.0E0)
+         alpha=CMPLX(Fact,0.0D0)
+         beta=(0.0D0,0.0D0)
          stat=CUBLAS_CGEMM('N','N',M,M,M,
      >        alpha,devPOmega,M,devPPrev,M,
      >        beta,devPNext,M)
@@ -125,6 +132,55 @@
       call CUBLAS_SHUTDOWN()
       stop
       endif
+#else
+       Rhonew=RhoOld
+       alpha=(1.0D0,0.0D0)
+       DO ii=1,N
+         Fact=factorial(ii)
+         alpha=CMPLX(Fact,0.0D0)
+         beta=(0.0D0,0.0D0)
+         stat=CUBLAS_ZGEMM('N','N',M,M,M,
+     >        alpha,devPOmega,M,devPPrev,M,
+     >        beta,devPNext,M)
+!=======================================!
+      if (stat.NE.0) then
+      write(*,*) "ZGEM failed -cumagnusfac/1"
+      call CUBLAS_FREE ( devPOmega )
+      call CUBLAS_FREE ( devPRho )
+      call CUBLAS_FREE ( devPNext )
+      call CUBLAS_FREE ( devPPrev )
+      call CUBLAS_SHUTDOWN()
+      stop
+      endif
+!======================================!
+         beta=(-1.0E0,0.0E0)
+         stat=CUBLAS_ZGEMM('N','N',M,M,M,
+     >        alpha,devPPrev,M,devPOmega,M,
+     >        beta,devPNext,M)
+!=======================================!
+      if (stat.NE.0) then
+      write(*,*) "ZGEM failed -cumagnusfac/2"
+      call CUBLAS_FREE ( devPOmega )
+      call CUBLAS_FREE ( devPRho )
+      call CUBLAS_FREE ( devPNext )
+      call CUBLAS_FREE ( devPPrev )
+      call CUBLAS_SHUTDOWN()
+      stop
+      endif
+!=======================================!
+         stat=CUBLAS_ZAXPY(M*M,1.0D0,devPNext,1,
+     >   devPRho,1)
+!=======================================!
+      if (stat.NE.0) then
+      write(*,*) "ZAXPY failed -cumagnusfac"
+      call CUBLAS_FREE ( devPOmega )
+      call CUBLAS_FREE ( devPRho )
+      call CUBLAS_FREE ( devPNext )
+      call CUBLAS_FREE ( devPPrev )
+      call CUBLAS_SHUTDOWN()
+      stop
+      endif
+#endif
 !=======================================!
       devPScratch=devPPrev
       devPPrev=devPNext

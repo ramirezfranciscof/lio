@@ -1,15 +1,15 @@
             subroutine matmulnanoc(A,B,C,M)
 !!!!!!!!  Hace C=Bt*(A*B)
        REAL*8 , intent(inout)  :: B(M,M)
-       COMPLEX*8, intent(inout) :: A(M,M), C(M,M)
        logical ta, tb
-
+#ifdef TD_SIMPLE
+       COMPLEX*8, intent(inout) :: A(M,M), C(M,M)
        COMPLEX*8, dimension (:,:), ALLOCATABLE :: scratch,scratch1
-
-
-
+#else
+       COMPLEX*16, intent(inout) :: A(M,M), C(M,M)
+       COMPLEX*16, dimension (:,:), ALLOCATABLE :: scratch,scratch1
+#endif
        allocate (scratch(M,M),scratch1(M,M))
-
         do i=1,M
         do j=1,M
          scratch(i,j)=A(j,i)
@@ -23,7 +23,6 @@
          enddo
         enddo
         enddo
-
          C=0
         do i=1,M
         do j=1,M
@@ -33,8 +32,6 @@
        enddo
        enddo
        return
-
-
        end
 
 

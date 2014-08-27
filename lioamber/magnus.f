@@ -8,13 +8,21 @@
        IMPLICIT NONE
        INTEGER,INTENT(IN)                   :: M,N
        REAL*8,INTENT(IN)                    :: Fock(M,M),dt
+       INTEGER                              :: ii
+       REAL*8, INTENT(IN)                   :: factorial(N)
+#ifdef TD_SIMPLE
+       COMPLEX*8,PARAMETER                  :: icmplx=CMPLX(0.0D0,1.0D0)
        COMPLEX*8,INTENT(IN)                 :: RhoOld(M,M)
        COMPLEX*8,INTENT(OUT)                :: RhoNew(M,M)
        COMPLEX*8,ALLOCATABLE,DIMENSION(:,:) :: ConmPrev,ConmNext,Omega1
        COMPLEX*8,ALLOCATABLE,DIMENSION(:,:) :: Scratch
-       INTEGER                              :: ii
-       COMPLEX*8,PARAMETER                  :: icmplx=CMPLX(0.0D0,1.0D0)
-       REAL*8, INTENT(IN)                   :: factorial(N)
+#else
+       COMPLEX*16,PARAMETER                 :: icmplx=CMPLX(0.0D0,1.0D0)
+       COMPLEX*16,INTENT(IN)                 :: RhoOld(M,M)
+       COMPLEX*16,INTENT(OUT)                :: RhoNew(M,M)
+       COMPLEX*16,ALLOCATABLE,DIMENSION(:,:) :: ConmPrev,ConmNext,Omega1
+       COMPLEX*16,ALLOCATABLE,DIMENSION(:,:) :: Scratch
+#endif
 !------------------------------------------------------------------------------!
 ! Variable initializations
        ALLOCATE(ConmPrev(M,M),ConmNext(M,M),Omega1(M,M))

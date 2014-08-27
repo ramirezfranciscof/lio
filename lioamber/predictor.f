@@ -8,10 +8,15 @@
        REAL*8,intent(in) :: Xtrans(M,M)
        REAL*8, intent(in) :: factorial(NBCH)
        REAL*8,allocatable :: F3(:,:),FBA(:,:)
-       COMPLEX*8, intent(in) :: rho2(M,M)
-       complex*8,allocatable :: rho4(:,:),rho2t(:,:)
        integer :: i,j,k,kk
        real*8 :: E2, tdstep1
+#ifdef TD_SIMPLE
+       COMPLEX*8, intent(in) :: rho2(M,M)
+       COMPLEX*8,allocatable :: rho4(:,:),rho2t(:,:)
+#else
+       COMPLEX*16, intent(in) :: rho2(M,M)
+       COMPLEX*16,allocatable :: rho4(:,:),rho2t(:,:)
+#endif
 !------------------------------------------------------------------------------!
        ALLOCATE(rho4(M,M),rho2t(M,M),F3(M,M),FBA(M,M))
 c
