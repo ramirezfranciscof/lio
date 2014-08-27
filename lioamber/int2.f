@@ -561,7 +561,7 @@ c
 #endif
 c
       endif
- 900  format('SWITCHING TO SVD rcond=',D8.2)
+ 900  format('SWITCHING TO SVD rcond=',D10.2)
 c
 c-------------------------------------------------------------------
       return
