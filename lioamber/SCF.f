@@ -879,30 +879,26 @@ c
 c Construction of new density matrix and comparison with old one
       kk=0
       good=0.
-c
-      do 130 j=1,M
-      do 130 i=j,M
-      kk=kk+1
-      tmp=RMM(kk)
-      RMM(kk)=0.
-c
-      if(i.eq.j) then
-       ff=2.D0
-      else
-       ff=4.D0
-      endif
-      do 139 k=1,NCO
-       RMM(kk)=RMM(kk)+ff*X(i,M2+k)*X(j,M2+k)
- 139  continue
-      del=RMM(kk)-tmp
-      if (i.ne.j) then
-       del=del*sq2
-      endif
-      good=good+del**2
- 130  continue
-c
-      good=sqrt(good)/float(M)
-      
+      call density(M,NCO,X,xnano)
+      do j=1,M
+         do k=j,M
+            if(j.eq.k) then
+               del=xnano(j,k)-(RMM(k+(M2-j)*(j-1)/2))
+               del=del*sq2
+               good=good+del**2
+               RMM(k+(M2-j)*(j-1)/2)=xnano(j,k)
+            else
+               del=xnano(j,k)-(RMM(k+(M2-j)*(j-1)/2))
+               del=del*sq2
+               good=good+del**2
+               RMM(k+(M2-j)*(j-1)/2)=xnano(j,k)
+            endif
+         enddo
+      enddo
+      do i=1,MM
+         write(1123,*) RMM(i)
+      enddo
+      good=sqrt(good)/float(M)      
       if (SHFT) then
 c Level Shifting
       do 141 i=1,M
