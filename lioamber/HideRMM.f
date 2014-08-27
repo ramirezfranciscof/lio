@@ -1,5 +1,5 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-!  FFR_HIDERMM
+!  HideRMM
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 !
 ! For easy access to the matrixes in RMM vector
@@ -18,6 +18,7 @@
 !
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+!
 ! When taken out of RMM packed storage (SP), rho matrix has doubled
 ! elements in non diagonal positions. This subroutine fixes that.
 ! When taken out of RMM packed storage (SP), rho matrix has doubled
@@ -37,7 +38,7 @@
        call spunpack('L',M,RMM(ptr),RhoMat)
        call fixrho(M,RhoMat)
 !
-       RETURN;END SUBROUTINE
+       return;end subroutine
 
 !------------------------------------------------------------------------------!
        SUBROUTINE rmm_put_rho(M,RhoMat)
@@ -52,43 +53,43 @@
        call messrho(M,RhoMat)
        call sprepack('L',M,RMM(ptr),RhoMat)
 !
-       RETURN;END SUBROUTINE
+       return;end subroutine
 
 !------------------------------------------------------------------------------!
-       SUBROUTINE fixrho(NM,Matrix)
+       SUBROUTINE fixrho(M,Matrix)
 !------------------------------------------------------------------------------!
-       IMPLICIT NONE
-       INTEGER,INTENT(IN) :: NM
-       REAL*8,INTENT(OUT) :: Matrix(NM,NM)
-       INTEGER            :: ii,jj
+       implicit none
+       integer,intent(in) :: M
+       real*8,intent(out) :: Matrix(M,M)
+       integer            :: ii,jj
 !
-       DO ii=1,NM
-       DO jj=1,NM
-         IF (ii.ne.jj) THEN
+       do ii=1,M
+       do jj=1,M
+         if (ii.ne.jj) then
            Matrix(ii,jj)=Matrix(ii,jj)/2
-         ENDIF
-       ENDDO
-       ENDDO
+         endif
+       enddo
+       enddo
 !
-       RETURN;END SUBROUTINE
+       return;end subroutine
 
 !------------------------------------------------------------------------------!
-       SUBROUTINE messrho(NM,Matrix)
+       SUBROUTINE messrho(M,Matrix)
 !------------------------------------------------------------------------------!
-       IMPLICIT NONE
-       INTEGER,INTENT(IN) :: NM
-       REAL*8,INTENT(OUT) :: Matrix(NM,NM)
-       INTEGER            :: ii,jj
+       implicit none
+       integer,intent(in) :: M
+       real*8,intent(out) :: Matrix(M,M)
+       integer            :: ii,jj
 !
-       DO ii=1,NM
-       DO jj=1,NM
-         IF (ii.ne.jj) THEN
+       do ii=1,M
+       do jj=1,M
+         if (ii.ne.jj) then
            Matrix(ii,jj)=2*Matrix(ii,jj)
-         ENDIF
-       ENDDO
-       ENDDO
+         endif
+       enddo
+       enddo
 !
-       RETURN;END SUBROUTINE
+       return;end subroutine
 
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 
@@ -96,17 +97,23 @@
 !
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+!
+!
+!------------------------------------------------------------------------------!
        SUBROUTINE rmm_get_sfm(M,SFMat)
+!------------------------------------------------------------------------------!
        use garcha_mod, only:RMM
        implicit none
        integer,intent(in)         :: M
        real*8,intent(out)         :: SFMat(M,M)
        integer                    :: ptr
-!------------------------------------------------------------------------------!
+
        ptr=1+M*(M+1)
        call spunpack('L',M,RMM(ptr),SFMat)
-       RETURN;END SUBROUTINE
-!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+
+       return;end subroutine
+
+!------------------------------------------------------------------------------!
        SUBROUTINE rmm_get_sfv(MM,SFVec)
 !------------------------------------------------------------------------------!
        use garcha_mod, only:RMM
@@ -119,14 +126,17 @@
        do kk=1,MM
          SFVec(kk)=RMM(ptr-1+kk)
        enddo
-       RETURN;END SUBROUTINE
-!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+
+       return;end subroutine
+
+!------------------------------------------------------------------------------!
        SUBROUTINE rmm_get_energy(Energy)
+!------------------------------------------------------------------------------!
        use garcha_mod, only:M,Md,RMM
        implicit none
        real*8,intent(out)         :: Energy
        integer                    :: MM,MMd,kk,ptr1,ptr2
-!------------------------------------------------------------------------------!
+
        MM=M*(M+1)/2
        MMd=Md*(Md+1)/2
        ptr1=1               ! M1 rho
@@ -136,19 +146,25 @@
        do kk=1,MM
          Energy=Energy+RMM(ptr1-1+kk)*RMM(ptr2-1+kk)
        enddo
-       RETURN;END SUBROUTINE
+
+       return;end subroutine
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 !
 !
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+!
+!
+!
+!------------------------------------------------------------------------------!
        SUBROUTINE rmm_put_qmm(M,QMat)
+!------------------------------------------------------------------------------!
        use garcha_mod, only:Md,RMM
        implicit none
        integer,intent(in)         :: M
        real*8,intent(in )         :: QMat(M,M)
        integer                    :: ptr,idx,ii,jj,MM,MMd
-!------------------------------------------------------------------------------!
+
        MM=M*(M+1)/2
        MMd=Md*(Md+1)/2
        ptr=1+M+4*MM+2*MMd
@@ -159,17 +175,22 @@
            IF (ii.EQ.jj) RMM(idx)=RMM(idx)/2
        enddo
        enddo
-       RETURN;END SUBROUTINE
-!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+
+       return;end subroutine
+
+!------------------------------------------------------------------------------!
        SUBROUTINE rmm_exc_qmm(M,Uinv,Rho,Fock,Linv)
+!------------------------------------------------------------------------------!
        implicit none
        integer,intent(in) :: M
        real*8,intent(in)  :: Uinv(M,M),Rho(M,M),Fock(M,M),Linv(M,M)
        real*8,allocatable :: Qaux(:,:)
-!------------------------------------------------------------------------------!
+
        allocate(Qaux(M,M))
        call prepQM(M,Qaux,UInv,Rho,Fock,LInv)
        call rmm_put_qmm(M,Qaux)
        deallocate(Qaux)
-       RETURN;END SUBROUTINE
+
+       return;end subroutine
+
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
