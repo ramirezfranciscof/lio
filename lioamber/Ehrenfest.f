@@ -74,7 +74,7 @@
          call rmm_get_sfm(M,FockGuess)
          call MatrixTransform(M,Linv,FockMat,Uinv) ! FockOA => FockON
 
-         call magnus_sc(M,RhoMat,FockMat,FockGuess,Uinv,Linv
+         call MagnusSC(M,RhoMat,FockMat,FockGuess,Uinv,Linv
      >   ,dt2,RhoNew,FockNew,Energy)
          RhoReal=real(RhoNew)
          RhoMat=RhoNew

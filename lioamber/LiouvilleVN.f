@@ -102,7 +102,7 @@
          call MatrixTransform(M,Linv,FockGuess,Uinv) ! FockOA => FockOM
          CALL ffr_print_conmut(666,M,RhoReal,FockMat)
          write(666,*) '--------'
-         call magnus_sc
+         call MagnusSC
      >   (M,RhoMat,FockMat,FockGuess,Uinv,Linv,dt,RhoNew,FockNew,Energy)
 
          RhoMat=RhoNew
