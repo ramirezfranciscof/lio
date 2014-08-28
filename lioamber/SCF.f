@@ -36,11 +36,14 @@ c       REAL*8 , intent(in)  :: clcoords(4,nsolin)
 #endif
 
       call g2g_timer_start('SCF')
+      if(verbose) write(*,*) '======>>>> INGRESO A SCF <<<<=========='
+
       just_int3n = .false.
       alloqueo = .true.
       ematalloc=.false.
       hagodiis=.false.
-c     if(verbose)  write(6,*) 'ntatom',ntatom,nsol,natom
+      if(verbose)  write(*,"(A,I8,I8,I8)") 
+     >  'ntatom,nsol,natom: ',ntatom,nsol,natom
 
 c------------------------------------------------------------------
 c
@@ -50,7 +53,7 @@ c chequeo -----------
 c
       Ndens=1
 c---------------------
-c       write(*,*) 'M=',M
+      if(verbose)  write(*,*) 'M=',M
       allocate (znano(M,M),xnano(M,M))
 
       npas=npas+1
@@ -239,7 +242,6 @@ c
 c ESSL OPTION ------------------------------------------
         do i=1,MM
          rmm5(i)=RMM(M5+i-1)
-c        write(56,*) RMM(M15+1)
         enddo
 #ifdef essl
         call DSPEV(1,RMM(M5),RMM(M13),X,M,M,RMM(M15),M2)
@@ -258,7 +260,6 @@ c LINEAR DEPENDENCY ELIMINATION
 c
         do i=1,MM
           RMM(M5+i-1)=rmm5(i)
-c          write(56,*) RMM(M15+1)
         enddo
 
         do j=1,M
@@ -432,7 +433,7 @@ c       write(*,*) 'eme=', M
       endif
 c-------------------------------------------------------------------
 c-------------------------------------------------------------------
-c      write(*,*) 'empiezo el loop',NMAX
+      if(verbose) write(*,*) 'empiezo el loop ',NMAX
 c-------------------------------------------------------------------
 c-------------------------------------------------------------------
       do 999 while (good.ge.told.and.niter.le.NMAX)
@@ -799,10 +800,7 @@ c---------------------
 c       do ik=1,M
 c         do jk=1,M
 c         write(45,*) X(ik,M+jk),fock(ik,jk)
-c
-c
 c         enddo
-c
 c       enddo
        call g2g_timer_start('coeff')
 
@@ -925,7 +923,13 @@ c
 c
         call g2g_timer_stop('otras cosas')
 
-        if(verbose) write(6,*) 'iter',niter,'QM Energy=',E+Ex
+        if(verbose) then
+          write(*,*) 'iter',niter,'QM Energy=',E+Ex
+          write(*,"(A,X,F23.16,X,F23.16,X,F23.16,X,F23.16)")
+     >         'En,E1,E2,Ex',En,E1,E2,Ex
+          write(*,"(A,F10.7,A,F10.7,A)") 'good= ',good,' (told= ',told,
+     >          ')'
+	endif
 c
         call g2g_timer_stop('Total iter')
  999  continue
@@ -934,12 +938,12 @@ c
 c-------------------------------------------------------------------
 
       if (niter.ge.NMAX) then
-        write(6,*) 'NO CONVERGENCE AT ',NMAX,' ITERATIONS'
+        write(*,*) 'NO CONVERGENCE AT ',NMAX,' ITERATIONS'
         noconverge=noconverge + 1
         converge=0
         call write_struct()
       else
-        write(6,*) 'CONVERGED AT',niter,'ITERATIONS'
+        write(*,*) 'CONVERGED AT',niter,'ITERATIONS'
         noconverge = 0
         converge=converge+1
       endif
@@ -947,14 +951,13 @@ c-------------------------------------------------------------------
       old3=old2
 
       old2=old1
-c        write(*,*) 'good final',good
 
       do i=1,MM
         old1(i)=RMM(i)
       enddo
 
       if(noconverge.gt.4) then
-        write(6,*)  'stop fon not convergion 4 times'
+        write(*,*)  'stop fon not convergion 4 times'
         stop
       endif
 
@@ -995,14 +998,14 @@ c       write(*,*) 'g2g-Exc',Exc
         E=E1+E2+En+Ens+Exc
         if (npas.eq.1) npasw = 0
         if (npas.gt.npasw) then
-          write(6,*)
-          write(6,600)
-          write(6,610)
-          write(6,620) E1,E2-Ex,En
+          write(*,*)
+          write(*,600)
+          write(*,610)
+          write(*,620) E1,E2-Ex,En
 c         if (sol) then
-c          write(6,615)
-c          write(6,625) Es
-c          write(6,*) 'E SCF = ', E , Exc, Ens
+c          write(*,615)
+c          write(*,625) Es
+c          write(*,*) 'E SCF = ', E , Exc, Ens
           npasw=npas+10
         endif
 c--------------------------------------------------------------

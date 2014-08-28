@@ -85,9 +85,16 @@ class PointGroup {
     void compute_weights(void);
 
     void compute_functions(bool forces, bool gga);
-    void solve(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy,double&,double&,double&,double&,double&,double* fort_forces_ptr, bool open);
-    void solve_closed(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy,double&,double&,double&,double&,double&,double* fort_forces_ptr);
-    void solve_opened(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy,double&,double&,double&,double&,double&,double* fort_forces_ptr);
+    void solve(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy,
+               double&,double&,double&,double&,double&,double* fort_forces_ptr, 
+               bool open, bool verbose);
+    void solve(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy,
+               double&,double&,double&,double&,double&,double* fort_forces_ptr,
+               bool open); 
+    void solve_closed(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy,
+                      double&,double&,double&,double&,double&,double* fort_forces_ptr);
+    void solve_opened(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy,
+                      double&,double&,double&,double&,double&,double* fort_forces_ptr);
 
     bool is_significative(FunctionType, double exponent, double coeff, double d2);
     bool operator<(const PointGroup<scalar_type>& T) const;
@@ -141,7 +148,8 @@ class Partition {
       cubes.clear(); spheres.clear();
     }
 
-    void solve(Timers& timers, bool compute_rmm,bool lda,bool compute_forces, bool compute_energy, double* fort_energy_ptr, double* fort_forces_ptr, bool OPEN)
+    void solve(Timers& timers, bool compute_rmm,bool lda,bool compute_forces, bool compute_energy, 
+               double* fort_energy_ptr, double* fort_forces_ptr, bool OPEN, bool verbose)
     {
       double cubes_energy = 0, spheres_energy = 0;
       double cubes_energy_i = 0, spheres_energy_i = 0;
@@ -159,7 +167,8 @@ class Partition {
         (*it)->solve(timers, compute_rmm,lda,compute_forces, compute_energy, cubes_energy,cubes_energy_i,cubes_energy_c,cubes_energy_c1,cubes_energy_c2, fort_forces_ptr, OPEN);
       }
 
-      if(compute_energy) {
+// Activar
+      if(compute_energy && verbose) {
           std::cout << "Ei: " << cubes_energy_i+spheres_energy_i;
           std::cout << " Ec: " << cubes_energy_c+spheres_energy_c;
           std::cout << " Ec1: " << cubes_energy_c1+spheres_energy_c1;

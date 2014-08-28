@@ -31,11 +31,15 @@ c       REAL*8 , intent(in)  :: clcoords(4,nsolin)
       REAL*8,ALLOCATABLE :: MatrixVec(:),TestMatrix(:)
 
       call g2g_timer_start('SCF')
-      write(*,*) '======>>>> INGRESO A SCFop <<<<=========='
+      if(verbose) write(*,*) '======>>>> INGRESO A SCFop <<<<=========='
+      if(verbose)  write(*,"(A,I8,I8,I8)") 
+     >  'ntatom,nsol,natom: ',ntatom,nsol,natom
+
 c------------------------------------------------------------------
 c
 c Pointers
 c
+      if(verbose)  write(*,*) 'M=',M
 c first P
       MM=M*(M+1)/2 
       MM2=M**2
@@ -406,7 +410,7 @@ c-------------------------------------------------------------------
       endif
 c-------------------------------------------------------------------
 c
-c      write(*,*) 'empiezo el loop=========>>>>>>',NMAX
+      if(verbose) write(*,*) 'empiezo el loop ',NMAX
 
       do 999 while (good.ge.told.and.niter.le.NMAX)
         call g2g_timer_start('Total iter')
@@ -1122,27 +1126,33 @@ c      endif
        E=E1+E2+En
        E=E+Es
 
-       write(*,300) niter,DAMP,E
-       write(*,"(A,X,F23.16,X,F23.16,X,F23.16,X,F23.16,X,F23.16)")
-     >         'En,E1,E2,Ex,Etotal',En,E1,E2,Ex,E1+E2+En+Ex
-
-       call g2g_timer_stop('Total iter')
+        if(verbose) then
+          write(*,*) 'iter',niter,'QM Energy=',E+Ex
+          write(*,"(A,X,F23.16,X,F23.16,X,F23.16,X,F23.16)")
+     >         'En,E1,E2,Ex',En,E1,E2,Ex
+          write(*,"(A,F10.7,A,F10.7,A)") 'good= ',good,' (told= ',told,
+     >          ')'
+	endif
+c
+        call g2g_timer_stop('Total iter')
  999  continue
-c 995   continue
+c-------------------------------------------------------------------
+c
+c-------------------------------------------------------------------
 
       if (niter.ge.NMAX) then
-        write(6,*) 'NO CONVERGENCE AT ',NMAX,' ITERATIONS'
+        write(*,*) 'NO CONVERGENCE AT ',NMAX,' ITERATIONS'
         noconverge=noconverge + 1
         converge=0
-c       goto 995
+        call write_struct()
       else
-        write(6,*) 'CONVERGED AT',niter,'ITERATIONS'
+        write(*,*) 'CONVERGED AT',niter,'ITERATIONS'
         noconverge = 0
         converge=converge+1
       endif
 
       if(noconverge.gt.4) then
-        write(6,*)  'stop fon not convergion 4 times'
+        write(*,*)  'stop fon not convergion 4 times'
         stop
       endif
 

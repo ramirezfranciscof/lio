@@ -893,7 +893,7 @@ c      write(*,*) 'estoooo',ngpru, ngDyn, ng0, natom
      >                        M,ncont,nshell,c,a, 
      >                        RMM,M18,M5,M3,rhoalpha,rhobeta,
      >                        NCO,OPEN,Nunp,nopt,Iexch,
-     >                        e_, e_2, e3, wang, wang2, wang3)
+     >                        e_, e_2, e3, wang, wang2, wang3,verbose)
 
 c      write(*,*) '======>>>> SALIENDO DE DRIVE <<<<=========='
 
