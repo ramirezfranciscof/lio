@@ -184,7 +184,7 @@ c
       allocate(natomc(natom),nnps(natom),nnpp(natom),nnp(natom))
       allocate(nnpd(natom),nns(natom),nnd(natom),atmin(natom))
       allocate(jatc(natom,natom))
-      
+     
       do i=1,natom
         natomc(i)=0 
       enddo
@@ -629,6 +629,13 @@ c variables defined in namelist cannot be in common ?
 c      NCO2=NCO
       Nunp2=Nunp
 c
+
+      if(OPEN) then
+        allocate(rhoalpha(M*(M+1)/2),rhobeta(M*(M+1)/2))
+      else
+        allocate(rhoalpha(1),rhobeta(1))
+      endif
+
       idip1=idip
       ipop1=ipop
       icharge1=icharge
@@ -701,6 +708,7 @@ c
 c open shell case
         else
 c
+          write(*,*) 'Leyendo RESTART de Densidad OPEN SHELL'
           NCOa=NCO
           NCOb=NCO+Nunp
           M18b=M18+M*NCOa
@@ -714,6 +722,7 @@ c
             do i=1,M
               kk=kk+1
               RMM(kk)=XX(indexii(i),k)
+c              rhoalpha(kk)=XX(indexii(i),k)
             enddo
           enddo
 c
@@ -722,9 +731,11 @@ c
           do 331 i=1,M
             do 331 j=1,M
               X(i,j)=0.0D0
+c              rhoalpha()=0.0D0
 c
               do 139 k=1,NCOa
                 X(i,j)=X(i,j)+XX(i,k)*XX(j,k)
+c                rhoalpha()=rhoalpha()+XX(i,k)*XX(j,k)
  139          continue
  331      continue
 c
@@ -738,6 +749,7 @@ c
             do i=1,M
               kk=kk+1
               RMM(kk)=XX(indexii(i),k)
+c              rhobeta(kk)=XX(indexii(i),k)
             enddo
           enddo
 c 
@@ -745,13 +757,17 @@ c Density Matrix
 c
           do i=1,M
             do j=1,M
+c              rhobeta()=0.0D0
               do k=1,NCOb
                 X(i,j)=X(i,j)+XX(i,k)*XX(j,k)
+c                rhobeta()=rhobeta()+XX(i,k)*XX(j,k)
               enddo
             enddo
           enddo
 c
+          write(*,*) 'LEIDA !!! RESTART de Densidad OPEN SHELL'
         endif
+    
       endif
 c
 c density matrix kept temporarily in S
@@ -881,12 +897,6 @@ c
       ntqpru=natom
       ngpru=ng0*natom
 c      write(*,*) 'estoooo',ngpru, ngDyn, ng0, natom
-
-      if(OPEN) then
-        allocate(rhoalpha(M*(M+1)/2),rhobeta(M*(M+1)/2))
-      else
-        allocate(rhoalpha(1),rhobeta(1))
-      endif
 
       call g2g_parameter_init(NORM,natom,natom,ngDyn,
      >                        rqm,Rm2,Iz,Nr,Nr2,Nuc,

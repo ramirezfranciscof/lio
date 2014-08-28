@@ -426,7 +426,7 @@ c
 c
       if (DIIS.and.alloqueo) then
         alloqueo=.false.
-c       write(*,*) 'eme=', M
+
        allocate(rho1(M,M),rho(M,M),fock(M,M),fockm(MM,ndiis),FP_PF(M,M),
      >  FP_PFv(MM),FP_PFm(MM,ndiis),EMAT(ndiis+1,ndiis+1),bcoef(ndiis+1)
      >  ,suma(MM))
@@ -446,7 +446,6 @@ c-------------------------------------------------------------------
           ndiist=ndiis
         endif
 
-c      if (MEMO) then
         call int3lu(E2)
         call g2g_solve_groups(0,Ex,0)
 c-------------------------------------------------------
@@ -986,7 +985,6 @@ c       call g2g_timer_start('exchnum')
 #else
         call g2g_new_grid(igrid)
         call g2g_solve_groups(1, Exc, 0)
-c       write(*,*) 'g2g-Exc',Exc
 #endif
 #else
 #ifdef ULTIMA_G2G
@@ -1001,7 +999,7 @@ c       write(*,*) 'g2g-Exc',Exc
           write(*,*)
           write(*,600)
           write(*,610)
-          write(*,620) E1,E2-Ex,En
+          write(*,620) E1,E2,En,Exc
 c         if (sol) then
 c          write(*,615)
 c          write(*,625) Es
@@ -1032,7 +1030,7 @@ c
         enddo
       enddo
 c
-c      if (nopt.eq.1) then
+c-----------------------------------------------------------------
 c
 c PROPERTIES CALCULATION
 c calculates dipole moment
@@ -1149,9 +1147,9 @@ c
  400  format(4(E14.7E2,2x))
  300  format(I3,E14.6,2x,F14.7)
  600  format('  ENERGY CONTRIBUTIONS IN A.U.')
- 610  format(2x,'ONE ELECTRON',9x,'COULOMB',11x,'NUCLEAR')
+ 610  format(2x,'ONE ELECTRON',9x,'COULOMB',11x,'NUCLEAR',10x,'EX/CORR')
  615  format(2x,'SOLVENT')
- 620  format(F14.7,4x,F14.7,4x,F14.7)
+ 620  format(F14.7,4x,F14.7,4x,F14.7,4x,F14.7)
  625  format(F14.7)
  760  format(I3,9x,I3,6x,F10.4)
  770  format('ATOM #',4x,'ATOM TYPE',4x,'POPULATION')
