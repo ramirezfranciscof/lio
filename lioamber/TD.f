@@ -25,7 +25,7 @@ c  In each step of the propagation the cartesian components of the sistem's dipo
 c  are stored in files x.dip, y.dip, z.dip.
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 c       USE latom
-       USE garcha_mod
+       USE garcha_mod!, nada => istep
        IMPLICIT REAL*8 (a-h,o-z)
 
        INTEGER :: istep

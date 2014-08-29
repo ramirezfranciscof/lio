@@ -31,21 +31,6 @@ c       REAL*8 , intent(in)  :: clcoords(4,nsolin)
         REAL*8,ALLOCATABLE :: WORK2(:)
         INTEGER, ALLOCATABLE :: IWORK2(:),IPIV(:)
 
-!--------------------------------------------------------------------!
-!      FFR VARS:
-!       INTEGER :: ErrID,iii,jjj
-!       LOGICAL :: docholesky
-       INTEGER :: kkk,ndir
-       LOGICAL :: dolowdin
-       REAL*8  :: fscratch
-       REAL*8,ALLOCATABLE :: 
-     >   fockaux(:,:),rhoaux(:,:),SMaux(:,:),
-     >   rmmaux(:),QM(:,:),rhoaux2(:,:),rhoaux3(:,:),
-     >   eigvec(:,:),eigval(:),Xfran(:,:),Matrix(:,:)
-     >   ,Lmat(:,:),Linv(:,:),Umat(:,:),Uinv(:,:)
-!--------------------------------------------------------------------!
-
-
 #ifdef magma
        call magmaf_init()
 #endif
@@ -113,22 +98,6 @@ c
       Nel=2*NCO+Nunp
 c
       allocate(rmm5(MM),rmm13(m),rmm15(mm))
-c
-!--------------------------------------------------------------------!
-! FFR - VARIABLE ALLOCATION
-       ALLOCATE(DSX(M,M,natom),DSY(M,M,natom),DSZ(M,M,natom))
-       ALLOCATE(rhoaux(M,M),fockaux(M,M),SMaux(M,M))
-       ALLOCATE(rhoaux2(M,M),rhoaux3(M,M))
-       ALLOCATE(rmmaux(MM),QM(M,M))
-       ALLOCATE(eigvec(M,M),eigval(M))
-       ALLOCATE(Matrix(M,M))
-!
-       ALLOCATE(Xfran(M,M))
-       ALLOCATE(Lmat(M,M),Linv(M,M),Umat(M,M),Uinv(M,M))
-!--------------------------------------------------------------------!
-
-
-
 c
       good=1.00D0
       niter=0
@@ -204,7 +173,6 @@ c Diagonalization of S matrix, after this is not needed anymore
 c
       docholesky=.true.
       call g2g_timer_start('cholesky')
-      call cholesky_vec(M,RMM(M5),Lmat,Linv,Umat,Uinv)
 
       IF (docholesky) THEN
 #ifdef magma
@@ -265,8 +233,6 @@ c
 
 
 #endif
-
-
       ELSE
 
 
@@ -1167,19 +1133,6 @@ c      endif
       deallocate (kkind,kkinds)
       deallocate(cool,cools)
       if(allocated(WORK2)) deallocate (WORK2)
-
-!--------------------------------------------------------------------!
-! FFR - VARIABLE DEALLOCATION
-       DEALLOCATE(Matrix)
-       DEALLOCATE(eigvec,eigval)
-       DEALLOCATE(rmmaux,QM)
-       DEALLOCATE(rhoaux2,rhoaux3)
-       DEALLOCATE(rhoaux,fockaux,SMaux)
-       DEALLOCATE(DSX,DSY,DSZ)
-
-       DEALLOCATE(Xfran)
-       DEALLOCATE(Lmat,Linv,Umat,Uinv)
-!--------------------------------------------------------------------!
 
 c       E=E*627.509391D0
 
