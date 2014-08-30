@@ -145,6 +145,12 @@ c Para hacer lineal la integral de 2 electrone con lista de vecinos. Nano
         nnpd(nuc(iikk))=iikk
       enddo
 
+c
+c -Create integration grid for XC here
+c -Assign points to groups (spheres/cubes)
+c -Assign significant functions to groups
+c -Calculate point weights
+c
       call g2g_reload_atom_positions(igrid2)
 
       if (predcoef.and.npas.gt.3) then
@@ -371,8 +377,10 @@ c
             kk=kk+1
             RMM(kk)=0.D0
 c
+c one factor of 2 for alpha+beta
             if(i.eq.j) then
              ff=2.D0
+c another factor of 2 for direct triangular sum (j>i) w/ real basis
             else
              ff=4.D0
             endif
@@ -752,6 +760,12 @@ c--------Eventualmente se puede probar con la matriz densidad-------------------
             call g2g_timer_stop('diis')
         endif
       endif
+
+c
+c F' diagonalization now
+c X(1,M) will contain (X^-1)*C
+c
+
        call g2g_timer_start('dspev')
 c ESSL OPTION ---------------------------------------------------
 #ifdef essl
@@ -812,6 +826,9 @@ c new coefficients
          enddo
        enddo
 c
+c-----------------------------------------------------------
+c Recover C from (X^-1)*C; put into xnano
+c-----------------------------------------------------------
 #ifdef magma
 
       do i=1,M
@@ -860,8 +877,10 @@ c
            kk=kk+1
            tmp=RMM(kk)
            RMM(kk)=0.
+c one factor of 2 for alpha+beta
            if(i.eq.j) then
              ff=2.D0
+c another factor of 2 for direct triangular sum (j>i) w/ real basis
            else
              ff=4.D0
            endif
