@@ -60,17 +60,7 @@ __global__ void gpu_compute_density(scalar_type* const energy, scalar_type* cons
         min_i2=min_i-DENSITY_BLOCK_SIZE ;
     }
 
-    if(valid_thread2)
-    {
-        Fi2 = function_values[(m) * point + i2];
-        if(!lda)
-        {
-            Fgi2 = vec_type<scalar_type,3>(gradient_values[(m) * point + i2]);
 
-            Fhi12 = vec_type<scalar_type,3>(hessian_values[(m)*2 * point +(2 * i2 + 0)]);
-            Fhi22 = vec_type<scalar_type,3>(hessian_values[(m)*2 * point +(2 * i2 + 1)]);
-        }
-    }
     if(valid_thread)
     {
         Fi = function_values[(m) * point + i];
@@ -80,6 +70,17 @@ __global__ void gpu_compute_density(scalar_type* const energy, scalar_type* cons
 
             Fhi1 = vec_type<scalar_type,3>(hessian_values[(m)*2 * point +(2 * i + 0)]);
             Fhi2 = vec_type<scalar_type,3>(hessian_values[(m)*2 * point +(2 * i + 1)]);
+        }
+        if(valid_thread2)
+        {
+            Fi2 = function_values[(m) * point + i2];
+            if(!lda)
+            {
+                Fgi2 = vec_type<scalar_type,3>(gradient_values[(m) * point + i2]);
+
+                Fhi12 = vec_type<scalar_type,3>(hessian_values[(m)*2 * point +(2 * i2 + 0)]);
+                Fhi22 = vec_type<scalar_type,3>(hessian_values[(m)*2 * point +(2 * i2 + 1)]);
+            }
         }
     }
 
@@ -164,22 +165,24 @@ __global__ void gpu_compute_density(scalar_type* const energy, scalar_type* cons
 
             dd2 = FgXXY * w3YZZ + FgiYZZ * w3XXY + Fhi2 * w + ww2 * Fi;
         }
-    }
-    if(valid_thread2)
-    {
-        partial_density += Fi2 * w2;
-        if (!lda)
+
+        if(valid_thread2)
         {
-            dxyz += Fgi2 * w2 + w32 * Fi2;
-            dd1 += Fgi2 * w32 * 2.0f + Fhi12 * w2 + ww12 * Fi2;
+            partial_density += Fi2 * w2;
+            if (!lda)
+            {
+                dxyz += Fgi2 * w2 + w32 * Fi2;
+                dd1 += Fgi2 * w32 * 2.0f + Fhi12 * w2 + ww12 * Fi2;
 
-            vec_type<scalar_type,3> FgXXY(Fgi2.x, Fgi2.x, Fgi2.y);
-            vec_type<scalar_type,3> w3YZZ(w32.y, w32.z, w32.z);
-            vec_type<scalar_type,3> FgiYZZ(Fgi2.y, Fgi2.z, Fgi2.z);
-            vec_type<scalar_type,3> w3XXY(w32.x, w32.x, w32.y);
+                vec_type<scalar_type,3> FgXXY(Fgi2.x, Fgi2.x, Fgi2.y);
+                vec_type<scalar_type,3> w3YZZ(w32.y, w32.z, w32.z);
+                vec_type<scalar_type,3> FgiYZZ(Fgi2.y, Fgi2.z, Fgi2.z);
+                vec_type<scalar_type,3> w3XXY(w32.x, w32.x, w32.y);
 
-            dd2 += FgXXY * w3YZZ + FgiYZZ * w3XXY + Fhi22 * w2 + ww22 * Fi2;
+                dd2 += FgXXY * w3YZZ + FgiYZZ * w3XXY + Fhi22 * w2 + ww22 * Fi2;
+            }
         }
+
     }
 
 
@@ -212,12 +215,13 @@ __global__ void gpu_compute_density(scalar_type* const energy, scalar_type* cons
             fh2j_sh[position]    += fh2j_sh[index];
         }
     }
+
     if(threadIdx.x==0)
     {
         const int myPoint = blockIdx.y*points + blockIdx.x;
         out_partial_density[myPoint] = fj_sh[position];
-	//printf("%.4e ",out_partial_density);
-	out_dxyz[myPoint]            = vec_type<scalar_type,4>(fgj_sh[position]);
+        //printf("%.4e ",out_partial_density);
+        out_dxyz[myPoint]            = vec_type<scalar_type,4>(fgj_sh[position]);
         out_dd1[myPoint]             = vec_type<scalar_type,4>(fh1j_sh[position]);
         out_dd2[myPoint]             = vec_type<scalar_type,4>(fh2j_sh[position]);
     }
