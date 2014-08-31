@@ -27,7 +27,7 @@ __global__ void gpu_compute_density(scalar_type* const energy, scalar_type* cons
     scalar_type partial_density (0.0f);
 
     vec_type<scalar_type,3> dxyz, dd1, dd2;
-    dxyz=dd1=dd2 =vec_type<scalar_type,3>(0.0f,0.0f,0.0f);
+    dxyz = dd1 = dd2 = vec_type<scalar_type,3>(0.0f,0.0f,0.0f);
 
     bool valid_thread = ( i < m );
     bool valid_thread2 = (i2 < m);
@@ -42,9 +42,6 @@ __global__ void gpu_compute_density(scalar_type* const energy, scalar_type* cons
         w32 = ww12 = ww22 = vec_type<scalar_type,3>(0.0f,0.0f,0.0f);
     }
 
-    scalar_type Fi, Fi2;
-    vec_type<scalar_type,3> Fgi, Fhi1, Fhi2, Fgi2, Fhi12, Fhi22;
-
     int position = threadIdx.x;
 
     __shared__ scalar_type fj_sh[DENSITY_BLOCK_SIZE];
@@ -52,44 +49,19 @@ __global__ void gpu_compute_density(scalar_type* const energy, scalar_type* cons
     __shared__ vec_type<scalar_type, 3> fh1j_sh [DENSITY_BLOCK_SIZE];
     __shared__ vec_type<scalar_type, 3> fh2j_sh [DENSITY_BLOCK_SIZE];
 
-    uint min_i2=min_i;
+    uint min_i2 = min_i;
 
     //Si nos vamos a pasar del bloque con el segundo puntero, hacemos que haga la misma cuenta
-    if(min_i>m)
+    if(min_i > m)
     {
-        min_i2=min_i-DENSITY_BLOCK_SIZE ;
+        min_i2 = min_i-DENSITY_BLOCK_SIZE ;
     }
-
-
-    if(valid_thread)
-    {
-        Fi = function_values[(m) * point + i];
-        if(!lda)
-        {
-            Fgi = vec_type<scalar_type,3>(gradient_values[(m) * point + i]);
-
-            Fhi1 = vec_type<scalar_type,3>(hessian_values[(m)*2 * point +(2 * i + 0)]);
-            Fhi2 = vec_type<scalar_type,3>(hessian_values[(m)*2 * point +(2 * i + 1)]);
-        }
-        if(valid_thread2)
-        {
-            Fi2 = function_values[(m) * point + i2];
-            if(!lda)
-            {
-                Fgi2 = vec_type<scalar_type,3>(gradient_values[(m) * point + i2]);
-
-                Fhi12 = vec_type<scalar_type,3>(hessian_values[(m)*2 * point +(2 * i2 + 0)]);
-                Fhi22 = vec_type<scalar_type,3>(hessian_values[(m)*2 * point +(2 * i2 + 1)]);
-            }
-        }
-    }
-
 
     for (int bj = 0; bj <= min_i2; bj += DENSITY_BLOCK_SIZE)
     {
         //Density deberia ser GET_DENSITY_BLOCK_SIZE
         __syncthreads();
-        if( bj+position<m )
+        if( bj+position < m )
         {
             fj_sh[position] = function_values[(m) * point + (bj+position)];
             if(!lda)
@@ -150,8 +122,20 @@ __global__ void gpu_compute_density(scalar_type* const energy, scalar_type* cons
             }
         }
     }
+
+
     if(valid_thread)
     {
+        scalar_type Fi = function_values[(m) * point + i];
+        vec_type<scalar_type,3> Fgi, Fhi1, Fhi2;
+        if(!lda)
+        {
+            Fgi = vec_type<scalar_type,3>(gradient_values[(m) * point + i]);
+
+            Fhi1 = vec_type<scalar_type,3>(hessian_values[(m)*2 * point +(2 * i + 0)]);
+            Fhi2 = vec_type<scalar_type,3>(hessian_values[(m)*2 * point +(2 * i + 1)]);
+        }
+
         partial_density = Fi * w;
         if (!lda)
         {
@@ -168,6 +152,16 @@ __global__ void gpu_compute_density(scalar_type* const energy, scalar_type* cons
 
         if(valid_thread2)
         {
+            scalar_type Fi2 = function_values[(m) * point + i2];
+            vec_type<scalar_type,3> Fgi2, Fhi12, Fhi22;
+            if(!lda)
+            {
+                Fgi2 = vec_type<scalar_type,3>(gradient_values[(m) * point + i2]);
+
+                Fhi12 = vec_type<scalar_type,3>(hessian_values[(m)*2 * point +(2 * i2 + 0)]);
+                Fhi22 = vec_type<scalar_type,3>(hessian_values[(m)*2 * point +(2 * i2 + 1)]);
+            }
+
             partial_density += Fi2 * w2;
             if (!lda)
             {
@@ -182,26 +176,17 @@ __global__ void gpu_compute_density(scalar_type* const energy, scalar_type* cons
                 dd2 += FgXXY * w3YZZ + FgiYZZ * w3XXY + Fhi22 * w2 + ww22 * Fi2;
             }
         }
-
     }
 
 
     __syncthreads();
     //Estamos reutilizando la memoria shared por block para hacer el acumulado por block.
-    if(valid_thread)
-    {
-        fj_sh[position]=partial_density;
-        fgj_sh[position]=dxyz;
-        fh1j_sh[position]=dd1;
-        fh2j_sh[position]=dd2;
-    }
-    else
-    {
-        fj_sh[position]=scalar_type(0.0f);
-        fgj_sh[position]=vec_type<scalar_type,3>(0.0f,0.0f,0.0f);
-        fh1j_sh[position]=vec_type<scalar_type,3>(0.0f,0.0f,0.0f);
-        fh2j_sh[position]=vec_type<scalar_type,3>(0.0f,0.0f,0.0f);
-    }
+    // No hace falta poner en cero porque si no es valid_thread, ya estan en cero
+    fj_sh[position]=partial_density;
+    fgj_sh[position]=dxyz;
+    fh1j_sh[position]=dd1;
+    fh2j_sh[position]=dd2;
+
     __syncthreads();
 
     for(int j=2;  j <= DENSITY_BLOCK_SIZE ; j=j*2) //
