@@ -492,9 +492,10 @@ c Density update (rhold-->rho, rho-->rhonew)
 ! DENSITY MATRIX PROPAGATION USING MAGNUS ALGORITHM
                  write(*,*) 'Magnus'
                  call predictor(F1a,F1b,fock,rho,Xtrans,factorial)
-!                 call magnus(M,fock,rho,rhonew,NBCH,dt_magnus)
                  call magnusold(fock,rho,rhonew,M,NBCH,dt_magnus,
      >                          factorial)
+!                 call magnus(M,fock,rho,rhonew,NBCH,dt_magnus)
+
                  F1a=F1b
                  F1b=fock
                  rho=rhonew

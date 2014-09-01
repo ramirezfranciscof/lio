@@ -26,6 +26,7 @@
 ! Density matrix propagation
        DO ii=1,N
          ConmNext=MATMUL(Omega1,ConmPrev)
+!         write(702,*) ConmNext
          Scratch=MATMUL(ConmPrev,Omega1)
          ConmNext=ConmNext-Scratch
          RhoNew=RhoNew+factorial(ii)*ConmNext

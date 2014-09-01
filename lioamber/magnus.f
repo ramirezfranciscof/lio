@@ -16,20 +16,19 @@
        IMPLICIT NONE
        INTEGER,INTENT(IN)                    :: M,N
        REAL*8,INTENT(IN)                     :: FockMid(M,M),dt
-       COMPLEX*16,INTENT(IN)                 :: RhoOld(M,M)
-       COMPLEX*16,INTENT(OUT)                :: RhoNew(M,M)
+       COMPLEX*8,INTENT(IN)                 :: RhoOld(M,M)
+       COMPLEX*8,INTENT(OUT)                :: RhoNew(M,M)
 !
-       COMPLEX*16,ALLOCATABLE,DIMENSION(:,:) :: Conmut,TermPos,TermNeg
-       COMPLEX*16,ALLOCATABLE,DIMENSION(:,:) :: Omega1
+       COMPLEX*8,ALLOCATABLE,DIMENSION(:,:) :: Conmut,TermPos,TermNeg
+       COMPLEX*8,ALLOCATABLE,DIMENSION(:,:) :: Omega1
        INTEGER                               :: kk
        REAL*8                                :: invfact
 !
-       COMPLEX*16,PARAMETER :: icmplx=CMPLX(0.0D0,1.0D0)
+       COMPLEX*8,PARAMETER :: icmplx=CMPLX(0.0D0,1.0D0)
 !
 !------------------------------------------------------------------------------!
 !
        call g2g_timer_start('magnus')
-       PRINT*,'I AM HERE'
        allocate(Conmut(M,M),TermPos(M,M),TermNeg(M,M))
        allocate(Omega1(M,M))
 !

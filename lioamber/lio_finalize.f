@@ -2,8 +2,8 @@
        subroutine lio_finalize()
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
        use garcha_mod
-       deallocate (r,v,rqm, Em, Rm, pc,Iz, nnat,
-     > af,c,a,cx,ax,cd,ad,B,Nuc,ncont,Nucx,ncontx,Nucd
+       deallocate (r,v,rqm, Em, Rm, pc,Iz, nnat
+     > ,af,c,a,cx,ax,cd,ad,B,Nuc,ncont,Nucx,ncontx,Nucd
      > ,ncontd, indexii, indexiid, RMM, X, XX, old1, old2, old3)
        deallocate (natomc,nnps,nnpp,nnpd,nns)
        deallocate (nnd,nnp,atmin,jatc,d)
@@ -11,7 +11,8 @@
 !
 !------------------------------------------------------------------------------!
 ! FFR ADD:
-       DEALLOCATE(FockMat,RhoMat)
+       IF (ALLOCATED(FockMat)) DEALLOCATE(FockMat)
+       IF (ALLOCATED(RhoMat))  DEALLOCATE(RhoMat)
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
        end subroutine lio_finalize 
