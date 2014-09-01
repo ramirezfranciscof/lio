@@ -26,6 +26,7 @@ c  are stored in files x.dip, y.dip, z.dip.
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 c       USE latom
        USE garcha_mod!, nada => istep
+       use debug
        IMPLICIT REAL*8 (a-h,o-z)
 
        INTEGER :: istep
@@ -41,6 +42,7 @@ c       USE latom
        REAL*8,dimension(:),ALLOCATABLE :: factorial
 !!------------------------------------!!
 !! FFR ADD
+       REAL*8,ALLOCATABLE,DIMENSION(:,:) :: fockaux
        INTEGER ::
      >   pert_steps,lpfrg_steps,chkpntF1a,chkpntF1b
        REAL*8 ::
@@ -88,7 +90,7 @@ c       USE latom
 !
        ALLOCATE(xnano(M,M),xnano2(M,M),fock(M,M),rhonew(M,M),
      >   rhold(M,M),rho(M,M),xmm(M,M),xtrans(M,M),Y(M,M),ytrans(M,M),
-     >   rho1(M,M))
+     >   rho1(M,M),fockaux(M,M))
 !
       if(propagator.eq.2) allocate (F1a(M,M),F1b(M,M))
 !--------------------------------------------------------------------!
@@ -491,9 +493,12 @@ c Density update (rhold-->rho, rho-->rhonew)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 ! DENSITY MATRIX PROPAGATION USING MAGNUS ALGORITHM
                  write(*,*) 'Magnus'
-                 call predictor(F1a,F1b,fock,rho,Xtrans,factorial)
+                 call predictor(F1a,F1b,fockaux,rho,Xtrans,factorial)
                  call magnusold(fock,rho,rhonew,M,NBCH,dt_magnus,
      >                          factorial)
+
+!                 call magnuspred(M,F1a,F1b,rho,fock,NBCH,dt_magnus,
+!     >           Ytrans,X,Y,Xtrans)
 !                 call magnus(M,fock,rho,rhonew,NBCH,dt_magnus)
 
                  F1a=F1b

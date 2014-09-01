@@ -13,6 +13,7 @@
        integer :: i,j,k,kk
        real*8 :: E2, tdstep1
 !------------------------------------------------------------------------------!
+       call g2g_timer_start('predictor')
        ALLOCATE(rho4(M,M),rho2t(M,M),F3(M,M),FBA(M,M))
 c
        M2=2*M
@@ -75,5 +76,6 @@ c Initializations/Defaults
        enddo
        call matmulnano(FBA,X,FON,M)
        DEALLOCATE(rho4,rho2t,F3,FBA)
+       call g2g_timer_stop('predictor')
        RETURN;END
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
