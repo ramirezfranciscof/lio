@@ -49,7 +49,7 @@ c Initializations/Defaults
        F3=(7.D0/4.D0)*F1b-(3.D0/4.D0)*F1a
 ! Step2: F3 is used to propagate rho2 to rho4
        rho2t=rho2
-       call magnusBCH(F3,rho2,rho4,M,NBCH,tdstep1,factorial)
+       call magnusold(F3,rho2,rho4,M,NBCH,tdstep1,factorial)
 ! Paso3: Escribimos rho4 en el RMM para poder obtener F5 en el siguiente paso.
 ! Step3: rho4 is copied to RMM(1,2,3,...,MM)
        call matmulnanoc(rho4,xtrans,rho2t,M)
