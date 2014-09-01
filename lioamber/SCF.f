@@ -1158,6 +1158,7 @@ c writes down MO coefficients and orbital energies
 c
 c-------------------------------------------------
 c      endif
+
       if(DIIS) then
         deallocate (Y,Ytrans,Xtrans,fock,fockm,rho,FP_PF,FP_PFv,FP_PFm,
      >  znano,EMAT, bcoef, suma,rho1)

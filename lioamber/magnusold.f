@@ -1,5 +1,5 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-       SUBROUTINE magnus(Fock,RhoOld,RhoNew,M,N,dt,factorial)
+       SUBROUTINE magnusold(Fock,RhoOld,RhoNew,M,N,dt,factorial)
 !------------------------------------------------------------------------------!
 ! Magnus propagator (N order)
 ! Entrada: Fock(t+(deltat/2)), rho(t)

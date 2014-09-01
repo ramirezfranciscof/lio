@@ -29,13 +29,14 @@
 !------------------------------------------------------------------------------!
 !
        call g2g_timer_start('magnus')
+       PRINT*,'I AM HERE'
        allocate(Conmut(M,M),TermPos(M,M),TermNeg(M,M))
        allocate(Omega1(M,M))
 !
        Omega1=(-1)*(icmplx)*(FockMid)*(dt)
        RhoNew=RhoOld
        Conmut=RhoOld
-
+!
        invfact=1
        do kk=1,N
          TermPos=MATMUL(Omega1,Conmut)
