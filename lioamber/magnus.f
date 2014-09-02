@@ -3,10 +3,13 @@
 !------------------------------------------------------------------------------!
 ! This subroutine applies the magnus propagator using the
 ! BCH formula of order N to propagate the density matrix
-! RhoOld into RhoNew, using FockMid.
+! RhoOld into RhoNew, using FockMid. It assumes that both
+! input matrixes are transformed (aka: "in the orthonormal
+! basis") and returns RhoNew in the same way.
 !
-! Input : Fock(t+(deltat/2)), rho(t)
-! Output: rho6=rho(t+deltat)
+! RhoOld  => t0         [in]
+! FockMid => t0+(dt/2)  [in]
+! RhoNew  => t0+dt      [out]
 !
 ! References for further information:
 !   (*) J. Chem. Theory Comput. 2011, 7, 1344–1355
@@ -16,11 +19,11 @@
        IMPLICIT NONE
        INTEGER,INTENT(IN)                    :: M,N
        REAL*8,INTENT(IN)                     :: FockMid(M,M),dt
-       COMPLEX*8,INTENT(IN)                 :: RhoOld(M,M)
-       COMPLEX*8,INTENT(OUT)                :: RhoNew(M,M)
+       COMPLEX*8,INTENT(IN)                  :: RhoOld(M,M)
+       COMPLEX*8,INTENT(OUT)                 :: RhoNew(M,M)
 !
-       COMPLEX*8,ALLOCATABLE,DIMENSION(:,:) :: Conmut,TermPos,TermNeg
-       COMPLEX*8,ALLOCATABLE,DIMENSION(:,:) :: Omega1
+       COMPLEX*8,ALLOCATABLE,DIMENSION(:,:)  :: Conmut,TermPos,TermNeg
+       COMPLEX*8,ALLOCATABLE,DIMENSION(:,:)  :: Omega1
        INTEGER                               :: kk
        REAL*8                                :: invfact
 !
