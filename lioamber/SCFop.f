@@ -21,14 +21,14 @@ c---------------------------------------------------
      >   FP_PFa_m,FP_PFb_m,EMATa,EMATb,EMAT2_a,EMAT2_b,
      >   Y,Ytrans,Xtrans
 c
-      integer ndiist
+       integer ndiist
 c       dimension d(natom,natom)
-      logical  hagodiis,alloqueo, ematalloc
+       logical  hagodiis,alloqueo, ematalloc
 c       REAL*8 , intent(in)  :: qmcoords(3,natom)
 c       REAL*8 , intent(in)  :: clcoords(4,nsolin)
-      INTEGER :: ErrID,iii,jjj
-      LOGICAL :: docholesky
-      REAL*8,ALLOCATABLE :: MatrixVec(:),TestMatrix(:)
+        INTEGER :: ErrID,iii,jjj
+        LOGICAL :: docholesky
+        REAL*8,ALLOCATABLE :: MatrixVec(:),TestMatrix(:)
 
       call g2g_timer_start('SCF')
       if(verbose) write(*,*) '======>>>> INGRESO A SCFop <<<<=========='
@@ -41,7 +41,7 @@ c Pointers
 c
       if(verbose)  write(*,*) 'M=',M
 c first P
-      MM=M*(M+1)/2 
+      MM=M*(M+1)/2
       MM2=M**2
       MMd=Md*(Md+1)/2
       Md2=2*Md
@@ -126,7 +126,7 @@ c      Qc=Qc-Nel
 c      Qc2=Qc**2
 C----------------------------------------
 c Para hacer lineal la integral de 2 electrone con lista de vecinos. Nano
-  
+
       do i=1,natom
         natomc(i)=0
         do j=1,natom
@@ -233,7 +233,7 @@ c LINEAR DEPENDENCY ELIMINATION
 c
         do j=1,M
           if (RMM(M13+j-1).lt.1.0D-06) then
-            write(*,*) 'LINEAR DEPENDENCY DETECTED ACA !!!!'
+            write(*,*) 'LINEAR DEPENDENCY DETECTED'
             do i=1,M
               X(i,j)=0.0D0
               Y(i,j)=0.0D0
@@ -261,7 +261,7 @@ c
 
       if((.not.ATRHO).and.(.not.VCINP).and.primera) then
         primera=.false.
-c QUE HACE ACA ?????
+        if(verbose) write(*,*) 'STARTING GUESS !!!!!'
         do i=1,M
           do j=1,M
             X(i,M+j)=0.D0
@@ -1012,14 +1012,14 @@ c
 c
 c--- Damping factor update - 
        DAMP=DAMP0
-c      IDAMP=0
-c      if (IDAMP.EQ.1) then
-c        DAMP=DAMP0
-c        if (abs(D1).lt.1.D-5) then
-c          fac=dmax1(0.90D0,abs(D1/D2))
-c          fac=dmin1(fac,1.1D0)
-c          DAMP=DAMP0*fac
-c        endif
+       IDAMP=0
+       if (IDAMP.EQ.1) then
+         DAMP=DAMP0
+         if (abs(D1).lt.1.D-5) then
+           fac=dmax1(0.90D0,abs(D1/D2))
+           fac=dmin1(fac,1.1D0)
+           DAMP=DAMP0*fac
+         endif
 c
 c        E=E1+E2+En
 c        E=E+Es
@@ -1029,7 +1029,7 @@ c        D1=(E-E0)
 c
 c        E0=E
 c        DAMP0=DAMP
-c      endif
+       endif
 
        E=E1+E2+En
        E=E+Es

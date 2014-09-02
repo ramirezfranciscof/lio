@@ -46,6 +46,11 @@ endif
 
 #eliminada   -lmkl_solver_lp64
 
+ifeq ($(debug),1)
+        DBUG = -g -O0 -debug all
+        CFLAGS = $(DBUG) -ip -c -cpp $(DEFINE)
+endif
+
 # directories
 G2G_CFLAGS=-DG2G
 

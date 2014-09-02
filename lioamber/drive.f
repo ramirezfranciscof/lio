@@ -722,7 +722,6 @@ c
             do i=1,M
               kk=kk+1
               RMM(kk)=XX(indexii(i),k)
-c              rhoalpha(kk)=XX(indexii(i),k)
             enddo
           enddo
 c
@@ -731,13 +730,30 @@ c
           do 331 i=1,M
             do 331 j=1,M
               X(i,j)=0.0D0
-c              rhoalpha()=0.0D0
 c
               do 139 k=1,NCOa
                 X(i,j)=X(i,j)+XX(i,k)*XX(j,k)
-c                rhoalpha()=rhoalpha()+XX(i,k)*XX(j,k)
  139          continue
  331      continue
+
+          kk=0
+          do j=1,M
+            do i=j,M
+c
+              kk=kk+1
+             
+              rhoalpha(kk)=0.D0
+c
+              do k=1,NCOa
+                rhoalpha(kk)=rhoalpha(kk)+XX(i,k)*XX(j,k)
+              enddo
+c
+              if (i.ne.j) then
+                rhoalpha(kk)=2.0D0*rhoalpha(kk)
+              endif
+c
+            enddo
+          enddo
 c
 c beta
           do l=1,M
@@ -749,22 +765,40 @@ c
             do i=1,M
               kk=kk+1
               RMM(kk)=XX(indexii(i),k)
-c              rhobeta(kk)=XX(indexii(i),k)
             enddo
           enddo
 c 
 c Density Matrix
 c
+          
           do i=1,M
             do j=1,M
-c              rhobeta()=0.0D0
               do k=1,NCOb
                 X(i,j)=X(i,j)+XX(i,k)*XX(j,k)
-c                rhobeta()=rhobeta()+XX(i,k)*XX(j,k)
               enddo
             enddo
           enddo
 c
+
+          kk=0
+          do j=1,M
+            do i=j,M
+c
+              kk=kk+1
+
+              rhobeta(kk)=0.D0
+c
+              do k=1,NCOb
+                rhobeta(kk)=rhobeta(kk)+XX(i,k)*XX(j,k)
+              enddo
+c
+              if (i.ne.j) then
+                rhobeta(kk)=2.0D0*rhobeta(kk)
+              endif
+c
+            enddo
+          enddo
+
           write(*,*) 'LEIDA !!! RESTART de Densidad OPEN SHELL'
         endif
     
