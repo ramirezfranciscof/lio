@@ -13,7 +13,8 @@ static __inline__ __device__ double fetch_double(texture<int2, 2> t, float x, fl
 template<class scalar_type, bool compute_energy, bool compute_factor, bool lda>
 __global__ void gpu_compute_density(scalar_type* const energy, scalar_type* const factor, const scalar_type* const point_weights,
                                     uint points, const scalar_type* function_values, const vec_type<scalar_type,4>* gradient_values,
-                                    const vec_type<scalar_type,4>* hessian_values, uint m, scalar_type* out_partial_density, vec_type<scalar_type,4>* out_dxyz, vec_type<scalar_type,4>* out_dd1, vec_type<scalar_type,4>*  out_dd2)
+                                    const vec_type<scalar_type,4>* hessian_values, uint m, scalar_type* out_partial_density,
+                                    vec_type<scalar_type,4>* out_dxyz, vec_type<scalar_type,4>* out_dd1, vec_type<scalar_type,4>*  out_dd2)
 {
 
     uint point = blockIdx.x;
@@ -22,12 +23,7 @@ __global__ void gpu_compute_density(scalar_type* const energy, scalar_type* cons
 
     uint i2    = i + DENSITY_BLOCK_SIZE;
 
-    uint min_i = blockIdx.y * 2 * DENSITY_BLOCK_SIZE + DENSITY_BLOCK_SIZE; //Para invertir el loop de bj
-
-    scalar_type partial_density (0.0f);
-
-    vec_type<scalar_type,3> dxyz, dd1, dd2;
-    dxyz = dd1 = dd2 = vec_type<scalar_type,3>(0.0f,0.0f,0.0f);
+    uint min_i = blockIdx.y * 2 * DENSITY_BLOCK_SIZE + DENSITY_BLOCK_SIZE;
 
     bool valid_thread = ( i < m );
     bool valid_thread2 = (i2 < m);
@@ -49,17 +45,14 @@ __global__ void gpu_compute_density(scalar_type* const energy, scalar_type* cons
     __shared__ vec_type<scalar_type, 3> fh1j_sh [DENSITY_BLOCK_SIZE];
     __shared__ vec_type<scalar_type, 3> fh2j_sh [DENSITY_BLOCK_SIZE];
 
-    uint min_i2 = min_i;
-
     //Si nos vamos a pasar del bloque con el segundo puntero, hacemos que haga la misma cuenta
     if(min_i > m)
     {
-        min_i2 = min_i-DENSITY_BLOCK_SIZE ;
+        min_i = min_i - DENSITY_BLOCK_SIZE ;
     }
 
-    for (int bj = 0; bj <= min_i2; bj += DENSITY_BLOCK_SIZE)
+    for (int bj = 0; bj <= min_i; bj += DENSITY_BLOCK_SIZE)
     {
-        //Density deberia ser GET_DENSITY_BLOCK_SIZE
         __syncthreads();
         if( bj+position < m )
         {
@@ -83,7 +76,7 @@ __global__ void gpu_compute_density(scalar_type* const energy, scalar_type* cons
         {
             for(int j=0; j<DENSITY_BLOCK_SIZE; j++)
             {
-                fjreg=fj_sh[j];
+                fjreg = fj_sh[j];
 
                 if(!lda)
                 {
@@ -123,6 +116,9 @@ __global__ void gpu_compute_density(scalar_type* const energy, scalar_type* cons
         }
     }
 
+    scalar_type partial_density (0.0f);
+    vec_type<scalar_type,3> dxyz, dd1, dd2;
+    dxyz = dd1 = dd2 = vec_type<scalar_type,3>(0.0f,0.0f,0.0f);
 
     if(valid_thread)
     {
@@ -189,7 +185,7 @@ __global__ void gpu_compute_density(scalar_type* const energy, scalar_type* cons
 
     __syncthreads();
 
-    for(int j=2;  j <= DENSITY_BLOCK_SIZE ; j=j*2) //
+    for(int j=2;  j <= DENSITY_BLOCK_SIZE ; j=j*2)
     {
         int index=position + DENSITY_BLOCK_SIZE/j;
         if( position < DENSITY_BLOCK_SIZE/j)
