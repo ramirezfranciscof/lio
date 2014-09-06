@@ -261,7 +261,6 @@ c
 
       if((.not.ATRHO).and.(.not.VCINP).and.primera) then
         primera=.false.
-        if(verbose) write(*,*) 'STARTING GUESS !!!!!'
         do i=1,M
           do j=1,M
             X(i,M+j)=0.D0
@@ -348,8 +347,8 @@ c
             kk=kk+1
              
             RMM(kk)=0.D0
-c            rhoalpha(kk)=0.D0
-c            rhobeta(kk)=0.D0
+            rhoalpha(kk)=0.D0
+            rhobeta(kk)=0.D0
 c
             do k=1,NCOa
               RMM(kk)=RMM(kk)+X(i,M2+k)*X(j,M2+k)
@@ -742,7 +741,6 @@ c
           enddo
         enddo
 c
-c
         kk=0
         do k=1,NCOa
           do i=1,M
@@ -973,8 +971,8 @@ c
            kk=kk+1
            tmp=RMM(kk)
            RMM(kk)=0.D0
-            rhoalpha(kk)=0.D0
-            rhobeta(kk)=0.D0
+           rhoalpha(kk)=0.D0
+           rhobeta(kk)=0.D0
 c
            do k=1,NCOa
              k0=M18+M*(k-1)-1
@@ -1000,9 +998,9 @@ c
              rhobeta(kk)=2.0D0*rhobeta(kk)
            endif
 c
-          del=RMM(kk)-tmp
-          if (i.ne.j) then
-            del=del*sqrt(2.D0)
+           del=RMM(kk)-tmp
+           if (i.ne.j) then
+             del=del*sqrt(2.D0)
            endif
            good=good+del**2
          enddo
@@ -1040,7 +1038,7 @@ c        DAMP0=DAMP
      >         'En,E1,E2,Ex',En,E1,E2,Ex
           write(*,"(A,F10.7,A,F10.7,A)") 'good= ',good,' (told= ',told,
      >          ')'
-	endif
+        endif
 c
         call g2g_timer_stop('Total iter')
  999  continue

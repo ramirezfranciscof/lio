@@ -852,6 +852,7 @@ c
           xnano(k,i)  = X(i,M2+k)
         enddo
       enddo
+      
 c
 c Construction of new density matrix and comparison with old one
        kk=0

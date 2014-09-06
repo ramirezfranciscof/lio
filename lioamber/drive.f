@@ -708,7 +708,6 @@ c
 c open shell case
         else
 c
-          write(*,*) 'Leyendo RESTART de Densidad OPEN SHELL'
           NCOa=NCO
           NCOb=NCO+Nunp
           M18b=M18+M*NCOa
@@ -736,24 +735,30 @@ c
  139          continue
  331      continue
 
-          kk=0
+          k=0
           do j=1,M
             do i=j,M
-c
-              kk=kk+1
-             
-              rhoalpha(kk)=0.D0
-c
-              do k=1,NCOa
-                rhoalpha(kk)=rhoalpha(kk)+XX(i,k)*XX(j,k)
-              enddo
-c
+              k=k+1
+              rhoalpha(k)=X(indexii(i),indexii(j))
               if (i.ne.j) then
-                rhoalpha(kk)=2.0D0*rhoalpha(kk)
+                rhoalpha(k)=rhoalpha(k)*2.D0
               endif
-c
             enddo
           enddo
+c
+c          kk=0
+c          do j=1,M
+c            do i=j,M
+c              kk=kk+1
+c              rhoalpha(kk)=0.D0
+c              do k=1,NCOa
+c                rhoalpha(kk)=rhoalpha(kk)+XX(i,k)*XX(j,k)
+c              enddo
+c              if (i.ne.j) then
+c                rhoalpha(kk)=2.0D0*rhoalpha(kk)
+c              endif
+c            enddo
+c          enddo
 c
 c beta
           do l=1,M
@@ -773,33 +778,39 @@ c
           
           do i=1,M
             do j=1,M
+              X2(i,j)=0.0D0
               do k=1,NCOb
                 X(i,j)=X(i,j)+XX(i,k)*XX(j,k)
+                X2(i,j)=X2(i,j)+XX(i,k)*XX(j,k)
               enddo
             enddo
           enddo
-c
 
-          kk=0
+          k=0
           do j=1,M
             do i=j,M
-c
-              kk=kk+1
-
-              rhobeta(kk)=0.D0
-c
-              do k=1,NCOb
-                rhobeta(kk)=rhobeta(kk)+XX(i,k)*XX(j,k)
-              enddo
-c
+              k=k+1
+              rhobeta(k)=X2(indexii(i),indexii(j))
               if (i.ne.j) then
-                rhobeta(kk)=2.0D0*rhobeta(kk)
+                rhobeta(k)=rhobeta(k)*2.D0
               endif
-c
             enddo
           enddo
+c
+c          kk=0
+c          do j=1,M
+c            do i=j,M
+c              kk=kk+1
+c              rhobeta(kk)=0.D0
+c              do k=1,NCOb
+c                rhobeta(kk)=rhobeta(kk)+XX(i,k)*XX(j,k)
+c              enddo
+c              if (i.ne.j) then
+c                rhobeta(kk)=2.0D0*rhobeta(kk)
+c              endif
+c            enddo
+c          enddo
 
-          write(*,*) 'LEIDA !!! RESTART de Densidad OPEN SHELL'
         endif
     
       endif
@@ -1045,7 +1056,7 @@ c      call system(date)
 c
 c---------------------------------------------------
 c---------------------------------------------------
-       deallocate(X,XX)
+       deallocate(X,X2,XX)
        allocate(X(M,4*M),XX(Md,Md))
        allocate(old1(MM))
 
