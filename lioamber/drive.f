@@ -950,8 +950,6 @@ c      write(*,*) 'estoooo',ngpru, ngDyn, ng0, natom
      >                        NCO,OPEN,Nunp,nopt,Iexch,
      >                        e_, e_2, e3, wang, wang2, wang3,verbose)
 
-c      write(*,*) '======>>>> SALIENDO DE DRIVE <<<<=========='
-
 c      if (parsearch) then
 c        call g2g_reload_atom_positions(igrid2)
 c        call g2g_solve_groups(1, E, 0)
@@ -1056,12 +1054,14 @@ c      call system(date)
 c
 c---------------------------------------------------
 c---------------------------------------------------
-       deallocate(X,X2,XX)
+       deallocate(X,XX)
        allocate(X(M,4*M),XX(Md,Md))
        allocate(old1(MM))
 
        allocate(old2(MM))
        allocate(old3(MM))
+      
+      if(verbose )write(*,*) '======>>>> SALIENDO DE DRIVE <<<<========'
 
  100  format (A8)
  200  format ('basis set corresponding to Z ',I3,' was not used')

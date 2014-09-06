@@ -179,42 +179,43 @@ c
 
 c Diagonalization of S matrix, after this is not needed anymore
 c
-c      docholesky=.true.
+      docholesky=.true.
 
-c      IF (docholesky) THEN
-c        call g2g_timer_start('cholesky')
-c        PRINT*,'DOING CHOLESKY'
-c        ALLOCATE(MatrixVec(MM))
-c        DO iii=1,MM
-c          MatrixVec(iii)=RMM(M5+iii-1)
-c        ENDDO
+      IF (docholesky) THEN
+        call g2g_timer_start('cholesky')
+        PRINT*,'DOING CHOLESKY'
+        ALLOCATE(MatrixVec(MM))
+        DO iii=1,MM
+          MatrixVec(iii)=RMM(M5+iii-1)
+        ENDDO
 
-c        CALL DPPTRF('L',M,MatrixVec,ErrID)
-c        PRINT*,ErrID
-c        ALLOCATE(Y(M,M),Ytrans(M,M))
-c        DO iii=1,M;DO jjj=1,M
-c          Y(iii,jjj)=0
-c          IF (jjj.LE.iii) THEN
-c            Y(iii,jjj)=MatrixVec(iii+(2*M-jjj)*(jjj-1)/2)
-c          ENDIF
-c          Ytrans(jjj,iii)=Y(iii,jjj)
-c        ENDDO;ENDDO
+        CALL DPPTRF('L',M,MatrixVec,ErrID)
+        PRINT*,ErrID
+        ALLOCATE(Y(M,M),Ytrans(M,M))
+        DO iii=1,M;DO jjj=1,M
+          Y(iii,jjj)=0
+          IF (jjj.LE.iii) THEN
+            Y(iii,jjj)=MatrixVec(iii+(2*M-jjj)*(jjj-1)/2)
+          ENDIF
+          Ytrans(jjj,iii)=Y(iii,jjj)
+        ENDDO;ENDDO
 
-c        CALL DTPTRI('L','N',M,MatrixVec,ErrID)
-c        PRINT*,ErrID
-c        ALLOCATE(Xtrans(M,M))
-c        DO iii=1,M;DO jjj=1,M
-c          Xtrans(iii,jjj)=0
-c          IF (jjj.LE.iii) THEN
-c            Xtrans(iii,jjj)=MatrixVec(iii+(2*M-jjj)*(jjj-1)/2)
-c          ENDIF
-c            X(jjj,iii)=Xtrans(iii,jjj)
-c        ENDDO;ENDDO
+        CALL DTPTRI('L','N',M,MatrixVec,ErrID)
+        PRINT*,ErrID
+        ALLOCATE(Xtrans(M,M))
+        DO iii=1,M;DO jjj=1,M
+          Xtrans(iii,jjj)=0
+          IF (jjj.LE.iii) THEN
+            Xtrans(iii,jjj)=MatrixVec(iii+(2*M-jjj)*(jjj-1)/2)
+          ENDIF
+            X(jjj,iii)=Xtrans(iii,jjj)
+            X(jjj,M2a+iii)=Xtrans(iii,jjj)
+        ENDDO;ENDDO
 
-c        DEALLOCATE(MatrixVec)
-c        PRINT*,'CHOLESKY DONE'
-c        call g2g_timer_stop('cholesky')
-c      ELSE
+        DEALLOCATE(MatrixVec)
+        PRINT*,'CHOLESKY DONE'
+        call g2g_timer_stop('cholesky')
+      ELSE
 
 c ESSL OPTION ------------------------------------------
 #ifdef essl
@@ -253,7 +254,7 @@ c QUE ES ESTO ????
             Xtrans(i,j)=X(j,i)
           enddo
         enddo
-c      ENDIF  
+      ENDIF  
 c
 c ======>>>>>> CASE OF NO STARTING GUESS PROVIDED,  <<<<<=========
 c   1 E FOCK MATRIX USED
