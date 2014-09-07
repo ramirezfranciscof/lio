@@ -1054,7 +1054,7 @@ c      call system(date)
 c
 c---------------------------------------------------
 c---------------------------------------------------
-       deallocate(X,XX)
+       deallocate(X,X2,XX)
        allocate(X(M,4*M),XX(Md,Md))
        allocate(old1(MM))
 

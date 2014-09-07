@@ -938,12 +938,12 @@ c
 c-------------------------------------------------------------------
 
       if (niter.ge.NMAX) then
-        write(*,*) 'NO CONVERGENCE AT ',NMAX,' ITERATIONS'
+        write(6,*) 'NO CONVERGENCE AT ',NMAX,' ITERATIONS'
         noconverge=noconverge + 1
         converge=0
         call write_struct()
       else
-        write(*,*) 'CONVERGED AT',niter,'ITERATIONS'
+        write(6,*) 'CONVERGED AT',niter,'ITERATIONS'
         noconverge = 0
         converge=converge+1
       endif
@@ -957,7 +957,7 @@ c-------------------------------------------------------------------
       enddo
 
       if(noconverge.gt.4) then
-        write(*,*)  'stop fon not convergion 4 times'
+        write(6,*)  'stop fon not convergion 4 times'
         stop
       endif
 
