@@ -535,7 +535,11 @@ c
 c ACA CONVIENE PONER ALGUNA ESTRATEGIA PARA CUANDO SE NIEGA A CONVERGER !!!
 c
         if (niter.gt.2.and.(DIIS)) then
-          hagodiis=.true.
+c          if (good.le.(50*told)) then
+c            hagodiis=.false.
+c          else
+            hagodiis=.true.
+c          endif
         endif
 
 c<============================
