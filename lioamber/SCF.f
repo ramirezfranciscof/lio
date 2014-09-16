@@ -15,7 +15,7 @@ c
        dimension q(natom),work(1000),IWORK(1000)
        REAL*8 , intent(inout)  :: dipxyz(3)
        real*8, dimension (:,:), ALLOCATABLE ::xnano,znano
-       real*8, dimension (:), ALLOCATABLE :: rmm5,rmm15,rmm13,
+       real*8, dimension (:), ALLOCATABLE :: rmm5,rmm15,
      >   bcoef, suma, FP_PFv
       real*8, dimension (:,:), allocatable :: fock,fockm,rho,FP_PF,
      >   FP_PFm,EMAT,Y,Ytrans,Xtrans,rho1,EMAT2
@@ -27,7 +27,7 @@ c       REAL*8 , intent(in)  :: qmcoords(3,natom)
 c       REAL*8 , intent(in)  :: clcoords(4,nsolin)
         INTEGER :: ErrID,iii,jjj
         LOGICAL :: docholesky
-        REAL*8,ALLOCATABLE :: MatrixVec(:),TestMatrix(:)
+        INTEGER            :: LWORK2
         REAL*8,ALLOCATABLE :: WORK2(:)
         INTEGER, ALLOCATABLE :: IWORK2(:),IPIV(:)
 
@@ -97,7 +97,7 @@ c
 c
       Nel=2*NCO+Nunp
 c
-      allocate(rmm5(MM),rmm13(m),rmm15(mm))
+      allocate(rmm5(MM),rmm15(mm))
 c
       good=1.00D0
       niter=0
@@ -171,11 +171,13 @@ c test ---------------------------------------------------------
 c
 c Diagonalization of S matrix, after this is not needed anymore
 c
-      docholesky=.true.
+      docholesky=.false.
       call g2g_timer_start('cholesky')
 
       IF (docholesky) THEN
 #ifdef magma
+        ! ESTO SIGUE USANDO Smat EN RMM(M5)
+        ! CAMBIARLO CUANDO SE SIGA PROBANDO MAGMA
         PRINT*,'DOING CHOLESKY'
 
         ALLOCATE(Y(M,M),Ytrans(M,M))
@@ -189,49 +191,38 @@ c
 
         CALL MAGMAF_DPOTRF('L',M,Y,M,ErrID)
 
-          Ytrans= transpose(Y)
+        Ytrans= transpose(Y)
         ALLOCATE(Xtrans(M,M))
-          Xtrans=Y
+        Xtrans=Y
         CALL MAGMAF_DTRTRI('L','N',M,Xtrans,M,ErrID)
         if(ErrID.ne.0) STOP ('Error in cholesky decomp.')
         xnano= transpose(Xtrans)
         do i=1,M;doj=1,M
-        X(i,j)=Xnano(i,j)
+          X(i,j)=Xnano(i,j)
         enddo;enddo
         PRINT*,'CHOLESKY MAGMA'
 
 #else
         PRINT*,'DOING CHOLESKY'
-        ALLOCATE(MatrixVec(MM))
-        DO iii=1,MM
-          MatrixVec(iii)=RMM(M5+iii-1)
-        ENDDO
+        ALLOCATE(Y(M,M),Ytrans(M,M),Xtrans(M,M))
 
-        CALL DPPTRF('L',M,MatrixVec,ErrID)
-        PRINT*,ErrID
-        ALLOCATE(Y(M,M),Ytrans(M,M))
+        Y=Smat
+        CALL dpotrf('L',M,Y,M,info)
         DO iii=1,M;DO jjj=1,M
-          Y(iii,jjj)=0
-          IF (jjj.LE.iii) THEN
-            Y(iii,jjj)=MatrixVec(iii+(2*M-jjj)*(jjj-1)/2)
+          IF (jjj.GT.iii) THEN
+            Y(iii,jjj)=0.0d0
           ENDIF
           Ytrans(jjj,iii)=Y(iii,jjj)
         ENDDO;ENDDO
 
-        CALL DTPTRI('L','N',M,MatrixVec,ErrID)
-        PRINT*,ErrID
-        ALLOCATE(Xtrans(M,M))
+        Xtrans=Y
+        CALL dtrtri('L','N',M,Xtrans,M,info)
         DO iii=1,M;DO jjj=1,M
-          Xtrans(iii,jjj)=0
-          IF (jjj.LE.iii) THEN
-            Xtrans(iii,jjj)=MatrixVec(iii+(2*M-jjj)*(jjj-1)/2)
+          IF (jjj.GT.iii) THEN
+            Xtrans(iii,jjj)=0.0d0
           ENDIF
           X(jjj,iii)=Xtrans(iii,jjj)
         ENDDO;ENDDO
-
-        DEALLOCATE(MatrixVec)
-
-
 #endif
       ELSE
 
@@ -248,8 +239,13 @@ c
 c LAPACK OPTION -----------------------------------------
 #ifdef pack
 c       call magmaf_dsyev('V','L',M,xxx,M,
-
-       call dspev('V','L',M,RMM5,RMM13,X,M,RMM15,info)
+       do ii=1,M; do jj=1,M
+         X(ii,jj)=Smat(ii,jj)
+       enddo; enddo
+       if (allocated(WORK2)) deallocate(WORK2); allocate(WORK2(1))
+       call dsyev('V','L',M,X,M,RMM(M13),WORK2,-1,info)
+       LWORK2=int(WORK2(1)); deallocate(WORK2); allocate(WORK2(LWORK2))
+       call dsyev('V','L',M,X,M,RMM(M13),WORK2,LWORK2,info)
 #endif
 c-----------------------------------------------------------
 c
@@ -258,11 +254,11 @@ c LINEAR DEPENDENCY ELIMINATION
 c
         do i=1,MM
           RMM(M5+i-1)=rmm5(i)
+          ! WHAT IS THE POINT OF DOING THIS?
 c          write(56,*) RMM(M15+1)
         enddo
 
         do j=1,M
-          RMM(M13+j-1)=rmm13(j)
           if (RMM(M13+j-1).lt.1.0D-06) then
             write(*,*) 'LINEAR DEPENDENCY DETECTED'
             do i=1,M
@@ -330,7 +326,6 @@ c ESSL OPTION
           rmm5(i)=RMM(M5+i-1)
         enddo
         rmm15=0
-        rmm13=0
         xnano=0
 #ifdef essl
         call DSPEV(1,RMM(M5),RMM(M13),X(1,M+1),M,M,RMM(M15),M2)
@@ -338,7 +333,7 @@ c ESSL OPTION
 c LAPACK OPTION -----------------------------------------
 #ifdef pack
 c
-        call dspev('V','L',M,RMM5,RMM13,Xnano,M,RMM15,info)
+        call dspev('V','L',M,RMM5,RMM(M13),Xnano,M,RMM15,info)
 #endif
         do i =1,M
           do j=1,M
@@ -1128,7 +1123,7 @@ c      endif
         deallocate (Y,Ytrans,Xtrans,fock,fockm,rho,FP_PF,FP_PFv,FP_PFm,
      >  znano,EMAT, bcoef, suma,rho1)
       endif
-      deallocate (xnano,rmm5,rmm13,rmm15)
+      deallocate (xnano,rmm5,rmm15)
 
       deallocate (kkind,kkinds)
       deallocate(cool,cools)
