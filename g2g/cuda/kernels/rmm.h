@@ -6,7 +6,7 @@
 // TODO: esto desperdicia la mitad de los threads -> quizas se puede armar una grilla sin los bloques que no hagan nada
 
 template<class scalar_type,bool check_pos>
-__global__ void gpu_update_rmm(scalar_type* factors, uint points, scalar_type* rmm, scalar_type* function_values, uint m)
+__global__ void gpu_update_rmm(const scalar_type* __restrict__ factors, uint points, scalar_type* rmm, const scalar_type* __restrict__ function_values, uint m)
 {
 //    if (blockIdx.x * blockDim.x > blockIdx.y * blockDim.y) return;
     uint i, j, first_fi, first_fj;
