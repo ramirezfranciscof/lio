@@ -13,8 +13,10 @@ __global__ void gpu_update_rmm(const scalar_type* __restrict__ factors, uint poi
     // There's more than one block; do the math to get position
     if (check_pos) {
         // Figure out where our block is in the lower triangle
-        // We get 1D index k = blockIdx.x; column 1 value of k in row j is always k_1 = j*(j+1); solving for j gives determinant 1+8*k_1
-        // Thus, 1+8*k_1 must be square of (odd) integer; take sqrt(1+8*k) and get first odd integer below it - get row and column from there
+        // We get 1D index k = blockIdx.x; column 1 value of k in row j is always k_1 = j*(j+1);
+        // solving for j gives determinant 1+8*k_1
+        // Thus, 1+8*k_1 must be square of (odd) integer; take sqrt(1+8*k) and get first odd integer below it -
+        // get row and column from there
         uint n = sqrtf(1.0f+8.0f*blockIdx.x);
         n -= (1 - n % 2);
         uint block_j = (n - 1) / 2;
@@ -57,20 +59,27 @@ __global__ void gpu_update_rmm(const scalar_type* __restrict__ factors, uint poi
 #pragma unroll 16
         for (uint point = point_base; point < last_point; point += RMM_BLOCK_SIZE_XY) {
             if (point < points) {
-                /* every RMM_BLOCK_SIZE_X iterations, Fi and Fj get filled with RMM_BLOCK_SIZE_Y functions, for RMM_BLOCK_SIZE_X different points */
+                /* every RMM_BLOCK_SIZE_X iterations, Fi and Fj get filled with RMM_BLOCK_SIZE_Y functions,
+                 * for RMM_BLOCK_SIZE_X different points */
                 __syncthreads();
 
                 if (point + threadIdx.x < points) {
 
                     if ((first_fi + threadIdx.y) < m) {
-                        functions_i_local[threadIdx.x][threadIdx.y] = function_values[COALESCED_DIMENSION(points) * (first_fi + threadIdx.y) + (point + threadIdx.x)];
-                        functions_i_local[threadIdx.x][threadIdx.y] *= factor_local[(point-point_base) + threadIdx.x];
+                      scalar_type fi_times_factor =
+                        function_values[COALESCED_DIMENSION(points) * (first_fi + threadIdx.y) + (point + threadIdx.x)] *
+                        factor_local[(point-point_base) + threadIdx.x];
+                      functions_i_local[threadIdx.x][threadIdx.y] =  fi_times_factor;
                     }
-                    /* on blocks with some invalid threads, the computation contributes 0 to rmm_local (this avoids instruction serialization) */
+                    /* on blocks with some invalid threads, the computation contributes 0 to rmm_local (
+                     * this avoids instruction serialization) */
                     else functions_i_local[threadIdx.x][threadIdx.y] = 0.0f;
 
-                    if ((first_fj + threadIdx.y) < m) functions_j_local[threadIdx.x][threadIdx.y] = function_values[COALESCED_DIMENSION(points) * (first_fj + threadIdx.y) + (point + threadIdx.x)];
-                    else functions_j_local[threadIdx.x][threadIdx.y] = 0.0f;
+                    if ((first_fj + threadIdx.y) < m)
+                      functions_j_local[threadIdx.x][threadIdx.y] =
+                        function_values[COALESCED_DIMENSION(points) * (first_fj + threadIdx.y) + (point + threadIdx.x)];
+                    else
+                      functions_j_local[threadIdx.x][threadIdx.y] = 0.0f;
                 }
                 else {
                     functions_i_local[threadIdx.x][threadIdx.y] = 0.0f;
