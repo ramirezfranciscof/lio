@@ -1091,32 +1091,32 @@ c       call g2g_solve_groups(1, Exc, 0)
 
 c calculation of energy weighted density matrix
 c
-c      kk=0
-c      do j=1,M
-c        do i=j,M
-c          kk=kk+1
-c          RMM(M15+kk-1)=0.D0
+      kk=0
+      do j=1,M
+        do i=j,M
+          kk=kk+1
+          RMM(M15+kk-1)=0.D0
 c
-c          do k=1,NCOa
-c            k0=M18+M*(k-1)-1
-c            ki=k0+i
-c            kj=k0+j
-c            RMM(M15+kk-1)=RMM(M15+kk-1)-RMM(M13+k-1)*RMM(ki)*RMM(kj)
-c          enddo
+          do k=1,NCOa
+            k0=M18+M*(k-1)-1
+            ki=k0+i
+            kj=k0+j
+            RMM(M15+kk-1)=RMM(M15+kk-1)-RMM(M13+k-1)*RMM(ki)*RMM(kj)
+          enddo
 c
-c          do k=1,NCOb
-c            k0=M18b+M*(k-1)-1
-c            ki=k0+i
-c            kj=k0+j
-c            RMM(M15+kk-1)=RMM(M15+kk-1)-RMM(M22+k-1)*RMM(ki)*RMM(kj)
-c          enddo
+          do k=1,NCOb
+            k0=M18b+M*(k-1)-1
+            ki=k0+i
+            kj=k0+j
+            RMM(M15+kk-1)=RMM(M15+kk-1)-RMM(M22+k-1)*RMM(ki)*RMM(kj)
+          enddo
 c
-c          if (i.ne.j) then
-c            RMM(M15+kk-1)=2.0D0*RMM(M15+kk-1)
-c          endif
+          if (i.ne.j) then
+            RMM(M15+kk-1)=2.0D0*RMM(M15+kk-1)
+          endif
 c
-c        enddo
-c      enddo
+        enddo
+      enddo
 c
 c-----------------------------------------------------------------
 c
