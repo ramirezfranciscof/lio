@@ -62,20 +62,25 @@ __global__ void gpu_update_rmm(const scalar_type* __restrict__ factors, uint poi
                 /* every RMM_BLOCK_SIZE_X iterations, Fi and Fj get filled with RMM_BLOCK_SIZE_Y functions,
                  * for RMM_BLOCK_SIZE_X different points */
                 __syncthreads();
-                bool ifexterno = point + threadIdx.x < points;
-                bool ifinterno1 = (first_fi + threadIdx.y) < m;
-                bool ifinterno2 = (first_fj + threadIdx.y) < m;
-                bool valid1 = ifexterno * ifinterno1;
-                bool valid2 = ifexterno * ifinterno2;
+                bool valid_point = point + threadIdx.x < points;
+                bool valid_fi_thread = (first_fi + threadIdx.y) < m;
+                bool valid_fj_thread = (first_fj + threadIdx.y) < m;
+                bool validFi = valid_point * valid_fi_thread;
+                bool validFj = valid_point * valid_fj_thread;
+                int function_values_fi_index = COALESCED_DIMENSION(points) * (first_fi + threadIdx.y) + (point + threadIdx.x);
+                int function_values_fj_index = COALESCED_DIMENSION(points) * (first_fj + threadIdx.y) + (point + threadIdx.x);
+                int factor_local_fi_index = (point-point_base) + threadIdx.x;
+
+                /* on blocks with some invalid threads, the computation contributes 0 to rmm_local (
+                 * this avoids instruction serialization).
+                 * We avoid if-elses using the boolean predicates of those if to multiply by 0 or 1 if needed.
+                 * We also do it on the array subindeces to avoid segfaulting.
+                 */
                 scalar_type fi_times_factor =
-                  function_values[valid1 * (COALESCED_DIMENSION(points) * (first_fi + threadIdx.y) + (point + threadIdx.x))] *
-                  factor_local[valid1 * ((point-point_base) + threadIdx.x)];
-                functions_i_local[threadIdx.x][threadIdx.y] =  valid1 * fi_times_factor;
-              /* on blocks with some invalid threads, the computation contributes 0 to rmm_local (
-               * this avoids instruction serialization) */
-                functions_j_local[threadIdx.x][threadIdx.y] =
-                  function_values[valid2 * (COALESCED_DIMENSION(points) * (first_fj + threadIdx.y) + (point + threadIdx.x))] *
-                  valid2;
+                  function_values[validFi * function_values_fi_index] * factor_local[validFi * factor_local_fi_index];
+
+                functions_i_local[threadIdx.x][threadIdx.y] = validFi * fi_times_factor;
+                functions_j_local[threadIdx.x][threadIdx.y] = validFj * function_values[validFj * function_values_fj_index];
 
                 __syncthreads();
                 for (uint point_sub = 0; point_sub < RMM_BLOCK_SIZE_XY; point_sub++) {
