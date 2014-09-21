@@ -8,8 +8,8 @@
 #include <iostream>
 #include "scalar_vector_types.h"
 #include "timer.h"
-
 #include "global_memory_pool.h"
+#include "omp.h"
 
 namespace G2G {
   struct Timers {
@@ -150,14 +150,29 @@ class Partition {
       double cubes_energy_c1 = 0, spheres_energy_c1 = 0;
       double cubes_energy_c2 = 0, spheres_energy_c2 = 0;
 
-      for (std::vector<Cube>::iterator it = cubes.begin(); it != cubes.end(); ++it) {
-        it->solve(timers, compute_rmm,lda,compute_forces, compute_energy, cubes_energy, cubes_energy_i, cubes_energy_c, cubes_energy_c1, cubes_energy_c2, fort_forces_ptr, OPEN);
+#ifndef CPU_KERNELS
+      int gpu_count;
+      cudaGetDeviceCount(&gpu_count);
+      if (gpu_count == 0) {
+        std::cout << "Error: No GPU found" << std::endl;
+        exit(1);
       }
-
-      for (std::vector<Sphere>::iterator it = spheres.begin(); it != spheres.end(); ++it) {
-        it->solve(timers, compute_rmm,lda,compute_forces, compute_energy, spheres_energy, spheres_energy_i, spheres_energy_c, spheres_energy_c1, spheres_energy_c2, fort_forces_ptr, OPEN);
+      omp_set_num_threads(gpu_count);
+#endif
+#pragma omp parallel for
+      for(int i = 0; i < cubes.size() + spheres.size(); i++) {
+        int my_thread = omp_get_thread_num();
+        cudaSetDevice(my_thread);
+        if(i < cubes.size()) {
+          cubes[i].solve(
+              timers, compute_rmm,lda,compute_forces, compute_energy, cubes_energy, cubes_energy_i, cubes_energy_c, cubes_energy_c1, cubes_energy_c2, fort_forces_ptr, OPEN);
+        }
+        else
+        {
+          spheres[i - cubes.size()].solve(
+              timers, compute_rmm,lda,compute_forces, compute_energy, spheres_energy, spheres_energy_i, spheres_energy_c, spheres_energy_c1, spheres_energy_c2, fort_forces_ptr, OPEN);
+        }
       }
-
       if(OPEN && compute_energy) {
           std::cout << "Ei: " << cubes_energy_i+spheres_energy_i;
           std::cout << " Ec: " << cubes_energy_c+spheres_energy_c;

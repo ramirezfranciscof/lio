@@ -317,7 +317,10 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
 
     /*** Contribute this RMM to the total RMM ***/
     HostMatrix<scalar_type> rmm_output_cpu(rmm_output_gpu);
-    add_rmm_output(rmm_output_cpu);
+    #pragma omp critical
+    {
+      add_rmm_output(rmm_output_cpu);
+    }
   }
   timers.rmm.pause_and_sync();
 

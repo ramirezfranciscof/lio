@@ -11,9 +11,6 @@ ifeq ($(cpu),1)
   SRCS         += $(CPU_SOURCES)
   OBJ          += $(CPU_SOURCES:%.cpp=%.o)
   CXXFLAGS     += -DCPU_KERNELS=1
-ifeq ($(openmp),1)
-	CXXFLAGS += -openmp
-endif
 
 else
   include Makefile.cuda
@@ -25,7 +22,11 @@ endif
 
 ## Other options
 ifeq ($(print), 1)
-        CXXFLAGS += -DPRINT_MATRICES
+  CXXFLAGS += -DPRINT_MATRICES
+endif
+
+ifeq ($(openmp),1)
+  CXXFLAGS += -openmp
 endif
 
 ifeq ($(time), 1)
