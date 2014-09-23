@@ -150,8 +150,13 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
 
   cudaArray* cuArray;
   cudaMallocArray(&cuArray, &rmm_input_gpu_tex.channelDesc, rmm_input_cpu.width, rmm_input_cpu.height);
+  #if FULL_DOUBLE
   cudaMemcpyToArray(cuArray, 0, 0, rmm_input_cpu.data,
-      sizeof(scalar_type)*rmm_input_cpu.width*rmm_input_cpu.height, cudaMemcpyHostToDevice);
+      sizeof(int2)*rmm_input_cpu.width*rmm_input_cpu.height, cudaMemcpyHostToDevice);
+  #else
+  cudaMemcpyToArray(cuArray, 0, 0, rmm_input_cpu.data,
+      sizeof(float)*rmm_input_cpu.width*rmm_input_cpu.height, cudaMemcpyHostToDevice);
+  #endif
   cudaBindTextureToArray(rmm_input_gpu_tex, cuArray);
 
   rmm_input_gpu_tex.normalized = false;
@@ -226,6 +231,16 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
   }
 
   timers.density.pause_and_sync();
+
+//************ Repongo los valores que puse a cero antes, para las fuerzas son necesarios (o por lo mens utiles)
+  for (uint i=0; i<(group_m); i++) {
+    for(uint j=0; j<(group_m); j++) {
+      if((i>=group_m) || (j>=group_m) || (j > i))
+      {
+        rmm_input_cpu.data[COALESCED_DIMENSION(group_m)*i+j]=rmm_input_cpu.data[COALESCED_DIMENSION(group_m)*j+i] ;
+      }
+    }
+  }
 
    dim3 threads;
   /* compute forces */
