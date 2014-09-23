@@ -76,7 +76,6 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
 
   /*** Computo sobre cada cubo ****/
   CudaMatrix<scalar_type> point_weights_gpu;
-  FortranMatrix<double> fort_forces(fort_forces_ptr, fortran_vars.atoms, 3, fortran_vars.max_atoms);
 
   /** Compute this group's functions **/
   timers.functions.start_and_sync();
@@ -223,9 +222,14 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
     cudaAssertNoError("compute_density");
 
     HostMatrix<scalar_type> energy_cpu(energy_gpu);
+    scalar_type localenergy = 0.0f;
     for (uint i = 0; i < number_of_points; i++) {
-      energy += energy_cpu(i);
+      localenergy += energy_cpu(i);
     } // TODO: hacer con un kernel?
+#pragma omp critical
+    {
+      energy += localenergy;
+    }
   }
   else {
 #undef compute_parameters
@@ -292,13 +296,17 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
     cudaAssertNoError("forces");
 
     HostMatrix<vec_type4> forces_cpu(forces_gpu);
+    #pragma omp critical
+    {
+      FortranMatrix<double> fort_forces(fort_forces_ptr, fortran_vars.atoms, 3, fortran_vars.max_atoms);
 
-    for (uint i = 0; i < total_nucleii(); ++i) {
-      vec_type4 atom_force = forces_cpu(i);
-      uint global_nuc = local2global_nuc[i];
-      fort_forces(global_nuc, 0) += atom_force.x;
-      fort_forces(global_nuc, 1) += atom_force.y;
-      fort_forces(global_nuc, 2) += atom_force.z;
+      for (uint i = 0; i < total_nucleii(); ++i) {
+        vec_type4 atom_force = forces_cpu(i);
+        uint global_nuc = local2global_nuc[i];
+        fort_forces(global_nuc, 0) += atom_force.x;
+        fort_forces(global_nuc, 1) += atom_force.y;
+        fort_forces(global_nuc, 2) += atom_force.z;
+      }
     }
     timers.forces.pause_and_sync();
   }

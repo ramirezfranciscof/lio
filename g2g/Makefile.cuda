@@ -132,10 +132,11 @@ else
   else
     #DEFAULT IS SM20
     NVCCFLAGS += -arch=sm_20
-  endif  
+  endif
 endif
 
-ifeq ($(sm20),1)
+ifeq ($(openmp),1)
+  NVCCFLAGS += -Xcompiler -fopenmp
 endif
 
 

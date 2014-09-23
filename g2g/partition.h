@@ -157,27 +157,38 @@ class Partition {
         std::cout << "Error: No GPU found" << std::endl;
         exit(1);
       }
-      omp_set_num_threads(gpu_count);
+      int total_threads = gpu_count;
+      omp_set_num_threads(total_threads);
+      double energy_cubes[total_threads];
+      double energy_spheres[total_threads];
+      for(int i = 0; i< total_threads; i++)
+        energy_cubes[i]=energy_spheres[i]=0.0f;
 #endif
 #pragma omp parallel for
-      for(int i = 0; i < cubes.size() + spheres.size(); i++) {
+      for(int t = 0; t < omp_get_num_threads(); t++) {
         int my_thread = omp_get_thread_num();
-        cudaSetDevice(my_thread);
-        if(i < cubes.size()) {
-          cubes[i].solve(
-              timers, compute_rmm,lda,compute_forces, compute_energy, cubes_energy, cubes_energy_i, cubes_energy_c, cubes_energy_c1, cubes_energy_c2, fort_forces_ptr, OPEN);
+        for(int i = my_thread; i < cubes.size() + spheres.size(); i+= total_threads) {
+          cudaSetDevice(my_thread % gpu_count);
+          if(i < cubes.size()) {
+            cubes[i].solve(
+                timers, compute_rmm,lda,compute_forces, compute_energy, energy_cubes[my_thread], cubes_energy_i, cubes_energy_c, cubes_energy_c1, cubes_energy_c2, fort_forces_ptr, OPEN);
+          }
+          else
+          {
+            spheres[i - cubes.size()].solve(
+                timers, compute_rmm,lda,compute_forces, compute_energy, energy_spheres[my_thread], spheres_energy_i, spheres_energy_c, spheres_energy_c1, spheres_energy_c2, fort_forces_ptr, OPEN);
+          }
         }
-        else
-        {
-          spheres[i - cubes.size()].solve(
-              timers, compute_rmm,lda,compute_forces, compute_energy, spheres_energy, spheres_energy_i, spheres_energy_c, spheres_energy_c1, spheres_energy_c2, fort_forces_ptr, OPEN);
+        if(OPEN && compute_energy) {
+            std::cout << "Ei: " << cubes_energy_i+spheres_energy_i;
+            std::cout << " Ec: " << cubes_energy_c+spheres_energy_c;
+            std::cout << " Ec1: " << cubes_energy_c1+spheres_energy_c1;
+            std::cout << " Ec2: " << cubes_energy_c2+spheres_energy_c2 << std::endl;
         }
       }
-      if(OPEN && compute_energy) {
-          std::cout << "Ei: " << cubes_energy_i+spheres_energy_i;
-          std::cout << " Ec: " << cubes_energy_c+spheres_energy_c;
-          std::cout << " Ec1: " << cubes_energy_c1+spheres_energy_c1;
-          std::cout << " Ec2: " << cubes_energy_c2+spheres_energy_c2 << std::endl;
+      for(int i = 0; i< total_threads; i++) {
+        cubes_energy += energy_cubes[i];
+        spheres_energy += energy_spheres[i];
       }
 
       *fort_energy_ptr = cubes_energy + spheres_energy;
