@@ -192,7 +192,7 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
     for (uint i = 0; i < number_of_points; i++) {
       localenergy += energy_cpu(i);
     } // TODO: hacer con un kernel?
-#pragma omp critical
+#pragma omp critical (sumaenergia)
     {
       energy += localenergy;
     }
@@ -258,7 +258,7 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
     cudaAssertNoError("forces");
 
     HostMatrix<vec_type4> forces_cpu(forces_gpu);
-    #pragma omp critical
+    #pragma omp critical (omp_fort_forces)
     {
       FortranMatrix<double> fort_forces(fort_forces_ptr, fortran_vars.atoms, 3, fortran_vars.max_atoms);
 
@@ -292,7 +292,7 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
 
     /*** Contribute this RMM to the total RMM ***/
     HostMatrix<scalar_type> rmm_output_cpu(rmm_output_gpu);
-    #pragma omp critical
+    #pragma omp critical (omp_add_rmm)
     {
       add_rmm_output(rmm_output_cpu);
     }
