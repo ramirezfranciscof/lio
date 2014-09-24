@@ -187,6 +187,7 @@ PointGroup<scalar_type>::~PointGroup<scalar_type>()
     if(inGlobal) {
       globalMemoryPool::dealloc(size_in_gpu());
       function_values.deallocate();
+      function_values_transposed.deallocate();
       gradient_values.deallocate();
       hessian_values.deallocate();
     }

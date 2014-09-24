@@ -153,7 +153,6 @@ class Partition {
       double cubes_energy_c1 = 0, spheres_energy_c1 = 0;
       double cubes_energy_c2 = 0, spheres_energy_c2 = 0;
 
-#ifndef CPU_KERNELS
       int gpu_count;
       cudaGetDeviceCount(&gpu_count);
       if (gpu_count == 0) {
@@ -161,15 +160,22 @@ class Partition {
         exit(1);
       }
       int total_threads = gpu_count;
+      #ifndef _OPENMP
+      total_threads = 1;
+      gpu_count = 1;
+      #else
       omp_set_num_threads(total_threads);
+      #endif
       double energy_cubes[total_threads];
       double energy_spheres[total_threads];
-      for(int i = 0; i< total_threads; i++)
-        energy_cubes[i]=energy_spheres[i]=0.0f;
-#endif
-#pragma omp parallel for
-      for(int t = 0; t < omp_get_num_threads(); t++) {
-        int my_thread = omp_get_thread_num();
+#pragma omp parallel for shared(energy_spheres, energy_cubes)
+      for(int t = 0; t < total_threads; t++) {
+        int my_thread = 0;
+        #ifdef _OPENMP
+        my_thread = omp_get_thread_num();
+        #endif
+        energy_spheres[my_thread] = 0.0f;
+        energy_cubes[my_thread] = 0.0f;
         for(int i = my_thread; i < cubes.size() + spheres.size(); i+= total_threads) {
           cudaSetDevice(my_thread % gpu_count);
           if(i < cubes.size()) {
