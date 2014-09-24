@@ -91,6 +91,29 @@ void PointGroup<scalar_type>::add_rmm_output(const HostMatrix<scalar_type>& rmm_
 }
 
 template<class scalar_type>
+void PointGroup<scalar_type>::add_rmm_output(
+    const HostMatrix<scalar_type>& rmm_output, HostMatrix<double>& target) const {
+  for (uint i = 0, ii = 0; i < total_functions_simple(); i++) {
+    uint inc_i = small_function_type(i);
+
+    for (uint k = 0; k < inc_i; k++, ii++) {
+      uint big_i = local2global_func[i] + k;
+      for (uint j = 0, jj = 0; j < total_functions_simple(); j++) {
+        uint inc_j = small_function_type(j);
+
+        for (uint l = 0; l < inc_j; l++, jj++) {
+          uint big_j = local2global_func[j] + l;
+          if (big_i > big_j) continue;
+          uint big_index = (big_i * fortran_vars.m - (big_i * (big_i - 1)) / 2) + (big_j - big_i);
+          target(big_index) += (double)rmm_output(ii, jj);
+        }
+      }
+    }
+  }
+
+}
+
+template<class scalar_type>
 void PointGroup<scalar_type>::add_rmm_output_a(const HostMatrix<scalar_type>& rmm_output) const {
   add_rmm_output(rmm_output, fortran_vars.rmm_output_a);
 }

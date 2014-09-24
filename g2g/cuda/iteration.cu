@@ -61,24 +61,19 @@ template void gpu_set_atom_positions<double3>(const HostMatrix<double3>& m);
 template<class scalar_type>
 void PointGroup<scalar_type>::solve(Timers& timers, bool compute_rmm, bool lda, bool compute_forces,
     bool compute_energy, double& energy,double& energy_i, double& energy_c, double& energy_c1,
-    double& energy_c2, double* fort_forces_ptr, bool open){
+    double& energy_c2, double* fort_forces_ptr, HostMatrix<double>& rmm_output_local, bool open){
   if(open) {
     solve_opened(timers, compute_rmm, lda, compute_forces, compute_energy, energy, energy_i, energy_c, energy_c1,
         energy_c2, fort_forces_ptr);
   }
   else {
-    solve_closed(timers, compute_rmm, lda, compute_forces, compute_energy, energy, fort_forces_ptr);
+    solve_closed(timers, compute_rmm, lda, compute_forces, compute_energy, energy, fort_forces_ptr, rmm_output_local);
   }
 
 }
 
 template<class scalar_type>
-void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy, double& energy, double* fort_forces_ptr){
-  //uint max_used_memory = 0;
-
-  /*** Computo sobre cada cubo ****/
-  CudaMatrix<scalar_type> point_weights_gpu;
-
+void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy, double& energy, double* fort_forces_ptr, HostMatrix<double>& rmm_output_local){
   /** Compute this group's functions **/
   timers.functions.start_and_sync();
   compute_functions(compute_forces, !lda);
@@ -86,8 +81,9 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
 
   uint group_m = total_functions();
 
-  timers.density.start_and_sync();
   /** Load points from group **/
+  timers.density.start_and_sync();
+  CudaMatrix<scalar_type> point_weights_gpu;
   HostMatrix<scalar_type> point_weights_cpu(number_of_points, 1);
 
   uint i = 0;
@@ -124,7 +120,6 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
 
   HostMatrix<scalar_type> rmm_input_cpu(COALESCED_DIMENSION(group_m), group_m+DENSITY_BLOCK_SIZE);
   get_rmm_input(rmm_input_cpu); //Achica la matriz densidad a la version reducida del grupo
-
   for (uint i=0; i<(group_m+DENSITY_BLOCK_SIZE); i++)
   {
     for(uint j=0; j<COALESCED_DIMENSION(group_m); j++)
@@ -191,10 +186,8 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
     for (uint i = 0; i < number_of_points; i++) {
       localenergy += energy_cpu(i);
     } // TODO: hacer con un kernel?
-#pragma omp critical (sumaenergia)
-    {
+#pragma omp atomic
       energy += localenergy;
-    }
   }
   else {
 #undef compute_parameters
@@ -301,10 +294,7 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
 
     /*** Contribute this RMM to the total RMM ***/
     HostMatrix<scalar_type> rmm_output_cpu(rmm_output_gpu);
-    #pragma omp critical (omp_add_rmm)
-    {
-      add_rmm_output(rmm_output_cpu);
-    }
+    add_rmm_output(rmm_output_cpu, rmm_output_local);
   }
   timers.rmm.pause_and_sync();
 

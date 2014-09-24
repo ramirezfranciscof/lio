@@ -81,6 +81,7 @@ class PointGroup {
 
     void add_rmm_output(const G2G::HostMatrix<scalar_type>& rmm_output, FortranMatrix<double>& target) const;
     void add_rmm_output(const G2G::HostMatrix<scalar_type>& rmm_output) const;
+    void add_rmm_output(const G2G::HostMatrix<scalar_type>& rmm_output, G2G::HostMatrix<double>& rmm_destination) const;
     void add_rmm_output_a(const G2G::HostMatrix<scalar_type>& rmm_output) const;
     void add_rmm_output_b(const G2G::HostMatrix<scalar_type>& rmm_output) const;
     void add_rmm_open_output(const G2G::HostMatrix<scalar_type>& rmm_output_a, const G2G::HostMatrix<scalar_type>& rmm_output_b) const;
@@ -91,8 +92,8 @@ class PointGroup {
     void compute_weights(void);
 
     void compute_functions(bool forces, bool gga);
-    void solve(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy,double&,double&,double&,double&,double&,double* fort_forces_ptr, bool open);
-    void solve_closed(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy,double&,double* fort_forces_ptr);
+    void solve(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy,double&,double&,double&,double&,double&,double* fort_forces_ptr, HostMatrix<double>&, bool open);
+    void solve_closed(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy,double&,double* fort_forces_ptr, HostMatrix<double>&);
     void solve_opened(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy,double&,double&,double&,double&,double&,double* fort_forces_ptr);
 
     bool is_significative(FunctionType, double exponent, double coeff, double d2);
@@ -108,10 +109,11 @@ class PointGroup {
 
 // ===== Sphere Class =======//
 #if FULL_DOUBLE
-class Sphere : public PointGroup<double> {
+  typedef double base_scalar_type;
 #else
-class Sphere : public PointGroup<float> {
+  typedef float base_scalar_type;
 #endif
+class Sphere : public PointGroup<base_scalar_type> {
   public:
     Sphere(void);
     Sphere(uint _atom, double _radius);
@@ -125,11 +127,7 @@ class Sphere : public PointGroup<float> {
 };
 
 // ====== Cube Class ===========//
-#if FULL_DOUBLE
-class Cube : public PointGroup<double> {
-#else
-class Cube : public PointGroup<float> {
-#endif
+class Cube : public PointGroup<base_scalar_type> {
   public:
     void assign_significative_functions(const double3& cube_coord, const std::vector<double>& min_exps, const std::vector<double>& min_coeff);
     bool is_sphere(void) { return false; }
@@ -168,33 +166,46 @@ class Partition {
       #endif
       double energy_cubes[total_threads];
       double energy_spheres[total_threads];
-#pragma omp parallel for shared(energy_spheres, energy_cubes)
-      for(int t = 0; t < total_threads; t++) {
+
+      HostMatrix<double> rmm_outputs[total_threads];
+      if (compute_rmm) {
+          for(int i = 0; i < total_threads; i++) {
+              rmm_outputs[i].resize(fortran_vars.rmm_output.width, fortran_vars.rmm_output.height);
+              rmm_outputs[i].zero();
+          }
+      }
+#pragma omp parallel shared(energy_spheres, energy_cubes)
+      {
         int my_thread = 0;
         #ifdef _OPENMP
         my_thread = omp_get_thread_num();
         #endif
         energy_spheres[my_thread] = 0.0f;
         energy_cubes[my_thread] = 0.0f;
+        cudaSetDevice(my_thread % gpu_count);
         for(int i = my_thread; i < cubes.size() + spheres.size(); i+= total_threads) {
-          cudaSetDevice(my_thread % gpu_count);
           if(i < cubes.size()) {
             cubes[i].solve(
-                timers, compute_rmm,lda,compute_forces, compute_energy, energy_cubes[my_thread], cubes_energy_i, cubes_energy_c, cubes_energy_c1, cubes_energy_c2, fort_forces_ptr, OPEN);
+                timers, compute_rmm,lda,compute_forces, compute_energy, energy_cubes[my_thread], cubes_energy_i, cubes_energy_c, cubes_energy_c1, cubes_energy_c2, fort_forces_ptr, rmm_outputs[my_thread], OPEN);
           }
           else
           {
             spheres[i - cubes.size()].solve(
-                timers, compute_rmm,lda,compute_forces, compute_energy, energy_spheres[my_thread], spheres_energy_i, spheres_energy_c, spheres_energy_c1, spheres_energy_c2, fort_forces_ptr, OPEN);
+                timers, compute_rmm,lda,compute_forces, compute_energy, energy_spheres[my_thread], spheres_energy_i, spheres_energy_c, spheres_energy_c1, spheres_energy_c2, fort_forces_ptr, rmm_outputs[my_thread], OPEN);
           }
         }
-        if(OPEN && compute_energy) {
-            std::cout << "Ei: " << cubes_energy_i+spheres_energy_i;
-            std::cout << " Ec: " << cubes_energy_c+spheres_energy_c;
-            std::cout << " Ec1: " << cubes_energy_c1+spheres_energy_c1;
-            std::cout << " Ec2: " << cubes_energy_c2+spheres_energy_c2 << std::endl;
+
+      }
+      if(compute_rmm) {
+        for(int k = 0; k < total_threads; k++) {
+          for(int i = 0; i < rmm_outputs[k].width; i++) {
+            for(int j = 0; j < rmm_outputs[k].height; j++) {
+              fortran_vars.rmm_output(i,j) += rmm_outputs[k](i,j);
+            }
+          }
         }
       }
+
       for(int i = 0; i< total_threads; i++) {
         cubes_energy += energy_cubes[i];
         spheres_energy += energy_spheres[i];

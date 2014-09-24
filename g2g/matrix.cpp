@@ -34,7 +34,6 @@ template<class T> bool Matrix<T>::is_allocated(void) const {
  ***************************/
 template<class T> void HostMatrix<T>::alloc_data(void) {
   assert(this->bytes() != 0);
-
 	if (pinned) {
     #if !CPU_KERNELS
 		cudaError_t error_status = cudaMallocHost((void**)&this->data, this->bytes());
@@ -43,7 +42,7 @@ template<class T> void HostMatrix<T>::alloc_data(void) {
     assert(false);
     #endif
 	}
-	else this->data = new T[this->elements()];
+	else this->data = new T[this->elements()+16];
 
 	assert(this->data);
 }
