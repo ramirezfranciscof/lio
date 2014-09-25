@@ -211,10 +211,7 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
   }
 #undef compute_parameters
 #undef accumulate_parameters
-  if(!(this->inGlobal)) {
-    gradient_values_transposed.deallocate();
-    hessian_values_transposed.deallocate();
-  }
+
   timers.density.pause_and_sync();
 
 //************ Repongo los valores que puse a cero antes, para las fuerzas son necesarios (o por lo mens utiles)
@@ -227,7 +224,6 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
     }
   }
   cudaMemcpyToArray(cuArray, 0, 0,rmm_input_cpu.data,sizeof(scalar_type)*rmm_input_cpu.width*rmm_input_cpu.height, cudaMemcpyHostToDevice);
-
   //Deshago el bind de textura de rmm
   cudaUnbindTexture(rmm_input_gpu_tex); //Enroque el Unbind con el Free, asi parece mas logico. Nano
   cudaFreeArray(cuArray);
@@ -301,7 +297,8 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
   /* clear functions */
   if(!(this->inGlobal)) {
     function_values.deallocate();
-    function_values_transposed.deallocate();
+    gradient_values.deallocate();
+    hessian_values.deallocate();
   }
 }
 
