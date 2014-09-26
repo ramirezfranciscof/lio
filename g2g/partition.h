@@ -186,12 +186,14 @@ class Partition {
         for(int i = my_thread; i < cubes.size() + spheres.size(); i+= total_threads) {
           if(i < cubes.size()) {
             cubes[i].solve(
-                timers, compute_rmm,lda,compute_forces, compute_energy, energy_cubes[my_thread], cubes_energy_i, cubes_energy_c, cubes_energy_c1, cubes_energy_c2, fort_forces_ptr, rmm_outputs[my_thread], OPEN);
+                timers, compute_rmm,lda,compute_forces, compute_energy, energy_cubes[my_thread], cubes_energy_i,
+                cubes_energy_c, cubes_energy_c1, cubes_energy_c2, fort_forces_ptr, rmm_outputs[my_thread], OPEN);
           }
-          else
-          {
+          else {
             spheres[i - cubes.size()].solve(
-                timers, compute_rmm,lda,compute_forces, compute_energy, energy_spheres[my_thread], spheres_energy_i, spheres_energy_c, spheres_energy_c1, spheres_energy_c2, fort_forces_ptr, rmm_outputs[my_thread], OPEN);
+                timers, compute_rmm,lda,compute_forces, compute_energy, energy_spheres[my_thread],
+                spheres_energy_i, spheres_energy_c, spheres_energy_c1, spheres_energy_c2, fort_forces_ptr,
+                rmm_outputs[my_thread], OPEN);
           }
         }
 

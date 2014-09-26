@@ -720,7 +720,7 @@ void PointGroup<scalar_type>::compute_functions(bool forces, bool gga)
   if(this->inGlobal) //Ya las tengo en memoria? entonces salgo porque ya estan las 3 calculadas
     return;
 
-  if(0 == globalMemoryPool::tryAlloc(this->size_in_gpu())) //1 si hubo error, 0 si pude reservar la memoria
+  if(0 == GlobalMemoryPool::tryAlloc(this->size_in_gpu())) //1 si hubo error, 0 si pude reservar la memoria
     this->inGlobal=true;
   CudaMatrix<vec_type4> points_position_gpu;
   CudaMatrix<vec_type2> factor_ac_gpu;
