@@ -212,7 +212,9 @@ PointGroup<scalar_type>::~PointGroup<scalar_type>()
       function_values.deallocate();
       function_values_transposed.deallocate();
       gradient_values.deallocate();
+      gradient_values_transposed.deallocate();
       hessian_values.deallocate();
+      hessian_values_transposed.deallocate();
     }
 #endif
 }
