@@ -4,9 +4,9 @@
 /* TODO: coalescear contractions y demas */
 template<class scalar_type, bool do_forces, bool do_gga>
 static __device__ __host__ void compute_function(uint m, uint idx, vec_type<scalar_type,3> point_position, uint contractions,
-  scalar_type* factor_a_sh, scalar_type* factor_c_sh, uint nuc, scalar_type& t, scalar_type& tg, scalar_type& th, vec_type<scalar_type,3>& v)
+  scalar_type* factor_a_sh, scalar_type* factor_c_sh, uint nuc, scalar_type& t, scalar_type& tg, scalar_type& th, vec_type<scalar_type,3>& v, int current_device)
 {
-	vec_type<scalar_type,3> atom_nuc_position(gpu_atom_positions[nuc]); // TODO: ver si al usar memoria compartida para esto, pago menos precio por todos los misses
+	vec_type<scalar_type,3> atom_nuc_position(gpu_atom_positions_[current_device][nuc]); // TODO: ver si al usar memoria compartida para esto, pago menos precio por todos los misses
 	v = point_position - atom_nuc_position;
 	scalar_type dist = length2(v);
 
@@ -29,10 +29,11 @@ static __device__ __host__ void compute_function(uint m, uint idx, vec_type<scal
 template<class scalar_type, bool do_forces, bool do_gga>
 __global__ void gpu_compute_functions(vec_type<scalar_type,4>* point_positions, uint points, uint* contractions, vec_type<scalar_type,2>* factor_ac,
 																			uint* nuc, scalar_type* function_values, vec_type<scalar_type,4>* gradient_values,
-                                      vec_type<scalar_type,4>* hessian_values, uint4 functions)
+                                      vec_type<scalar_type,4>* hessian_values, uint4 functions, int current_device)
 {
 	dim3 pos = index(blockDim, blockIdx, threadIdx);
 	uint point = pos.x;
+  scalar_type gpu_normalization_factor = gpu_normalization_factor_[current_device];
 
 	/**** Load Point Information ****/
   bool valid_thread = (point < points);
@@ -67,7 +68,7 @@ __global__ void gpu_compute_functions(vec_type<scalar_type,4>* point_positions, 
     // TODO: se podrian evitar los modulos
     if (valid_thread) {
       for (uint ii = 0; ii < FUNCTIONS_BLOCK_SIZE && (i + ii < functions.w); ii++) {
-        compute_function<scalar_type, do_forces, do_gga>(functions.w, ii, point_position, contractions_sh[ii], factor_a_sh[ii], factor_c_sh[ii], nuc_sh[ii], t, tg, th, v);
+        compute_function<scalar_type, do_forces, do_gga>(functions.w, ii, point_position, contractions_sh[ii], factor_a_sh[ii], factor_c_sh[ii], nuc_sh[ii], t, tg, th, v, current_device);
         uint idx = COALESCED_DIMENSION(points) * (i + ii) + point;
         uint hidx1, hidx2;
         if (do_gga) {

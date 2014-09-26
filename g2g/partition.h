@@ -162,6 +162,7 @@ class Partition {
       total_threads = 1;
       gpu_count = 1;
       #else
+      total_threads = 2;
       omp_set_num_threads(total_threads);
       #endif
       double energy_cubes[total_threads];
@@ -185,11 +186,13 @@ class Partition {
         cudaSetDevice(my_thread % gpu_count);
         for(int i = my_thread; i < cubes.size() + spheres.size(); i+= total_threads) {
           if(i < cubes.size()) {
+            std::cout << "Thread " << my_thread << "  Cube " << i << std::endl;
             cubes[i].solve(
                 timers, compute_rmm,lda,compute_forces, compute_energy, energy_cubes[my_thread], cubes_energy_i, cubes_energy_c, cubes_energy_c1, cubes_energy_c2, fort_forces_ptr, rmm_outputs[my_thread], OPEN);
           }
           else
           {
+            std::cout << "Thread " << my_thread << "  Sphere " << i << std::endl;
             spheres[i - cubes.size()].solve(
                 timers, compute_rmm,lda,compute_forces, compute_energy, energy_spheres[my_thread], spheres_energy_i, spheres_energy_c, spheres_energy_c1, spheres_energy_c2, fort_forces_ptr, rmm_outputs[my_thread], OPEN);
           }

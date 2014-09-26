@@ -1,14 +1,17 @@
 // TODO: precomputar/precargar las cosas por atomo una sola vez para todos los puntos, pasar esto a nucleii_count, etc, coalescing
 
 template<class scalar_type>
-__global__ void gpu_compute_weights(uint points, vec_type<scalar_type,4>* point_positions, vec_type<scalar_type,4>* atom_position_rm, scalar_type* weights,
-                                    uint* nucleii, uint nucleii_count)
+__global__ void gpu_compute_weights(uint points, vec_type<scalar_type,4>* point_positions,
+                                    vec_type<scalar_type,4>* atom_position_rm, scalar_type* weights,
+                                    uint* nucleii, uint nucleii_count, int current_device)
 {
   uint point = index_x(blockDim, blockIdx, threadIdx);
 
   __shared__ vec_type<scalar_type,3> atom_position_sh[MAX_ATOMS];
   __shared__ uint nucleii_sh[MAX_ATOMS];
   __shared__ scalar_type rm_sh[MAX_ATOMS];
+
+  uint gpu_atoms = gpu_atoms_[current_device];
 
   for (uint i = 0; i < gpu_atoms; i += WEIGHT_BLOCK_SIZE) {
     if (i + threadIdx.x < gpu_atoms) {
