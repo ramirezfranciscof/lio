@@ -43,14 +43,26 @@ using std::endl;
 
 // Host function to set the constant
 void gpu_set_variables(void) {
-  cudaMemcpyToSymbol(gpu_normalization_factor, &fortran_vars.normalization_factor, sizeof(fortran_vars.normalization_factor), 0, cudaMemcpyHostToDevice);
-  cudaMemcpyToSymbol(gpu_atoms, &fortran_vars.atoms, sizeof(fortran_vars.atoms), 0, cudaMemcpyHostToDevice);
-  cudaMemcpyToSymbol(gpu_Iexch, &fortran_vars.iexch, sizeof(fortran_vars.iexch), 0, cudaMemcpyHostToDevice);
+  int gpu_devices;
+  cudaGetDeviceCount(&gpu_devices);
+  for(int i = 0; i < gpu_devices; i++) {
+    cudaSetDevice(i);
+    cudaMemcpyToSymbol(gpu_normalization_factor, &fortran_vars.normalization_factor, sizeof(fortran_vars.normalization_factor), 0, cudaMemcpyHostToDevice);
+    cudaMemcpyToSymbol(gpu_atoms, &fortran_vars.atoms, sizeof(fortran_vars.atoms), 0, cudaMemcpyHostToDevice);
+    cudaMemcpyToSymbol(gpu_Iexch, &fortran_vars.iexch, sizeof(fortran_vars.iexch), 0, cudaMemcpyHostToDevice);
+  }
+  cudaSetDevice(0);
   cudaAssertNoError("set_gpu_variables");
 }
 
 template<class T> void gpu_set_atom_positions(const HostMatrix<T>& m) {
-  cudaMemcpyToSymbol(gpu_atom_positions, m.data, m.bytes(), 0, cudaMemcpyHostToDevice);
+  int gpu_devices;
+  cudaGetDeviceCount(&gpu_devices);
+  for(int i = 0; i < gpu_devices; i++) {
+    cudaSetDevice(i);
+    cudaMemcpyToSymbol(gpu_atom_positions, m.data, m.bytes(), 0, cudaMemcpyHostToDevice);
+  }
+  cudaSetDevice(0);
 }
 
 template void gpu_set_atom_positions<float3>(const HostMatrix<float3>& m);
