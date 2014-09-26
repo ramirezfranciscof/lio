@@ -162,7 +162,6 @@ class Partition {
       total_threads = 1;
       gpu_count = 1;
       #else
-      total_threads = 2;
       omp_set_num_threads(total_threads);
       #endif
       double energy_cubes[total_threads];

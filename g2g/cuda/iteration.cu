@@ -43,30 +43,20 @@ using std::endl;
 
 // Host function to set the constant
 void gpu_set_variables(void) {
-  int gpu_count;
-  cudaGetDeviceCount(&gpu_count);
-  for(int i = 0; i < gpu_count; i++) {
-    cudaSetDevice(i);
-    cudaMemcpyToSymbol(gpu_normalization_factor_[i], &fortran_vars.normalization_factor, sizeof(fortran_vars.normalization_factor), 0, cudaMemcpyHostToDevice);
-    cudaMemcpyToSymbol(gpu_atoms_[i], &fortran_vars.atoms, sizeof(fortran_vars.atoms), 0, cudaMemcpyHostToDevice);
-    cudaMemcpyToSymbol(gpu_Iexch_[i], &fortran_vars.iexch, sizeof(fortran_vars.iexch), 0, cudaMemcpyHostToDevice);
-  }
-  cudaSetDevice(0);
+  cudaMemcpyToSymbol(gpu_normalization_factor, &fortran_vars.normalization_factor, sizeof(fortran_vars.normalization_factor), 0, cudaMemcpyHostToDevice);
+  cudaMemcpyToSymbol(gpu_atoms, &fortran_vars.atoms, sizeof(fortran_vars.atoms), 0, cudaMemcpyHostToDevice);
+  cudaMemcpyToSymbol(gpu_Iexch, &fortran_vars.iexch, sizeof(fortran_vars.iexch), 0, cudaMemcpyHostToDevice);
   cudaAssertNoError("set_gpu_variables");
 }
 
 template<class T> void gpu_set_atom_positions(const HostMatrix<T>& m) {
-  int gpu_count;
-  cudaGetDeviceCount(&gpu_count);
-  for(int i = 0; i < gpu_count; i++) {
-    cudaSetDevice(i);
-    cudaMemcpyToSymbol(gpu_atom_positions_[i], m.data, m.bytes(), 0, cudaMemcpyHostToDevice);
-  }
- cudaSetDevice(0);
+  cudaMemcpyToSymbol(gpu_atom_positions, m.data, m.bytes(), 0, cudaMemcpyHostToDevice);
 }
 
 template void gpu_set_atom_positions<float3>(const HostMatrix<float3>& m);
 template void gpu_set_atom_positions<double3>(const HostMatrix<double3>& m);
+//template<class scalar_type,true> __global__ void gpu_update_rmm(scalar_type* factors, uint points, scalar_type* rmm, scalar_type* function_values, uint m);
+//template<class scalar_type,false> __global__ void gpu_update_rmm(scalar_type* factors, uint points, scalar_type* rmm, scalar_type* function_values, uint m);
 
 template<class scalar_type>
 void PointGroup<scalar_type>::solve(Timers& timers, bool compute_rmm, bool lda, bool compute_forces,
@@ -85,7 +75,6 @@ void PointGroup<scalar_type>::solve(Timers& timers, bool compute_rmm, bool lda, 
 template<class scalar_type>
 void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy, double& energy, double* fort_forces_ptr, HostMatrix<double>& rmm_output_local){
   /** Compute this group's functions **/
-  int current_device; cudaGetDevice(&current_device);
   timers.functions.start_and_sync();
   compute_functions(compute_forces, !lda);
   timers.functions.pause_and_sync();
@@ -165,7 +154,7 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
 #define compute_parameters \
     energy_gpu.data,factors_gpu.data,point_weights_gpu.data,number_of_points,function_values_transposed.data,gradient_values_transposed.data,hessian_values_transposed.data,group_m,partial_densities_gpu.data,dxyz_gpu.data,dd1_gpu.data,dd2_gpu.data
 #define accumulate_parameters \
-    energy_gpu.data,factors_gpu.data,point_weights_gpu.data,number_of_points,block_height,partial_densities_gpu.data,dxyz_gpu.data,dd1_gpu.data,dd2_gpu.data,current_device
+    energy_gpu.data,factors_gpu.data,point_weights_gpu.data,number_of_points,block_height,partial_densities_gpu.data,dxyz_gpu.data,dd1_gpu.data,dd2_gpu.data
     if (compute_forces || compute_rmm) {
       if (lda)
       {
@@ -207,7 +196,7 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
 #define compute_parameters \
     NULL,factors_gpu.data,point_weights_gpu.data,number_of_points,function_values_transposed.data,gradient_values_transposed.data,hessian_values_transposed.data,group_m,partial_densities_gpu.data,dxyz_gpu.data,dd1_gpu.data,dd2_gpu.data
 #define accumulate_parameters \
-    NULL,factors_gpu.data,point_weights_gpu.data,number_of_points,block_height,partial_densities_gpu.data,dxyz_gpu.data,dd1_gpu.data,dd2_gpu.data,current_device
+    NULL,factors_gpu.data,point_weights_gpu.data,number_of_points,block_height,partial_densities_gpu.data,dxyz_gpu.data,dd1_gpu.data,dd2_gpu.data
     if (lda)
     {
         gpu_compute_density<scalar_type, false, true, true><<<threadGrid, threadBlock>>>(compute_parameters);
@@ -324,7 +313,6 @@ void PointGroup<scalar_type>::solve_opened(Timers& timers, bool compute_rmm, boo
 //    cout<<"!!!!!!"<<endl;
 //  }
   //uint max_used_memory = 0;
-  int current_device; cudaGetDevice(&current_device);
 
   /*** Computo sobre cada cubo ****/
   CudaMatrix<scalar_type> point_weights_gpu;
@@ -520,7 +508,7 @@ void PointGroup<scalar_type>::solve_opened(Timers& timers, bool compute_rmm, boo
                                   energy_gpu.data,energy_i_gpu.data,energy_c_gpu.data,energy_c1_gpu.data,energy_c2_gpu.data,
                                   factors_a_gpu.data, factors_b_gpu.data, point_weights_gpu.data,number_of_points,block_height,
                                   partial_densities_a_gpu.data, dxyz_a_gpu.data, dd1_a_gpu.data, dd2_a_gpu.data,
-				  partial_densities_b_gpu.data, dxyz_b_gpu.data, dd1_b_gpu.data, dd2_b_gpu.data, current_device);
+				  partial_densities_b_gpu.data, dxyz_b_gpu.data, dd1_b_gpu.data, dd2_b_gpu.data);
 //         }
       }
       else{
@@ -538,8 +526,7 @@ void PointGroup<scalar_type>::solve_opened(Timers& timers, bool compute_rmm, boo
                                    energy_gpu.data, energy_i_gpu.data,energy_c_gpu.data,energy_c1_gpu.data,energy_c2_gpu.data,
                                    factors_a_gpu.data, factors_b_gpu.data, point_weights_gpu.data,number_of_points,block_height,
                                    partial_densities_a_gpu.data, dxyz_a_gpu.data, dd1_a_gpu.data, dd2_a_gpu.data,
-                                   partial_densities_b_gpu.data, dxyz_b_gpu.data, dd1_b_gpu.data, dd2_b_gpu.data,
-                                   current_device);
+                                   partial_densities_b_gpu.data, dxyz_b_gpu.data, dd1_b_gpu.data, dd2_b_gpu.data);
 //          }
       }
       cudaAssertNoError("compute_density");
@@ -572,8 +559,7 @@ void PointGroup<scalar_type>::solve_opened(Timers& timers, bool compute_rmm, boo
                                NULL,NULL,NULL,NULL,NULL,
                                factors_a_gpu.data, factors_b_gpu.data, point_weights_gpu.data,number_of_points,block_height,
                                partial_densities_a_gpu.data, dxyz_a_gpu.data, dd1_a_gpu.data, dd2_a_gpu.data,
-                               partial_densities_b_gpu.data, dxyz_b_gpu.data, dd1_b_gpu.data, dd2_b_gpu.data,
-                               current_device);
+                               partial_densities_b_gpu.data, dxyz_b_gpu.data, dd1_b_gpu.data, dd2_b_gpu.data);
 //      }
       cudaAssertNoError("compute_density");
   }
@@ -720,8 +706,6 @@ void PointGroup<scalar_type>::compute_functions(bool forces, bool gga)
 
   if(0 == globalMemoryPool::tryAlloc(this->size_in_gpu())) //1 si hubo error, 0 si pude reservar la memoria
     this->inGlobal=true;
-
-  int current_device; cudaGetDevice(&current_device);
   CudaMatrix<vec_type4> points_position_gpu;
   CudaMatrix<vec_type2> factor_ac_gpu;
   CudaMatrixUInt nuc_gpu;
@@ -780,7 +764,7 @@ void PointGroup<scalar_type>::compute_functions(bool forces, bool gga)
 
  // cout << "points: " << threads.x << " " << threadGrid.x << " " << threadBlock.x << endl;
 #define compute_functions_parameters \
-  points_position_gpu.data,number_of_points,contractions_gpu.data,factor_ac_gpu.data,nuc_gpu.data,function_values.data,gradient_values.data,hessian_values.data,group_functions,current_device
+  points_position_gpu.data,number_of_points,contractions_gpu.data,factor_ac_gpu.data,nuc_gpu.data,function_values.data,gradient_values.data,hessian_values.data,group_functions
   if (forces) {
     if (gga)
       gpu_compute_functions<scalar_type, true, true><<<threadGrid, threadBlock>>>(compute_functions_parameters);
@@ -831,7 +815,6 @@ void PointGroup<scalar_type>::compute_functions(bool forces, bool gga)
 template<class scalar_type>
 void PointGroup<scalar_type>::compute_weights(void)
 {
-  int current_device; cudaGetDevice(&current_device);
   CudaMatrix<vec_type4> point_positions_gpu;
   CudaMatrix<vec_type4> atom_position_rm_gpu;
   {
@@ -857,8 +840,7 @@ void PointGroup<scalar_type>::compute_weights(void)
   dim3 blockSize(WEIGHT_BLOCK_SIZE);
   dim3 gridSize = divUp(threads, blockSize);
   gpu_compute_weights<scalar_type><<<gridSize,blockSize>>>(
-      number_of_points, point_positions_gpu.data, atom_position_rm_gpu.data, weights_gpu.data, nucleii_gpu.data, total_nucleii(),
-      current_device);
+      number_of_points, point_positions_gpu.data, atom_position_rm_gpu.data, weights_gpu.data, nucleii_gpu.data, total_nucleii());
   cudaAssertNoError("compute_weights");
 
   #if REMOVE_ZEROS

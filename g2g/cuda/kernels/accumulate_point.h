@@ -9,8 +9,7 @@ __global__ void gpu_accumulate_point_open(scalar_type* const energy, scalar_type
                                     scalar_type* partial_density_a, vec_type<scalar_type,WIDTH>*  dxyz_a,
                                     vec_type<scalar_type,WIDTH>* dd1_a, vec_type<scalar_type,WIDTH>* dd2_a,
                                     scalar_type* partial_density_b, vec_type<scalar_type,WIDTH>*  dxyz_b,
-                                    vec_type<scalar_type,WIDTH>* dd1_b, vec_type<scalar_type,WIDTH>* dd2_b,
-                                    int current_device) {
+                                    vec_type<scalar_type,WIDTH>* dd1_b, vec_type<scalar_type,WIDTH>* dd2_b) {
   uint point = blockIdx.x * DENSITY_ACCUM_BLOCK_SIZE + threadIdx.x;
 
   scalar_type point_weight = 0.0f;
@@ -38,7 +37,7 @@ __global__ void gpu_accumulate_point_open(scalar_type* const energy, scalar_type
      }
   }
   gpu_potop<scalar_type>(_partial_density_a, _partial_density_b, _dxyz_a, _dxyz_b, _dd1_a, _dd1_b, _dd2_a, _dd2_b,
-      exc_corr, exc, corr, corr1, corr2, v_a, v_b, current_device);
+      exc_corr, exc, corr, corr1, corr2, v_a, v_b);
 
   if (compute_energy && valid_thread){
     energy[point]   = ((_partial_density_a + _partial_density_b) * point_weight) * exc_corr;
@@ -56,9 +55,8 @@ __global__ void gpu_accumulate_point_open(scalar_type* const energy, scalar_type
 
 template<class scalar_type, bool compute_energy, bool compute_factor, bool lda>
 __global__ void gpu_accumulate_point(scalar_type* const energy, scalar_type* const factor, const scalar_type* const point_weights,
-                                     uint points, int block_height, scalar_type* partial_density,
-                                     vec_type<scalar_type,WIDTH>* dxyz, vec_type<scalar_type,WIDTH>* dd1,
-                                     vec_type<scalar_type,WIDTH>* dd2, int current_device) {
+                                     uint points, int block_height, scalar_type* partial_density, vec_type<scalar_type,WIDTH>*  dxyz,
+                                     vec_type<scalar_type,WIDTH>* dd1, vec_type<scalar_type,WIDTH>* dd2) {
 
   uint point = blockIdx.x * DENSITY_ACCUM_BLOCK_SIZE + threadIdx.x;
 
@@ -85,7 +83,7 @@ __global__ void gpu_accumulate_point(scalar_type* const energy, scalar_type* con
      }
   }
 
-  gpu_pot<scalar_type, compute_energy, true, lda>(_partial_density, _dxyz, _dd1, _dd2, exc_corr, y2a, current_device);
+  gpu_pot<scalar_type, compute_energy, true, lda>(_partial_density, _dxyz, _dd1, _dd2, exc_corr, y2a);
   // TODO: segundo parametro, que tenga en cuenta RMM+energy
 
   if (compute_energy && valid_thread)

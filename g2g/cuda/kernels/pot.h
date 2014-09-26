@@ -217,11 +217,10 @@ __device__ void closedpbe(scalar_type rho, scalar_type agrad, scalar_type delgra
 }
 
 template<class scalar_type, bool compute_exc, bool compute_y2a, bool lda>
-__device__ void gpu_pot(scalar_type dens, const vec_type<scalar_type,4>& grad, const vec_type<scalar_type,4>& hess1, const vec_type<scalar_type,4>& hess2, scalar_type& exc_corr, scalar_type& y2a, int current_device)
+__device__ void gpu_pot(scalar_type dens, const vec_type<scalar_type,4>& grad, const vec_type<scalar_type,4>& hess1, const vec_type<scalar_type,4>& hess2, scalar_type& exc_corr, scalar_type& y2a)
 {
   // data X alpha
   scalar_type ec;
-  uint gpu_Iexch = gpu_Iexch_[current_device];
 
   if (lda) {
     if (dens == 0.0f) {

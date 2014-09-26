@@ -37,8 +37,6 @@
 // used for "types" constant memory
 #define MAX_ATOMS 200
 
-#define MAX_GPUS 2
-
 #define COMPUTE_RMM 		0
 #define COMPUTE_ENERGY_ONLY	1
 #define COMPUTE_ENERGY_FORCE	2
