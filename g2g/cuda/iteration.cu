@@ -301,6 +301,10 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
   if(!(this->inGlobal)) {
     function_values.deallocate();
     function_values_transposed.deallocate();
+    gradient_values.deallocate();
+    gradient_values_transposed.deallocate();
+    hessian_values.deallocate();
+    hessian_values_transposed.deallocate();
   }
 }
 
@@ -805,7 +809,6 @@ void PointGroup<scalar_type>::compute_functions(bool forces, bool gga)
     transpose<<<transpose_grid, transpose_threads>>> (hessian_values_transposed.data,
         hessian_values.data, COALESCED_DIMENSION(number_of_points), (group_m)*2);
 
-  gradient_values.deallocate();
   hessian_values.deallocate();
 
   cudaAssertNoError("compute_functions");

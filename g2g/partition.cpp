@@ -188,7 +188,9 @@ PointGroup<scalar_type>::~PointGroup<scalar_type>()
       globalMemoryPool::dealloc(size_in_gpu());
       function_values.deallocate();
       gradient_values.deallocate();
+      gradient_values_transposed.deallocate();
       hessian_values.deallocate();
+      hessian_values_transposed.deallocate();
     }
 #endif
 }
