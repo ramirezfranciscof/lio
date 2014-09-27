@@ -92,9 +92,9 @@ class PointGroup {
     void compute_weights(void);
 
     void compute_functions(bool forces, bool gga);
-    void solve(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy,double&,double&,double&,double&,double&,double* fort_forces_ptr, HostMatrix<double>&, bool open);
-    void solve_closed(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy,double&,double* fort_forces_ptr, HostMatrix<double>&);
-    void solve_opened(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy,double&,double&,double&,double&,double&,double* fort_forces_ptr);
+    void solve(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy,double&,double&,double&,double&,double&,HostMatrix<double>& fort_forces_ptr, HostMatrix<double>&, bool open);
+    void solve_closed(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy,double&, HostMatrix<double>&, HostMatrix<double>&);
+    void solve_opened(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy,double&,double&,double&,double&,double&,HostMatrix<double>&);
 
     bool is_significative(FunctionType, double exponent, double coeff, double d2);
     bool operator<(const PointGroup<scalar_type>& T) const;
@@ -143,8 +143,10 @@ class Partition {
       cubes.clear(); spheres.clear();
     }
 
-    void solve(Timers& timers, bool compute_rmm,bool lda,bool compute_forces, bool compute_energy, double* fort_energy_ptr, double* fort_forces_ptr, bool OPEN)
-    {
+    void regenerate(void);
+
+    void solve(Timers& timers, bool compute_rmm,bool lda,bool compute_forces,
+                          bool compute_energy, double* fort_energy_ptr, double* fort_forces_ptr, bool OPEN) {
       double cubes_energy = 0, spheres_energy = 0;
       double cubes_energy_i = 0, spheres_energy_i = 0;
       double cubes_energy_c = 0, spheres_energy_c = 0;
@@ -162,10 +164,20 @@ class Partition {
       total_threads = 1;
       gpu_count = 1;
       #else
+      total_threads = 2;
       omp_set_num_threads(total_threads);
       #endif
       double energy_cubes[total_threads];
       double energy_spheres[total_threads];
+
+      HostMatrix<double> fort_forces_ms[total_threads];
+
+      if (compute_forces) {
+          for(int i = 0; i < total_threads; i++) {
+              fort_forces_ms[i].resize(fortran_vars.max_atoms, 3);
+              fort_forces_ms[i].zero();
+          }
+      }
 
       HostMatrix<double> rmm_outputs[total_threads];
       if (compute_rmm) {
@@ -187,17 +199,28 @@ class Partition {
           if(i < cubes.size()) {
             cubes[i].solve(
                 timers, compute_rmm,lda,compute_forces, compute_energy, energy_cubes[my_thread], cubes_energy_i,
-                cubes_energy_c, cubes_energy_c1, cubes_energy_c2, fort_forces_ptr, rmm_outputs[my_thread], OPEN);
+                cubes_energy_c, cubes_energy_c1, cubes_energy_c2, fort_forces_ms[my_thread], rmm_outputs[my_thread], OPEN);
           }
           else {
             spheres[i - cubes.size()].solve(
                 timers, compute_rmm,lda,compute_forces, compute_energy, energy_spheres[my_thread],
-                spheres_energy_i, spheres_energy_c, spheres_energy_c1, spheres_energy_c2, fort_forces_ptr,
+                spheres_energy_i, spheres_energy_c, spheres_energy_c1, spheres_energy_c2, fort_forces_ms[my_thread],
                 rmm_outputs[my_thread], OPEN);
           }
         }
-
       }
+
+      if (compute_forces) {
+          FortranMatrix<double> fort_forces_out(fort_forces_ptr, fortran_vars.atoms, 3, fortran_vars.max_atoms);
+          for(int k = 0; k < total_threads; k++) {
+              for(int i = 0; i < fortran_vars.atoms; i++) {
+                  for(int j = 0; j < 3; j++) {
+                      fort_forces_out(i,j) += fort_forces_ms[k](i,j);
+                  }
+              }
+          }
+      }
+
       if(compute_rmm) {
         for(int k = 0; k < total_threads; k++) {
           for(int i = 0; i < rmm_outputs[k].width; i++) {
@@ -223,8 +246,6 @@ class Partition {
        }
 
     }
-
-    void regenerate(void);
 
     void compute_functions(bool forces, bool gga)
     {

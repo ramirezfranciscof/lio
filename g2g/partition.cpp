@@ -218,6 +218,9 @@ PointGroup<scalar_type>::~PointGroup<scalar_type>()
     }
 #endif
 }
+
+
+
 /**********************
  * Sphere
  **********************/

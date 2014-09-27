@@ -73,19 +73,19 @@ template void gpu_set_atom_positions<double3>(const HostMatrix<double3>& m);
 template<class scalar_type>
 void PointGroup<scalar_type>::solve(Timers& timers, bool compute_rmm, bool lda, bool compute_forces,
     bool compute_energy, double& energy,double& energy_i, double& energy_c, double& energy_c1,
-    double& energy_c2, double* fort_forces_ptr, HostMatrix<double>& rmm_output_local, bool open){
+    double& energy_c2, HostMatrix<double>& fort_forces_ms, HostMatrix<double>& rmm_output_local, bool open){
   if(open) {
     solve_opened(timers, compute_rmm, lda, compute_forces, compute_energy, energy, energy_i, energy_c, energy_c1,
-        energy_c2, fort_forces_ptr);
+        energy_c2, fort_forces_ms);
   }
   else {
-    solve_closed(timers, compute_rmm, lda, compute_forces, compute_energy, energy, fort_forces_ptr, rmm_output_local);
+    solve_closed(timers, compute_rmm, lda, compute_forces, compute_energy, energy, fort_forces_ms, rmm_output_local);
   }
 
 }
 
 template<class scalar_type>
-void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy, double& energy, double* fort_forces_ptr, HostMatrix<double>& rmm_output_local){
+void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy, double& energy, HostMatrix<double>& fort_forces_ms, HostMatrix<double>& rmm_output_local){
   /** Compute this group's functions **/
   timers.functions.start_and_sync();
   compute_functions(compute_forces, !lda);
@@ -269,17 +269,13 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
     cudaAssertNoError("forces");
 
     HostMatrix<vec_type4> forces_cpu(forces_gpu);
-    #pragma omp critical (omp_fort_forces)
-    {
-      FortranMatrix<double> fort_forces(fort_forces_ptr, fortran_vars.atoms, 3, fortran_vars.max_atoms);
 
-      for (uint i = 0; i < total_nucleii(); ++i) {
-        vec_type4 atom_force = forces_cpu(i);
-        uint global_nuc = local2global_nuc[i];
-        fort_forces(global_nuc, 0) += atom_force.x;
-        fort_forces(global_nuc, 1) += atom_force.y;
-        fort_forces(global_nuc, 2) += atom_force.z;
-      }
+    for (uint i = 0; i < total_nucleii(); ++i) {
+      vec_type4 atom_force = forces_cpu(i);
+      uint global_nuc = local2global_nuc[i];
+      fort_forces_ms(global_nuc, 0) += atom_force.x;
+      fort_forces_ms(global_nuc, 1) += atom_force.y;
+      fort_forces_ms(global_nuc, 2) += atom_force.z;
     }
     timers.forces.pause_and_sync();
   }
@@ -322,7 +318,7 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
 // OPENSHELL
 //======================
 template<class scalar_type>
-void PointGroup<scalar_type>::solve_opened(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy, double& energy, double& energy_i, double& energy_c, double& energy_c1, double& energy_c2, double* fort_forces_ptr){
+void PointGroup<scalar_type>::solve_opened(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy, double& energy, double& energy_i, double& energy_c, double& energy_c1, double& energy_c2, HostMatrix<double>& fort_forces_ms){
 //  if(open){
 //    cout<<"!!!!!!"<<endl;
 //    cout<<"ENTRANDO A SOLVE !!!!!!"<<endl;
@@ -332,7 +328,6 @@ void PointGroup<scalar_type>::solve_opened(Timers& timers, bool compute_rmm, boo
 
   /*** Computo sobre cada cubo ****/
   CudaMatrix<scalar_type> point_weights_gpu;
-  FortranMatrix<double> fort_forces(fort_forces_ptr, fortran_vars.atoms, 3, fortran_vars.max_atoms);
 
   /** Compute this group's functions **/
   timers.functions.start_and_sync();
@@ -645,16 +640,16 @@ void PointGroup<scalar_type>::solve_opened(Timers& timers, bool compute_rmm, boo
     	    HostMatrix<vec_type4> forces_cpu_b(forces_gpu_b);
 
     	    for (uint i = 0; i < total_nucleii(); ++i) {
-      	    	vec_type4 atom_force_a = forces_cpu_a(i);
-      	    	vec_type4 atom_force_b = forces_cpu_b(i);
-            	uint global_nuc = local2global_nuc[i];
+            vec_type4 atom_force_a = forces_cpu_a(i);
+            vec_type4 atom_force_b = forces_cpu_b(i);
+            uint global_nuc = local2global_nuc[i];
 
-                fort_forces(global_nuc, 0)=fort_forces(global_nuc, 0) + atom_force_a.x + atom_force_b.x;
-		fort_forces(global_nuc, 1)=fort_forces(global_nuc, 1) + atom_force_a.y + atom_force_b.y;
-		fort_forces(global_nuc, 2)=fort_forces(global_nuc, 2) + atom_force_a.z + atom_force_b.z;
+            fort_forces_ms(global_nuc, 0)=fort_forces_ms(global_nuc, 0) + atom_force_a.x + atom_force_b.x;
+            fort_forces_ms(global_nuc, 1)=fort_forces_ms(global_nuc, 1) + atom_force_a.y + atom_force_b.y;
+            fort_forces_ms(global_nuc, 2)=fort_forces_ms(global_nuc, 2) + atom_force_a.z + atom_force_b.z;
 
 //                cout<<"force.x="<<atom_force_a.x+atom_force_b.x<<"force.y="<<atom_force_a.y+atom_force_b.y<<"force.z="<<atom_force_a.z+atom_force_b.z<<endl;
-            }
+           }
 
     	timers.forces.pause_and_sync();
   }
