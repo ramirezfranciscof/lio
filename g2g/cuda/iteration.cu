@@ -226,26 +226,24 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
 
   timers.density.pause_and_sync();
 
-//************ Repongo los valores que puse a cero antes, para las fuerzas son necesarios (o por lo mens utiles)
-  for (uint i=0; i<(group_m); i++) {
-    for(uint j=0; j<(group_m); j++) {
-      if((i>=group_m) || (j>=group_m) || (j > i))
-      {
-        rmm_input_cpu.data[COALESCED_DIMENSION(group_m)*i+j]=rmm_input_cpu.data[COALESCED_DIMENSION(group_m)*j+i] ;
-      }
-    }
-  }
 
-  cudaMemcpyToArray(cuArray, 0, 0,rmm_input_cpu.data,sizeof(scalar_type)*rmm_input_cpu.width*rmm_input_cpu.height, cudaMemcpyHostToDevice);
-  //Deshago el bind de textura de rmm
-  cudaUnbindTexture(rmm_input_gpu_tex); //Enroque el Unbind con el Free, asi parece mas logico. Nano
-  cudaFreeArray(cuArray);
-
-
-   dim3 threads;
   /* compute forces */
   if (compute_forces) {
     timers.density_derivs.start_and_sync();
+    //************ Repongo los valores que puse a cero antes, para las fuerzas son necesarios (o por lo mens utiles)
+    for (uint i=0; i<(group_m); i++) {
+      for(uint j=0; j<(group_m); j++) {
+        if((i>=group_m) || (j>=group_m) || (j > i))
+        {
+          rmm_input_cpu.data[COALESCED_DIMENSION(group_m)*i+j]=rmm_input_cpu.data[COALESCED_DIMENSION(group_m)*j+i] ;
+        }
+      }
+    }
+
+    cudaMemcpyToArray(cuArray, 0, 0,rmm_input_cpu.data,
+        sizeof(scalar_type)*rmm_input_cpu.width*rmm_input_cpu.height, cudaMemcpyHostToDevice);
+
+    dim3 threads;
     threads = dim3(number_of_points);
     threadBlock = dim3(DENSITY_DERIV_BLOCK_SIZE);
     threadGrid = divUp(threads, threadBlock);
@@ -291,9 +289,11 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
     CudaMatrix<scalar_type> rmm_output_gpu(COALESCED_DIMENSION(group_m), group_m);
     // For calls with a single block (pretty common with cubes) don't bother doing the arithmetic to get block position in the matrix
     if (blocksPerRow > 1) {
-        gpu_update_rmm<scalar_type,true><<<threadGrid, threadBlock>>>(factors_gpu.data, number_of_points, rmm_output_gpu.data, function_values.data, group_m);
+        gpu_update_rmm<scalar_type,true><<<threadGrid, threadBlock>>>(
+            factors_gpu.data, number_of_points, rmm_output_gpu.data, function_values.data, group_m);
     } else {
-        gpu_update_rmm<scalar_type,false><<<threadGrid, threadBlock>>>(factors_gpu.data, number_of_points, rmm_output_gpu.data, function_values.data, group_m);
+        gpu_update_rmm<scalar_type,false><<<threadGrid, threadBlock>>>(
+            factors_gpu.data, number_of_points, rmm_output_gpu.data, function_values.data, group_m);
     }
     cudaAssertNoError("update_rmm");
 
@@ -312,6 +312,9 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
     hessian_values.deallocate();
     hessian_values_transposed.deallocate();
   }
+  //Deshago el bind de textura de rmm
+  cudaUnbindTexture(rmm_input_gpu_tex); //Enroque el Unbind con el Free, asi parece mas logico. Nano
+  cudaFreeArray(cuArray);
 }
 
 //======================
