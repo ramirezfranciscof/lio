@@ -198,7 +198,7 @@ size_t PointGroup<scalar_type>::size_in_gpu() const
 
     total_cost += 2*single_matrix_cost;       //1 scalar_type functions * 2 (matrix and its transposed)
     if (fortran_vars.do_forces || fortran_vars.gga)
-      total_cost += (single_matrix_cost*4); //4 vec_type gradient
+      total_cost += (single_matrix_cost*4) * 2; //4 vec_type gradient and its transposed
     if (fortran_vars.gga)
       total_cost+= (single_matrix_cost*8);  //2*4 vec_type hessian
     return total_cost*sizeof(scalar_type);  // size in bytes according to precision

@@ -226,7 +226,6 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
 
   timers.density.pause_and_sync();
 
-
   /* compute forces */
   if (compute_forces) {
     timers.density_derivs.start_and_sync();
@@ -764,7 +763,6 @@ void PointGroup<scalar_type>::compute_functions(bool forces, bool gga)
   contractions_gpu = contractions_cpu;
 
   /** Compute Functions **/
-  CudaMatrix<vec_type4> gradient_values;
   CudaMatrix<vec_type4> hessian_values;
   function_values.resize(COALESCED_DIMENSION(number_of_points), group_functions.w);
   if (fortran_vars.do_forces || fortran_vars.gga)
