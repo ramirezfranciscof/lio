@@ -267,6 +267,8 @@ void Partition::solve(Timers& timers, bool compute_rmm,bool lda,bool compute_for
     energy_spheres[my_thread] = 0.0f;
     energy_cubes[my_thread] = 0.0f;
     cudaSetDevice(my_thread % gpu_count);
+    Timer t0;
+    t0.start_and_sync();
     for(int i = my_thread; i < cubes.size() + spheres.size(); i+= total_threads) {
       if(i < cubes.size()) {
         cubes[i].solve(
@@ -280,6 +282,8 @@ void Partition::solve(Timers& timers, bool compute_rmm,bool lda,bool compute_for
             rmm_outputs[my_thread], OPEN);
       }
     }
+    t0.stop_and_sync();
+    std::cout << "Workload " << my_thread << " " << t0 << std::endl;
   }
 
   if (compute_forces) {

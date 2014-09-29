@@ -24,17 +24,22 @@ void GlobalMemoryPool::init(double free_global_memory) {
   int previous_device; cudaGetDevice(&previous_device);
   int gpu_count; cudaGetDeviceCount(&gpu_count);
   for (int i = 0; i < gpu_count; i++) {
-    cudaSetDevice(i);
-    double free_factor = free_global_memory;
     size_t free_memory, total_memory;
-
+    cudaSetDevice(i);
     cudaGetMemoryInfo(free_memory, total_memory);
+#if 0
+    double free_factor = free_global_memory;
 
     if (free_factor > 1.0f) free_factor = 1.0f;
     if (free_factor < 0.0f) free_factor = 0.0f;
     _freeFactor = free_factor;
 
     _freeGlobalMemory.push_back(static_cast<size_t>(static_cast<double>(free_memory)*_freeFactor));
+#endif
+    size_t safety = 500*1024*1024; // 500 Mb
+    long long remaining_memory = static_cast<long long>(free_memory) - static_cast<long long>(safety);
+    if(remaining_memory < 0.0f) remaining_memory = 0.0f;
+    _freeGlobalMemory.push_back(static_cast<size_t>(remaining_memory));
     _totalGlobalMemory.push_back(total_memory);
   }
   cudaSetDevice(previous_device);
