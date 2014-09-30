@@ -86,6 +86,8 @@ void PointGroup<scalar_type>::solve(Timers& timers, bool compute_rmm, bool lda, 
 
 template<class scalar_type>
 void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, bool compute_energy, double& energy, HostMatrix<double>& fort_forces_ms, HostMatrix<double>& rmm_output_local){
+
+  long long used_memory = 0;
   /** Compute this group's functions **/
   timers.functions.start_and_sync();
   compute_functions(compute_forces, !lda);
@@ -130,6 +132,10 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
   if (compute_rmm || compute_forces)
     factors_gpu.resize(number_of_points);
 
+  used_memory += partial_densities_gpu.bytes() + dxyz_gpu.bytes() + dd1_gpu.bytes() +
+    dd2_gpu.bytes() + point_weights_gpu.bytes() + factors_gpu.bytes();
+
+
   HostMatrix<scalar_type> rmm_input_cpu(COALESCED_DIMENSION(group_m), group_m+DENSITY_BLOCK_SIZE);
   get_rmm_input(rmm_input_cpu); //Achica la matriz densidad a la version reducida del grupo
   for (uint i=0; i<(group_m+DENSITY_BLOCK_SIZE); i++)
@@ -142,6 +148,23 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
       }
     }
   }
+
+  int transposed_width = COALESCED_DIMENSION(number_of_points);
+  #define BLOCK_DIM 16
+  dim3 transpose_grid(transposed_width / BLOCK_DIM, divUp((group_m),BLOCK_DIM));
+  dim3 transpose_threads(BLOCK_DIM, BLOCK_DIM, 1);
+
+  function_values_transposed.resize(group_m, COALESCED_DIMENSION(number_of_points));
+
+  if (fortran_vars.do_forces || fortran_vars.gga)
+      gradient_values_transposed.resize( group_m,COALESCED_DIMENSION(number_of_points));
+
+  transpose<<<transpose_grid, transpose_threads>>> (function_values_transposed.data,
+      function_values.data, COALESCED_DIMENSION(number_of_points), group_m);
+
+  if (fortran_vars.do_forces || fortran_vars.gga)
+    transpose<<<transpose_grid, transpose_threads>>> (gradient_values_transposed.data,
+        gradient_values.data, COALESCED_DIMENSION(number_of_points), group_m );
 
 
   /*
@@ -161,8 +184,11 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
 
   rmm_input_gpu_tex.normalized = false;
 
+  used_memory += (sizeof(scalar_type)*rmm_input_cpu.width*rmm_input_cpu.height);
+
   if (compute_energy) {
     CudaMatrix<scalar_type> energy_gpu(number_of_points);
+    used_memory+=energy_gpu.bytes();
 #define compute_parameters \
     energy_gpu.data,factors_gpu.data,point_weights_gpu.data,number_of_points,function_values_transposed.data,gradient_values_transposed.data,hessian_values_transposed.data,group_m,partial_densities_gpu.data,dxyz_gpu.data,dd1_gpu.data,dd2_gpu.data
 #define accumulate_parameters \
@@ -265,6 +291,8 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
         number_of_points, factors_gpu.data, dd_gpu.data, forces_gpu.data, total_nucleii());
     cudaAssertNoError("forces");
 
+    used_memory += dd_gpu.bytes() + nuc_gpu.bytes() + forces_gpu.bytes();
+
     HostMatrix<vec_type4> forces_cpu(forces_gpu);
 
     for (uint i = 0; i < total_nucleii(); ++i) {
@@ -299,18 +327,23 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
     /*** Contribute this RMM to the total RMM ***/
     HostMatrix<scalar_type> rmm_output_cpu(rmm_output_gpu);
     add_rmm_output(rmm_output_cpu, rmm_output_local);
+    used_memory += rmm_output_gpu.bytes();
   }
   timers.rmm.pause_and_sync();
+
+  used_memory += function_values_transposed.bytes() + gradient_values_transposed.bytes();
+  long long functions_size = function_values.bytes() +
+    gradient_values.bytes() + hessian_values_transposed.bytes();
 
   /* clear functions */
   if(!(this->inGlobal)) {
     function_values.deallocate();
-    function_values_transposed.deallocate();
     gradient_values.deallocate();
-    gradient_values_transposed.deallocate();
     hessian_values.deallocate();
     hessian_values_transposed.deallocate();
   }
+  function_values_transposed.deallocate();
+  gradient_values_transposed.deallocate();
   //Deshago el bind de textura de rmm
   cudaUnbindTexture(rmm_input_gpu_tex); //Enroque el Unbind con el Free, asi parece mas logico. Nano
   cudaFreeArray(cuArray);
@@ -714,6 +747,7 @@ void PointGroup<scalar_type>::solve_opened(Timers& timers, bool compute_rmm, boo
 template<class scalar_type>
 void PointGroup<scalar_type>::compute_functions(bool forces, bool gga)
 {
+  long long compute_memory = 0;
   if(this->inGlobal) //Ya las tengo en memoria? entonces salgo porque ya estan las 3 calculadas
     return;
 
@@ -792,29 +826,18 @@ void PointGroup<scalar_type>::compute_functions(bool forces, bool gga)
 
   int transposed_width = COALESCED_DIMENSION(number_of_points);
   #define BLOCK_DIM 16
-  dim3 transpose_grid(transposed_width / BLOCK_DIM, divUp((group_m),BLOCK_DIM));
   dim3 transpose_threads(BLOCK_DIM, BLOCK_DIM, 1);
 
-  function_values_transposed.resize(group_m, COALESCED_DIMENSION(number_of_points));
-
-  if (fortran_vars.do_forces || fortran_vars.gga)
-      gradient_values_transposed.resize( group_m,COALESCED_DIMENSION(number_of_points));
   if (fortran_vars.gga)
-      hessian_values_transposed.resize((group_m) * 2, COALESCED_DIMENSION(number_of_points));
+    hessian_values_transposed.resize((group_m) * 2, COALESCED_DIMENSION(number_of_points));
 
-  transpose<<<transpose_grid, transpose_threads>>> (function_values_transposed.data,
-      function_values.data, COALESCED_DIMENSION(number_of_points), group_m);
-
-  if (fortran_vars.do_forces || fortran_vars.gga)
-    transpose<<<transpose_grid, transpose_threads>>> (gradient_values_transposed.data,
-        gradient_values.data, COALESCED_DIMENSION(number_of_points), group_m );
-
-  transpose_grid=dim3(transposed_width / BLOCK_DIM, divUp((group_m)*2, BLOCK_DIM), 1);
+  dim3 transpose_grid = dim3(transposed_width / BLOCK_DIM, divUp((group_m)*2, BLOCK_DIM), 1);
 
   if (fortran_vars.gga)
     transpose<<<transpose_grid, transpose_threads>>> (hessian_values_transposed.data,
         hessian_values.data, COALESCED_DIMENSION(number_of_points), (group_m)*2);
 
+  compute_memory += hessian_values.bytes() + factor_ac_gpu.bytes() + nuc_gpu.bytes() + contractions_gpu.bytes();
   hessian_values.deallocate();
 
   cudaAssertNoError("compute_functions");

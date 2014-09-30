@@ -9,7 +9,7 @@
 class GlobalMemoryPool {
   public:
     static void init (double free_global_memory = 0.0);
-    static bool tryAlloc (size_t size);
+    static int tryAlloc (size_t size);
     static void dealloc (size_t size);
     static size_t getFreeMemory() {
       if(!_init) init();

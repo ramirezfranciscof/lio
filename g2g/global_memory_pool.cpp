@@ -2,13 +2,13 @@
 #include <cassert>
 
 //TryAlloc return true if error, false if success
-bool GlobalMemoryPool::tryAlloc(size_t size) {
+int GlobalMemoryPool::tryAlloc(size_t size) {
   if (!_init) init();
   int current_device; cudaGetDevice(&current_device);
   if (_freeGlobalMemory[current_device] < size)
-      return true;
+      return 1;
   _freeGlobalMemory[current_device] -= size;
-  return false;
+  return 0;
 }
 
 void GlobalMemoryPool::dealloc(size_t size) {
@@ -27,7 +27,6 @@ void GlobalMemoryPool::init(double free_global_memory) {
     size_t free_memory, total_memory;
     cudaSetDevice(i);
     cudaGetMemoryInfo(free_memory, total_memory);
-#if 0
     double free_factor = free_global_memory;
 
     if (free_factor > 1.0f) free_factor = 1.0f;
@@ -35,11 +34,6 @@ void GlobalMemoryPool::init(double free_global_memory) {
     _freeFactor = free_factor;
 
     _freeGlobalMemory.push_back(static_cast<size_t>(static_cast<double>(free_memory)*_freeFactor));
-#endif
-    size_t safety = 500*1024*1024; // 500 Mb
-    long long remaining_memory = static_cast<long long>(free_memory) - static_cast<long long>(safety);
-    if(remaining_memory < 0.0f) remaining_memory = 0.0f;
-    _freeGlobalMemory.push_back(static_cast<size_t>(remaining_memory));
     _totalGlobalMemory.push_back(total_memory);
   }
   cudaSetDevice(previous_device);
