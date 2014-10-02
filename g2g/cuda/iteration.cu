@@ -131,7 +131,6 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
   if (compute_rmm || compute_forces)
     factors_gpu.resize(number_of_points);
 
-
   HostMatrix<scalar_type> rmm_input_cpu(COALESCED_DIMENSION(group_m), group_m+DENSITY_BLOCK_SIZE);
   get_rmm_input(rmm_input_cpu); //Achica la matriz densidad a la version reducida del grupo
   for (uint i=0; i<(group_m+DENSITY_BLOCK_SIZE); i++)
@@ -152,7 +151,6 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
 
   CudaMatrix<scalar_type> function_values_transposed;
   CudaMatrix<vec_type4> gradient_values_transposed;
-
   function_values_transposed.resize(group_m, COALESCED_DIMENSION(number_of_points));
 
   if (fortran_vars.do_forces || fortran_vars.gga)
@@ -328,7 +326,6 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
   if(!(this->inGlobal)) {
     function_values.deallocate();
     gradient_values.deallocate();
-    hessian_values.deallocate();
     hessian_values_transposed.deallocate();
   }
   //Deshago el bind de textura de rmm
@@ -784,7 +781,6 @@ void PointGroup<scalar_type>::compute_functions(bool forces, bool gga)
   contractions_gpu = contractions_cpu;
 
   /** Compute Functions **/
-  CudaMatrix<vec_type4> hessian_values;
   function_values.resize(COALESCED_DIMENSION(number_of_points), group_functions.w);
   if (fortran_vars.do_forces || fortran_vars.gga)
       gradient_values.resize(COALESCED_DIMENSION(number_of_points), group_functions.w);
