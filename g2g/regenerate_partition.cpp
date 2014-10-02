@@ -26,6 +26,25 @@ void sortBySize(std::vector<T> input) {
 }
 
 /* methods */
+
+void Partition::compute_work_partition()
+{
+    int total_threads = 1;
+    #if !CPU_KERNELS
+    int gpu_count; cudaGetDeviceCount(&gpu_count);
+    total_threads = gpu_count;
+    #endif
+    #ifndef _OPENMP
+    total_threads = 1;
+    #endif
+
+    work = std::vector<std::vector<int> >(total_threads);
+    for(int i = 0; i < cubes.size()+spheres.size(); i++) {
+      int thread_assigned = i % total_threads;
+      work[thread_assigned].push_back(i);
+    }
+}
+
 void Partition::regenerate(void)
 {
 //	cout << "<============ G2G Partition (" << fortran_vars.grid_type << ")============>" << endl;
@@ -297,7 +316,7 @@ void Partition::regenerate(void)
     //Initialize the global memory pool for CUDA, with the default safety factor
     //If it is CPU, then this doesn't matter
     GlobalMemoryPool::init(G2G::free_global_memory);
-
+    compute_work_partition();
     //cout << "Grilla final: " << puntos_finales << " puntos (recordar que los de peso 0 se tiran), " << funciones_finales << " funciones" << endl ;
     //cout << "Costo: " << costo << endl;
     //cout << "NCOxM: " << nco_m << " MxM: " << m_m << endl;

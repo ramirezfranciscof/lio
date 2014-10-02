@@ -99,6 +99,7 @@ class PointGroup {
     bool is_significative(FunctionType, double exponent, double coeff, double d2);
     bool operator<(const PointGroup<scalar_type>& T) const;
     size_t size_in_gpu() const;
+    void deallocate();
 
     virtual bool is_sphere(void) = 0;
     virtual bool is_cube(void) = 0;
@@ -143,6 +144,8 @@ class Partition {
       cubes.clear(); spheres.clear();
     }
 
+    void compute_work_partition();
+
     void regenerate(void);
 
     void solve(Timers& timers, bool compute_rmm,bool lda,bool compute_forces,
@@ -164,6 +167,7 @@ class Partition {
 
     std::vector<Cube> cubes;
     std::vector<Sphere> spheres;
+    std::vector<std::vector<int> > work;
 };
 
 extern Partition partition;
