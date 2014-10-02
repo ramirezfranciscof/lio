@@ -210,9 +210,7 @@ void PointGroup<scalar_type>::deallocate() {
   if(inGlobal) {
     GlobalMemoryPool::dealloc(size_in_gpu());
     function_values.deallocate();
-    function_values_transposed.deallocate();
     gradient_values.deallocate();
-    gradient_values_transposed.deallocate();
     hessian_values.deallocate();
     hessian_values_transposed.deallocate();
   }
@@ -243,6 +241,7 @@ void Partition::solve(Timers& timers, bool compute_rmm,bool lda,bool compute_for
   total_threads = 1;
   gpu_count = 1;
   #else
+  total_threads = 1;
   omp_set_num_threads(total_threads);
   #endif
   double energy_cubes[total_threads];
@@ -302,45 +301,46 @@ void Partition::solve(Timers& timers, bool compute_rmm,bool lda,bool compute_for
     thread_duration[my_thread] = t0.getMicrosec() + 1000*1000*t0.getSec();
   }
 
-  // Work stealing
-  // Primero consigo el thread mas lento y el mas rapido
-  long long min_time = numeric_limits<long long>::max();
-  long long max_time = 0;
-  int min_time_index = 0; int max_time_index = 0;
-  for(int i = 0; i < total_threads; i++){
-    if (thread_duration[i] > max_time) {
-      max_time_index = i; max_time = thread_duration[i];
-    }
-    if (thread_duration[i] < min_time) {
-      min_time_index = i; min_time = thread_duration[i];
-    }
-  }
-  // Si hay mas de un 10% de diferencia, hacemos work stealing
-  if (max_time < min_time+(min_time/10)) {
-    long long delta = max_time - min_time;
-    // Busco todos los trabajos del thread con max_time, el que mas cerca tenga
-    // duracion como delta/2 y se lo mando
-    int best_index = work_duration[max_time_index][0];
-    long long best_index_delta = work_duration[max_time_index][best_index] - delta;
-    for (int i = 0; i < work_duration[max_time_index].size(); i++) {
-      if(work_duration[max_time_index][i] - delta/2 < best_index_delta) {
-        best_index = i;
-        best_index_delta = work_duration[max_time_index][i] - work_duration[max_time_index][best_index];
+  if(total_threads > 1) {
+    // Work stealing
+    // Primero consigo el thread mas lento y el mas rapido
+    long long min_time = numeric_limits<long long>::max();
+    long long max_time = 0;
+    int min_time_index = 0; int max_time_index = 0;
+    for(int i = 0; i < total_threads; i++){
+      if (thread_duration[i] > max_time) {
+        max_time_index = i; max_time = thread_duration[i];
+      }
+      if (thread_duration[i] < min_time) {
+        min_time_index = i; min_time = thread_duration[i];
       }
     }
-    // best_index tiene el indice de trabajo del thread que mas tardo, que se podria
-    // procesar en el otro thread
-    int element_index = work[max_time_index][best_index];
-    std::cout << "Voy a hacer mover de " << max_time_index << " a " << min_time_index <<
-      "un trabajo con duracion/2 = " << work_duration[max_time_index][best_index] << std::endl;
-    if(element_index < cubes.size())
-      cubes[element_index].deallocate();
-    else
-      spheres[cubes.size()-element_index].deallocate();
-    work[min_time_index].push_back(element_index);
-    work[max_time_index].erase(work[max_time_index].begin()+best_index);
+    // Si hay mas de un 10% de diferencia, hacemos work stealing
+    if (max_time < min_time+(min_time/10)) {
+      long long delta = max_time - min_time;
+      // Busco todos los trabajos del thread con max_time, el que mas cerca tenga
+      // duracion como delta/2 y se lo mando
+      int best_index = work_duration[max_time_index][0];
+      long long best_index_delta = work_duration[max_time_index][best_index] - delta;
+      for (int i = 0; i < work_duration[max_time_index].size(); i++) {
+        if(work_duration[max_time_index][i] - delta/2 < best_index_delta) {
+          best_index = i;
+          best_index_delta = work_duration[max_time_index][i] - work_duration[max_time_index][best_index];
+        }
+      }
+      // best_index tiene el indice de trabajo del thread que mas tardo, que se podria
+      // procesar en el otro thread
+      int element_index = work[max_time_index][best_index];
+      std::cout << "Voy a hacer mover de " << max_time_index << " a " << min_time_index <<
+        "un trabajo con duracion/2 = " << work_duration[max_time_index][best_index] << std::endl;
+      if(element_index < cubes.size())
+        cubes[element_index].deallocate();
+      else
+        spheres[cubes.size()-element_index].deallocate();
+      work[min_time_index].push_back(element_index);
+      work[max_time_index].erase(work[max_time_index].begin()+best_index);
+    }
   }
-
 
   if (compute_forces) {
       FortranMatrix<double> fort_forces_out(fort_forces_ptr, fortran_vars.atoms, 3, fortran_vars.max_atoms);
