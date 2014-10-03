@@ -739,7 +739,6 @@ void PointGroup<scalar_type>::solve_opened(Timers& timers, bool compute_rmm, boo
 template<class scalar_type>
 void PointGroup<scalar_type>::compute_functions(bool forces, bool gga)
 {
-  long long compute_memory = 0;
   if(this->inGlobal) //Ya las tengo en memoria? entonces salgo porque ya estan las 3 calculadas
     return;
 

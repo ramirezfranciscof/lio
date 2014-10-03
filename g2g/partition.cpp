@@ -213,13 +213,56 @@ void PointGroup<scalar_type>::deallocate() {
     gradient_values.deallocate();
     hessian_values.deallocate();
     hessian_values_transposed.deallocate();
+    inGlobal = false;
   }
-  inGlobal = false;
 #endif
 }
 template<class scalar_type>
 PointGroup<scalar_type>::~PointGroup<scalar_type>() {
   deallocate();
+}
+
+// Work stealing
+void Partition::balance_load(const vector<long long>& thread_duration, const vector<vector<long long> >& work_duration) {
+  // Primero consigo el thread mas lento y el mas rapido
+  long long min_time = numeric_limits<long long>::max();
+  long long max_time = 0;
+  int min_time_index = 0; int max_time_index = 0;
+  for(int i = 0; i < thread_duration.size(); i++){
+    if (thread_duration[i] > max_time) {
+      max_time_index = i; max_time = thread_duration[i];
+    }
+    if (thread_duration[i] < min_time) {
+      min_time_index = i; min_time = thread_duration[i];
+    }
+  }
+  // Si hay mas de un 2% de diferencia, hacemos work stealing
+  if (max_time > min_time+(min_time/50)) {
+    long long delta = (max_time - min_time)/2;
+    // Busco todos los trabajos del thread con max_time, el que mas cerca tenga
+    // duracion como delta/2 y se lo mando
+    int best_index = 0;
+    long long best_index_delta = abs(work_duration[max_time_index][best_index] - delta);
+    for (int i = 0; i < work_duration[max_time_index].size(); i++) {
+      if(abs(work_duration[max_time_index][i] - delta) < best_index_delta) {
+        best_index = i;
+        best_index_delta = abs(work_duration[max_time_index][i] - delta);
+      }
+    }
+    // best_index tiene el indice de trabajo del thread que mas tardo, que se podria
+    // procesar en el otro thread
+    int element_index = work[max_time_index][best_index];
+    std::cout << "Voy a mover de " << max_time_index << " a " << min_time_index <<
+      " un trabajo con duracion = " << work_duration[max_time_index][best_index] << std::endl;
+    if(element_index < cubes.size()) {
+      cubes[element_index].deallocate();
+    }
+    else {
+      spheres[element_index-cubes.size()].deallocate();
+    }
+    work[min_time_index].push_back(element_index);
+    work[max_time_index].erase(work[max_time_index].begin()+best_index);
+  }
 }
 
 void Partition::solve(Timers& timers, bool compute_rmm,bool lda,bool compute_forces,
@@ -304,44 +347,7 @@ void Partition::solve(Timers& timers, bool compute_rmm,bool lda,bool compute_for
 
   if(total_threads > 1) {
     // Work stealing
-    // Primero consigo el thread mas lento y el mas rapido
-    long long min_time = numeric_limits<long long>::max();
-    long long max_time = 0;
-    int min_time_index = 0; int max_time_index = 0;
-    for(int i = 0; i < total_threads; i++){
-      if (thread_duration[i] > max_time) {
-        max_time_index = i; max_time = thread_duration[i];
-      }
-      if (thread_duration[i] < min_time) {
-        min_time_index = i; min_time = thread_duration[i];
-      }
-    }
-    // Si hay mas de un 2% de diferencia, hacemos work stealing
-    if (max_time > min_time+(min_time/50)) {
-      long long delta = max_time - min_time;
-      // Busco todos los trabajos del thread con max_time, el que mas cerca tenga
-      // duracion como delta/2 y se lo mando
-      int best_index = 0;
-      long long best_index_delta = work_duration[max_time_index][best_index] - delta;
-      for (int i = 0; i < work_duration[max_time_index].size(); i++) {
-        if(work_duration[max_time_index][i] - delta/2 < best_index_delta) {
-          best_index = i;
-          best_index_delta = work_duration[max_time_index][i] - work_duration[max_time_index][best_index];
-        }
-      }
-      // best_index tiene el indice de trabajo del thread que mas tardo, que se podria
-      // procesar en el otro thread
-      int element_index = work[max_time_index][best_index];
-      std::cout << "Voy a mover de " << max_time_index << " a " << min_time_index <<
-        " un trabajo con duracion = " << work_duration[max_time_index][best_index] << std::endl;
-      if(element_index < cubes.size())
-        cubes[element_index].deallocate();
-      else
-        spheres[cubes.size()-element_index].deallocate();
-      work[min_time_index].push_back(element_index);
-      sort(work[min_time_index].begin(), work[min_time_index].end());
-      work[max_time_index].erase(work[max_time_index].begin()+best_index);
-    }
+    balance_load(thread_duration, work_duration);
   }
 
   if (compute_forces) {

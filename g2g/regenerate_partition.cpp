@@ -40,7 +40,8 @@ void Partition::compute_work_partition()
 
     work = std::vector<std::vector<int> >(total_threads);
     for(int i = 0; i < cubes.size()+spheres.size(); i++) {
-      int thread_assigned = i % total_threads;
+      int thread_assigned = 0;
+      thread_assigned = i % total_threads;
       work[thread_assigned].push_back(i);
     }
 }
