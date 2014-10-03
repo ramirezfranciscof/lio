@@ -23,6 +23,9 @@ void GlobalMemoryPool::init(double free_global_memory) {
 #if !CPU_KERNELS
   int previous_device; cudaGetDevice(&previous_device);
   int gpu_count; cudaGetDeviceCount(&gpu_count);
+#ifndef _OPENMP
+  gpu_count = 1;
+#endif
   for (int i = 0; i < gpu_count; i++) {
     size_t free_memory, total_memory;
     cudaSetDevice(i);
