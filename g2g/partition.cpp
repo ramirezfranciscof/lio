@@ -241,7 +241,6 @@ void Partition::solve(Timers& timers, bool compute_rmm,bool lda,bool compute_for
   total_threads = 1;
   gpu_count = 1;
   #else
-  total_threads = 1;
   omp_set_num_threads(total_threads);
   #endif
   double energy_cubes[total_threads];
@@ -273,7 +272,9 @@ void Partition::solve(Timers& timers, bool compute_rmm,bool lda,bool compute_for
     #endif
     energy_spheres[my_thread] = 0.0f;
     energy_cubes[my_thread] = 0.0f;
-    cudaSetDevice(my_thread % gpu_count);
+    if(cudaSetDevice(my_thread % gpu_count) != cudaSuccess)
+      std::cout << "Error: can't set the device for thread " << my_thread << " using # " << gpu_count
+        << " assigning device " << my_thread % gpu_count << std::endl;
 
 
     Timer t0;
@@ -297,8 +298,8 @@ void Partition::solve(Timers& timers, bool compute_rmm,bool lda,bool compute_for
       work_duration[my_thread].push_back(t1.getMicrosec() + 1000*1000*t1.getSec());
     }
     t0.stop_and_sync();
-    std::cout << "Workload " << my_thread << " " << t0 << std::endl;
     thread_duration[my_thread] = t0.getMicrosec() + 1000*1000*t0.getSec();
+    std::cout << "Workload " << my_thread << " " << thread_duration[my_thread] << std::endl;
   }
 
   if(total_threads > 1) {
@@ -315,12 +316,12 @@ void Partition::solve(Timers& timers, bool compute_rmm,bool lda,bool compute_for
         min_time_index = i; min_time = thread_duration[i];
       }
     }
-    // Si hay mas de un 10% de diferencia, hacemos work stealing
-    if (max_time < min_time+(min_time/10)) {
+    // Si hay mas de un 2% de diferencia, hacemos work stealing
+    if (max_time > min_time+(min_time/50)) {
       long long delta = max_time - min_time;
       // Busco todos los trabajos del thread con max_time, el que mas cerca tenga
       // duracion como delta/2 y se lo mando
-      int best_index = work_duration[max_time_index][0];
+      int best_index = 0;
       long long best_index_delta = work_duration[max_time_index][best_index] - delta;
       for (int i = 0; i < work_duration[max_time_index].size(); i++) {
         if(work_duration[max_time_index][i] - delta/2 < best_index_delta) {
@@ -331,13 +332,14 @@ void Partition::solve(Timers& timers, bool compute_rmm,bool lda,bool compute_for
       // best_index tiene el indice de trabajo del thread que mas tardo, que se podria
       // procesar en el otro thread
       int element_index = work[max_time_index][best_index];
-      std::cout << "Voy a hacer mover de " << max_time_index << " a " << min_time_index <<
-        "un trabajo con duracion/2 = " << work_duration[max_time_index][best_index] << std::endl;
+      std::cout << "Voy a mover de " << max_time_index << " a " << min_time_index <<
+        " un trabajo con duracion = " << work_duration[max_time_index][best_index] << std::endl;
       if(element_index < cubes.size())
         cubes[element_index].deallocate();
       else
         spheres[cubes.size()-element_index].deallocate();
       work[min_time_index].push_back(element_index);
+      sort(work[min_time_index].begin(), work[min_time_index].end());
       work[max_time_index].erase(work[max_time_index].begin()+best_index);
     }
   }
