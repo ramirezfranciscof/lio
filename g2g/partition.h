@@ -149,8 +149,8 @@ class Partition {
     void solve(Timers& timers, bool compute_rmm,bool lda,bool compute_forces,
                bool compute_energy, double* fort_energy_ptr, double* fort_forces_ptr, bool OPEN);
 
-    void balance_load(const std::vector<long long>& thread_duration,
-        const std::vector<std::vector<long long> >& work_duration);
+    void balance_load(std::vector<long long>& thread_duration,
+        std::vector<std::vector<long long> >& work_duration);
 
     void compute_functions(bool forces, bool gga)
     {

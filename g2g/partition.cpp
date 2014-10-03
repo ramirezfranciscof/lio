@@ -223,45 +223,63 @@ PointGroup<scalar_type>::~PointGroup<scalar_type>() {
 }
 
 // Work stealing
-void Partition::balance_load(const vector<long long>& thread_duration, const vector<vector<long long> >& work_duration) {
-  // Primero consigo el thread mas lento y el mas rapido
-  long long min_time = numeric_limits<long long>::max();
-  long long max_time = 0;
-  int min_time_index = 0; int max_time_index = 0;
-  for(int i = 0; i < thread_duration.size(); i++){
-    if (thread_duration[i] > max_time) {
-      max_time_index = i; max_time = thread_duration[i];
-    }
-    if (thread_duration[i] < min_time) {
-      min_time_index = i; min_time = thread_duration[i];
-    }
-  }
-  // Si hay mas de un 2% de diferencia, hacemos work stealing
-  if (max_time > min_time+(min_time/50)) {
-    long long delta = (max_time - min_time)/2;
-    // Busco todos los trabajos del thread con max_time, el que mas cerca tenga
-    // duracion como delta/2 y se lo mando
-    int best_index = 0;
-    long long best_index_delta = abs(work_duration[max_time_index][best_index] - delta);
-    for (int i = 0; i < work_duration[max_time_index].size(); i++) {
-      if(abs(work_duration[max_time_index][i] - delta) < best_index_delta) {
-        best_index = i;
-        best_index_delta = abs(work_duration[max_time_index][i] - delta);
+void Partition::balance_load(vector<long long>& thread_duration, vector<vector<long long> >& work_duration) {
+  int thread_round_counts = 0;
+  const int max_thread_rounds = 5;
+  // Hacemos multiples rondas de work stealing, por si tenemos varios threads que balancear
+  while(thread_round_counts < max_thread_rounds) {
+    thread_round_counts++;
+    // Primero consigo el thread mas lento y el mas rapido
+    long long min_time = numeric_limits<long long>::max();
+    long long max_time = 0;
+    int min_time_index = 0; int max_time_index = 0;
+    for(int i = 0; i < thread_duration.size(); i++){
+      if (thread_duration[i] > max_time) {
+        max_time_index = i; max_time = thread_duration[i];
+      }
+      if (thread_duration[i] < min_time) {
+        min_time_index = i; min_time = thread_duration[i];
       }
     }
-    // best_index tiene el indice de trabajo del thread que mas tardo, que se podria
-    // procesar en el otro thread
-    int element_index = work[max_time_index][best_index];
-    std::cout << "Voy a mover de " << max_time_index << " a " << min_time_index <<
-      " un trabajo con duracion = " << work_duration[max_time_index][best_index] << std::endl;
-    if(element_index < cubes.size()) {
-      cubes[element_index].deallocate();
+    int round_counts = 0;
+    const int max_rounds = 15;
+    // Si hay mas de un 5% de diferencia, migramos tareas
+    while (max_time > min_time+(min_time/50) && round_counts < max_rounds) {
+      round_counts++;
+      long long delta = (max_time - min_time)/2;
+      // Busco todos los trabajos del thread con max_time, el que mas cerca tenga
+      // duracion como delta/2 y se lo mando
+      int best_index = 0;
+      long long best_index_delta = abs(work_duration[max_time_index][best_index] - delta);
+      for (int i = 0; i < work_duration[max_time_index].size(); i++) {
+        if(abs(work_duration[max_time_index][i] - delta) < best_index_delta) {
+          best_index = i;
+          best_index_delta = abs(work_duration[max_time_index][i] - delta);
+        }
+      }
+      // best_index tiene el indice de trabajo del thread que mas tardo, que se podria
+      // procesar en el otro thread
+      int element_index = work[max_time_index][best_index];
+      std::cout << "Voy a mover de " << max_time_index << " a " << min_time_index <<
+        " un trabajo con duracion = " << work_duration[max_time_index][best_index] << std::endl;
+      // Liberamos la memoria global del proceso que vayamos a migrar
+      if(element_index < cubes.size())
+        cubes[element_index].deallocate();
+      else
+        spheres[element_index-cubes.size()].deallocate();
+      // Actualizamos la migracion de cargas y las estimaciones
+      thread_duration[min_time_index] += work_duration[max_time_index][best_index];
+      thread_duration[max_time_index] -= work_duration[max_time_index][best_index];
+
+      min_time = thread_duration[min_time_index];
+      max_time = thread_duration[max_time_index];
+
+      work[min_time_index].push_back(element_index);
+      work[max_time_index].erase(work[max_time_index].begin()+best_index);
+
+      work_duration[min_time_index].push_back(work_duration[max_time_index][best_index]);
+      work_duration[max_time_index].erase(work_duration[max_time_index].begin()+best_index);
     }
-    else {
-      spheres[element_index-cubes.size()].deallocate();
-    }
-    work[min_time_index].push_back(element_index);
-    work[max_time_index].erase(work[max_time_index].begin()+best_index);
   }
 }
 
