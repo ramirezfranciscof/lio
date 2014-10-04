@@ -243,18 +243,20 @@ void Partition::balance_load(vector<long long>& thread_duration, vector<vector<l
     }
     int round_counts = 0;
     const int max_rounds = 15;
-    // Si hay mas de un 5% de diferencia, migramos tareas
+    // Si hay mas de un 2% de diferencia, migramos tareas
     while (max_time > min_time+(min_time/50) && round_counts < max_rounds) {
       round_counts++;
       long long delta = (max_time - min_time)/2;
       // Busco todos los trabajos del thread con max_time, el que mas cerca tenga
-      // duracion como delta/2 y se lo mando
+      // duracion como delta tiempo de los trabajos (/2 porque es un promedio) y se lo mando al
+      // thread mas corto.
+      // Multiplicamos por 7/6 para agregarle 1/6 de factor de penalidad por mover de placa.
       int best_index = 0;
       long long best_index_delta = abs(work_duration[max_time_index][best_index] - delta);
       for (int i = 0; i < work_duration[max_time_index].size(); i++) {
-        if(abs(work_duration[max_time_index][i] - delta) < best_index_delta) {
+        if(abs((work_duration[max_time_index][i]*7)/6 - delta) < best_index_delta) {
           best_index = i;
-          best_index_delta = abs(work_duration[max_time_index][i] - delta);
+          best_index_delta = abs((work_duration[max_time_index][i]*7)/6 - delta);
         }
       }
       // best_index tiene el indice de trabajo del thread que mas tardo, que se podria
@@ -262,13 +264,16 @@ void Partition::balance_load(vector<long long>& thread_duration, vector<vector<l
       int element_index = work[max_time_index][best_index];
       std::cout << "Voy a mover de " << max_time_index << " a " << min_time_index <<
         " un trabajo con duracion = " << work_duration[max_time_index][best_index] << std::endl;
-      // Liberamos la memoria global del proceso que vayamos a migrar
+      // Liberamos la memoria global del proceso que vayamos a migrar, por si se cachearon
+      // esas funciones.
       if(element_index < cubes.size())
         cubes[element_index].deallocate();
       else
         spheres[element_index-cubes.size()].deallocate();
-      // Actualizamos la migracion de cargas y las estimaciones
-      thread_duration[min_time_index] += work_duration[max_time_index][best_index];
+      // Actualizamos la migracion de cargas y las estimaciones, agregando el factor de correccion por
+      // mover y rehacer compute functions
+      long long extra_work_duration = work_duration[max_time_index][best_index]/6;
+      thread_duration[min_time_index] += work_duration[max_time_index][best_index] + extra_work_duration;
       thread_duration[max_time_index] -= work_duration[max_time_index][best_index];
 
       min_time = thread_duration[min_time_index];
@@ -277,7 +282,7 @@ void Partition::balance_load(vector<long long>& thread_duration, vector<vector<l
       work[min_time_index].push_back(element_index);
       work[max_time_index].erase(work[max_time_index].begin()+best_index);
 
-      work_duration[min_time_index].push_back(work_duration[max_time_index][best_index]);
+      work_duration[min_time_index].push_back(work_duration[max_time_index][best_index] + extra_work_duration);
       work_duration[max_time_index].erase(work_duration[max_time_index].begin()+best_index);
     }
   }
