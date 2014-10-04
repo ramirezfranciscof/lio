@@ -73,6 +73,44 @@ template<class T> void gpu_set_atom_positions(const HostMatrix<T>& m) {
   cudaSetDevice(previous_device);
 }
 
+unsigned long do_benchmark(void) {
+  Timer t0;
+  const int elems = 1000;
+  float factors_host[elems];
+  float* factors_device;
+  float matrix_host[elems][elems];
+  float* matrix_device;
+  cudaMalloc(&factors_device, sizeof(factors_host));
+  cudaMalloc(&matrix_device, sizeof(matrix_host));
+  for(int i = 0; i < elems; i++) {
+    for(int j = 0; j < elems; j++) {
+      float val = (i*37.0+j*23.0)/200.0;
+      matrix_host[i][j] = val;
+      matrix_host[j][i] = val;
+    }
+    factors_host[i] = (i*43.0) / 1000.0;
+  }
+
+  cudaMemcpy(factors_device, factors_host, sizeof(factors_host), cudaMemcpyHostToDevice);
+  cudaMemcpy(matrix_device, matrix_host, sizeof(matrix_host), cudaMemcpyHostToDevice);
+  dim3 threadBlock = dim3(RMM_BLOCK_SIZE_XY, RMM_BLOCK_SIZE_XY);
+  uint blocksPerRow = divUp(elems, RMM_BLOCK_SIZE_XY);
+  // Only use enough blocks for lower triangle
+  dim3 threadGrid = dim3(blocksPerRow*(blocksPerRow+1)/2);
+
+  CudaMatrix<float> rmm_output_gpu(COALESCED_DIMENSION(elems), elems);
+
+  t0.start_and_sync();
+  for(int i = 0; i < 10; i++) {
+    gpu_update_rmm<float,true><<<threadGrid, threadBlock>>>(
+        factors_device, elems, rmm_output_gpu.data, matrix_device, elems);
+  }
+  t0.stop_and_sync();
+  cudaFree(factors_device); cudaFree(matrix_device);
+  return (t0.getMicrosec() + 1000*1000*t0.getSec());
+}
+
+
 template void gpu_set_atom_positions<float3>(const HostMatrix<float3>& m);
 template void gpu_set_atom_positions<double3>(const HostMatrix<double3>& m);
 //template<class scalar_type,true> __global__ void gpu_update_rmm(scalar_type* factors, uint points, scalar_type* rmm, scalar_type* function_values, uint m);

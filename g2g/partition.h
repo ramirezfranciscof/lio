@@ -142,6 +142,7 @@ class Partition {
       cubes.clear(); spheres.clear();
     }
 
+    void generate_gpu_profile();
     void compute_work_partition();
 
     void regenerate(void);
@@ -167,6 +168,7 @@ class Partition {
     std::vector<Cube> cubes;
     std::vector<Sphere> spheres;
     std::vector<std::vector<int> > work;
+    std::vector<std::vector<double> > correction;
 };
 
 extern Partition partition;

@@ -26,24 +26,63 @@ void sortBySize(std::vector<T> input) {
 }
 
 /* methods */
+namespace G2G {
+  unsigned long do_benchmark();
+}
 
-void Partition::compute_work_partition()
-{
+void Partition::generate_gpu_profile() {
     int total_threads = 1;
-    #if !CPU_KERNELS
-    int gpu_count; cudaGetDeviceCount(&gpu_count);
-    total_threads = gpu_count;
+    int gpu_count = 0;
+    int prev_gpu = 0;
+    #if CPU_KERNELS
+    return;
     #endif
+
     #ifndef _OPENMP
     total_threads = 1;
     #endif
+    cudaGetDevice(&prev_gpu);
+    cudaGetDeviceCount(&gpu_count);
+    total_threads = gpu_count;
 
-    work = std::vector<std::vector<int> >(total_threads);
-    for(int i = 0; i < cubes.size()+spheres.size(); i++) {
-      int thread_assigned = 0;
-      thread_assigned = i % total_threads;
-      work[thread_assigned].push_back(i);
+    correction = std::vector<std::vector<double> >(gpu_count, std::vector<double>(gpu_count, 0));
+
+    std::vector<double> runtimes(gpu_count, 0.0);
+    for(int i = 0; i < gpu_count ; i++) {
+      cudaSetDevice(i);
+      double result = (double) G2G::do_benchmark();
+      runtimes[i] = result;
     }
+    std::cout << std::endl;
+    std::cout << "La Matriz de correccion: " << std::endl;
+    for(int i = 0; i < gpu_count ; i++) {
+      for(int j = 0; j < gpu_count ; j++) {
+        double corr = runtimes[i]/ runtimes[j];
+        correction[i][j] = corr;
+        std::cout << corr << "  ";
+      }
+      std::cout << std::endl;
+    }
+    cudaSetDevice(prev_gpu);
+  }
+
+void Partition::compute_work_partition()
+{
+  int total_threads = 1;
+  #if !CPU_KERNELS
+  int gpu_count; cudaGetDeviceCount(&gpu_count);
+  total_threads = gpu_count;
+  #endif
+  #ifndef _OPENMP
+  total_threads = 1;
+  #endif
+
+  work = std::vector<std::vector<int> >(total_threads);
+  for(int i = 0; i < cubes.size()+spheres.size(); i++) {
+    int thread_assigned = 0;
+    thread_assigned = i % total_threads;
+    work[thread_assigned].push_back(i);
+  }
 }
 
 void Partition::regenerate(void)
@@ -317,6 +356,7 @@ void Partition::regenerate(void)
     //Initialize the global memory pool for CUDA, with the default safety factor
     //If it is CPU, then this doesn't matter
     GlobalMemoryPool::init(G2G::free_global_memory);
+    generate_gpu_profile();
     compute_work_partition();
     //cout << "Grilla final: " << puntos_finales << " puntos (recordar que los de peso 0 se tiran), " << funciones_finales << " funciones" << endl ;
     //cout << "Costo: " << costo << endl;
