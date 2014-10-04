@@ -53,8 +53,7 @@ void Partition::generate_gpu_profile() {
       double result = (double) G2G::do_benchmark();
       runtimes[i] = result;
     }
-    std::cout << std::endl;
-    std::cout << "La Matriz de correccion: " << std::endl;
+    std::cout << "Matriz de correccion de tiempos de GPU: " << std::endl;
     for(int i = 0; i < gpu_count ; i++) {
       for(int j = 0; j < gpu_count ; j++) {
         double corr = runtimes[i]/ runtimes[j];

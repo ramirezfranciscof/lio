@@ -241,6 +241,11 @@ void Partition::balance_load(vector<long long>& thread_duration, vector<vector<l
         min_time_index = i; min_time = thread_duration[i];
       }
     }
+    // Conseguimos el factor de correccion que vamos a usar para mover de un thread de
+    // mas duracion a uno de menos duracion.
+    const double time_correction = correction[max_time_index][min_time_index];
+    // Agregamos un factor de correcion adicional producto de migrar el thread y recalcular las funciones.
+    const double migration_factor = 7.0/6.0;
     int round_counts = 0;
     const int max_rounds = 15;
     // Si hay mas de un 2% de diferencia, migramos tareas
@@ -252,11 +257,13 @@ void Partition::balance_load(vector<long long>& thread_duration, vector<vector<l
       // thread mas corto.
       // Multiplicamos por 7/6 para agregarle 1/6 de factor de penalidad por mover de placa.
       int best_index = 0;
-      long long best_index_delta = abs(work_duration[max_time_index][best_index] - delta);
-      for (int i = 0; i < work_duration[max_time_index].size(); i++) {
-        if(abs((work_duration[max_time_index][i]*7)/6 - delta) < best_index_delta) {
-          best_index = i;
-          best_index_delta = abs((work_duration[max_time_index][i]*7)/6 - delta);
+      double best_index_delta =
+        abs(work_duration[max_time_index][best_index] * time_correction * migration_factor - delta);
+      for (int i = 1; i < work_duration[max_time_index].size(); i++) {
+        double current_index_delta =
+          abs((work_duration[max_time_index][i] * time_correction * migration_factor) - delta);
+        if(current_index_delta < best_index_delta) {
+          best_index = i; best_index_delta = current_index_delta;
         }
       }
       // best_index tiene el indice de trabajo del thread que mas tardo, que se podria
@@ -270,10 +277,9 @@ void Partition::balance_load(vector<long long>& thread_duration, vector<vector<l
         cubes[element_index].deallocate();
       else
         spheres[element_index-cubes.size()].deallocate();
-      // Actualizamos la migracion de cargas y las estimaciones, agregando el factor de correccion por
-      // mover y rehacer compute functions
-      long long extra_work_duration = work_duration[max_time_index][best_index]/6;
-      thread_duration[min_time_index] += work_duration[max_time_index][best_index] + extra_work_duration;
+      // Actualizamos la migracion de cargas y las estimaciones, considerando las diferencias
+      // de velocidad entre ambos.
+      thread_duration[min_time_index] += work_duration[max_time_index][best_index] * time_correction * migration_factor;
       thread_duration[max_time_index] -= work_duration[max_time_index][best_index];
 
       min_time = thread_duration[min_time_index];
@@ -282,7 +288,7 @@ void Partition::balance_load(vector<long long>& thread_duration, vector<vector<l
       work[min_time_index].push_back(element_index);
       work[max_time_index].erase(work[max_time_index].begin()+best_index);
 
-      work_duration[min_time_index].push_back(work_duration[max_time_index][best_index] + extra_work_duration);
+      work_duration[min_time_index].push_back(work_duration[max_time_index][best_index] * time_correction * migration_factor);
       work_duration[max_time_index].erase(work_duration[max_time_index].begin()+best_index);
     }
   }
@@ -341,7 +347,6 @@ void Partition::solve(Timers& timers, bool compute_rmm,bool lda,bool compute_for
     if(cudaSetDevice(my_thread % gpu_count) != cudaSuccess)
       std::cout << "Error: can't set the device for thread " << my_thread << " using # " << gpu_count
         << " assigning device " << my_thread % gpu_count << std::endl;
-
 
     Timer t0;
     t0.start_and_sync();
