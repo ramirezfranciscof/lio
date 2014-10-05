@@ -348,6 +348,8 @@ void Partition::solve(Timers& timers, bool compute_rmm,bool lda,bool compute_for
       std::cout << "Error: can't set the device for thread " << my_thread << " using # " << gpu_count
         << " assigning device " << my_thread % gpu_count << std::endl;
 
+    // Util este coeficiente para hacer pruebas de escalabilidad.
+    double slow_coef = (my_thread==1)? (1) : 1;
     Timer t0;
     t0.start_and_sync();
     for(int i = 0; i < work[my_thread].size(); i++){
@@ -366,10 +368,10 @@ void Partition::solve(Timers& timers, bool compute_rmm,bool lda,bool compute_for
             rmm_outputs[my_thread], OPEN);
       }
       t1.stop_and_sync();
-      work_duration[my_thread].push_back(t1.getMicrosec() + 1000*1000*t1.getSec());
+      work_duration[my_thread].push_back(slow_coef * (t1.getMicrosec() + 1000*1000*t1.getSec()));
     }
     t0.stop_and_sync();
-    thread_duration[my_thread] = t0.getMicrosec() + 1000*1000*t0.getSec();
+    thread_duration[my_thread] = slow_coef*(t0.getMicrosec() + 1000*1000*t0.getSec());
     std::cout << "Workload " << my_thread << " " << thread_duration[my_thread] << std::endl;
   }
 

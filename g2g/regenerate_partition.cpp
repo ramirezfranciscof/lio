@@ -27,7 +27,7 @@ void sortBySize(std::vector<T> input) {
 
 /* methods */
 namespace G2G {
-  unsigned long do_benchmark();
+  template <class T> unsigned long do_benchmark();
 }
 
 void Partition::generate_gpu_profile() {
@@ -41,6 +41,11 @@ void Partition::generate_gpu_profile() {
     #ifndef _OPENMP
     total_threads = 1;
     #endif
+    #if FULL_DOUBLE
+    typedef double scalar_type;
+    #else
+    typedef float scalar_type;
+    #endif
     cudaGetDevice(&prev_gpu);
     cudaGetDeviceCount(&gpu_count);
     total_threads = gpu_count;
@@ -50,14 +55,15 @@ void Partition::generate_gpu_profile() {
     std::vector<double> runtimes(gpu_count, 0.0);
     for(int i = 0; i < gpu_count ; i++) {
       cudaSetDevice(i);
-      double result = (double) G2G::do_benchmark();
+      double slow_coef = (i==1)? (1) : 1;
+      double result = slow_coef * (double) G2G::do_benchmark<scalar_type>();
       runtimes[i] = result;
     }
     std::cout << "Matriz de correccion de tiempos de GPU: " << std::endl;
     for(int i = 0; i < gpu_count ; i++) {
       for(int j = 0; j < gpu_count ; j++) {
         double corr = runtimes[i]/ runtimes[j];
-        correction[i][j] = corr;
+        correction[j][i] = corr;
         std::cout << corr << "  ";
       }
       std::cout << std::endl;
@@ -79,7 +85,7 @@ void Partition::compute_work_partition()
   work = std::vector<std::vector<int> >(total_threads);
   for(int i = 0; i < cubes.size()+spheres.size(); i++) {
     int thread_assigned = 0;
-    thread_assigned = i % total_threads;
+    //thread_assigned = i % total_threads;
     work[thread_assigned].push_back(i);
   }
 }
