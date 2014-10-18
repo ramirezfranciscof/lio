@@ -1,8 +1,6 @@
 &lio
 nsol=0
-natom=3
+natom=24
 charge=0
-timedep=0
-ntdstep=1000
 writeforces=t
 &end
