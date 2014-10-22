@@ -87,9 +87,10 @@ void Partition::compute_work_partition()
   work = std::vector<std::vector<int> >(total_threads);
   for(int i = 0; i < cubes.size()+spheres.size(); i++) {
     int thread_assigned = 0;
-    //thread_assigned = i % total_threads;
+    thread_assigned = i % total_threads;
     work[thread_assigned].push_back(i);
     size_t size = (i<cubes.size())? cubes[i].size_in_gpu() : spheres[i-cubes.size()].size_in_gpu();
+    //long long size = (i<cubes.size())? cubes[i].cost() : spheres[i-cubes.size()].cost();
     thread_estimate[thread_assigned] += size;
     work_estimate[thread_assigned].push_back(size);
   }

@@ -184,6 +184,14 @@ bool PointGroup<scalar_type>::is_significative(FunctionType type, double exponen
     break;
   }
 }
+
+template<class scalar_type>
+long long PointGroup<scalar_type>::cost() const {
+    long long np = number_of_points, gm = total_functions();
+    static const long long MIN_COST = 2100000;
+    return 10*((np * gm * (1+gm)) / 2) + MIN_COST;
+}
+
 template<class scalar_type>
 bool PointGroup<scalar_type>::operator<(const PointGroup<scalar_type>& T) const{
     int my_cost = number_of_points * total_functions();
@@ -372,7 +380,7 @@ void Partition::solve(Timers& timers, bool compute_rmm,bool lda,bool compute_for
     }
     t0.stop_and_sync();
     thread_duration[my_thread] = slow_coef*(t0.getMicrosec() + 1000*1000*t0.getSec());
-    std::cout << "Workload " << my_thread << " " << thread_duration[my_thread] << std::endl;
+    std::cout << "Workload " << my_thread << " " << thread_duration[my_thread] << " " << work[my_thread].size() << std::endl;
   }
 
   if(total_threads > 1) {

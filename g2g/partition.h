@@ -62,6 +62,7 @@ class PointGroup {
     G2G::CudaMatrix<vec_type4> hessian_values_transposed;
     #endif
 
+    long long cost() const;
     inline FunctionType small_function_type(uint f) const {
       if (f < s_functions) return FUNCTION_S;
       else if (f < s_functions + p_functions) return FUNCTION_P;
