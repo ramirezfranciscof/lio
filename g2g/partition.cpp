@@ -294,9 +294,9 @@ void Partition::balance_load(vector<long long>& thread_duration, vector<vector<l
       max_time = thread_duration[max_time_index];
 
       work[min_time_index].push_back(element_index);
-      work[max_time_index].erase(work[max_time_index].begin()+best_index);
-
       work_duration[min_time_index].push_back(work_duration[max_time_index][best_index] * time_correction * migration_factor);
+
+      work[max_time_index].erase(work[max_time_index].begin()+best_index);
       work_duration[max_time_index].erase(work_duration[max_time_index].begin()+best_index);
     }
   }
