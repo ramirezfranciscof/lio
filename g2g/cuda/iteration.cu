@@ -79,24 +79,22 @@ template void gpu_set_atom_positions<double3>(const HostMatrix<double3>& m);
 template <class scalar_type>
 unsigned long do_benchmark(void) {
   Timer t0;
-  const int elems = 1000;
-  scalar_type factors_host[elems];
-  scalar_type* factors_device;
-  scalar_type matrix_host[elems][elems];
-  scalar_type* matrix_device;
-  cudaMalloc(&factors_device, sizeof(factors_host));
-  cudaMalloc(&matrix_device, sizeof(matrix_host));
+  const int elems = 512;
+  HostMatrix<scalar_type> matrix_host(elems,elems);
+  HostMatrix<scalar_type> factors_host(elems,elems);
+
   for(int i = 0; i < elems; i++) {
     for(int j = 0; j < elems; j++) {
       scalar_type val = (i*37.0+j*23.0)/200.0;
-      matrix_host[i][j] = val;
-      matrix_host[j][i] = val;
+      matrix_host(i,j) = val;
+      matrix_host(j,i)= val;
     }
-    factors_host[i] = (i*43.0) / 1000.0;
+    factors_host(i)= (i*43.0) / 1000.0;
   }
 
-  cudaMemcpy(factors_device, factors_host, sizeof(factors_host), cudaMemcpyHostToDevice);
-  cudaMemcpy(matrix_device, matrix_host, sizeof(matrix_host), cudaMemcpyHostToDevice);
+  CudaMatrix<scalar_type> matrix_device(matrix_host);
+  CudaMatrix<scalar_type> factors_device(factors_host);
+
   dim3 threadBlock = dim3(RMM_BLOCK_SIZE_XY, RMM_BLOCK_SIZE_XY);
   uint blocksPerRow = divUp(elems, RMM_BLOCK_SIZE_XY);
   // Only use enough blocks for lower triangle
@@ -107,10 +105,9 @@ unsigned long do_benchmark(void) {
   t0.start_and_sync();
   for(int i = 0; i < 10; i++) {
     gpu_update_rmm<scalar_type,true><<<threadGrid, threadBlock>>>(
-        factors_device, elems, rmm_output_gpu.data, matrix_device, elems);
+        factors_device.data, elems, rmm_output_gpu.data, matrix_device.data, elems);
   }
   t0.stop_and_sync();
-  cudaFree(factors_device); cudaFree(matrix_device);
   return (t0.getMicrosec() + 1000*1000*t0.getSec());
 }
 
