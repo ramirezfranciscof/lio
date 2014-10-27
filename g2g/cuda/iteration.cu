@@ -258,12 +258,11 @@ void PointGroup<scalar_type>::solve_closed(Timers& timers, bool compute_rmm, boo
     cudaAssertNoError("compute_density");
 
     HostMatrix<scalar_type> energy_cpu(energy_gpu);
-    scalar_type localenergy = 0.0f;
+    double localenergy = 0.0f;
     for (uint i = 0; i < number_of_points; i++) {
       localenergy += energy_cpu(i);
     } // TODO: hacer con un kernel?
-#pragma omp atomic
-      energy += localenergy;
+    energy += localenergy;
   }
   else {
 #undef compute_parameters

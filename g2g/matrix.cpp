@@ -42,7 +42,7 @@ template<class T> void HostMatrix<T>::alloc_data(void) {
     assert(false);
     #endif
 	}
-	else this->data = new T[this->elements()+16];
+	else this->data = new T[this->elements()];
 
 	assert(this->data);
 }
