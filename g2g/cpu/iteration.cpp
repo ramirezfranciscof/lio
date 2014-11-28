@@ -25,7 +25,7 @@ namespace G2G {
 template<class scalar_type> void PointGroup<scalar_type>::solve(Timers& timers,
   bool compute_rmm, bool lda, bool compute_forces, bool compute_energy, 
   double& energy, double& energy_i, double& energy_c, double& energy_c1, double& energy_c2,
-  HostMatrix<double> & fort_forces, int inner_threads, HostMatrix<scalar_type> & rmm_global_output, bool OPEN)
+  HostMatrix<double> & fort_forces, int inner_threads, HostMatrix<double> & rmm_global_output, bool OPEN)
 {
 
   solve_closed(timers, compute_rmm, lda, compute_forces, compute_energy, 
@@ -34,7 +34,7 @@ template<class scalar_type> void PointGroup<scalar_type>::solve(Timers& timers,
 
 template<class scalar_type> void PointGroup<scalar_type>::solve_closed(Timers& timers,
   bool compute_rmm, bool lda, bool compute_forces, bool compute_energy, 
-  double& energy, HostMatrix<double> & fort_forces, int inner_threads, HostMatrix<scalar_type> & rmm_global_output)
+  double& energy, HostMatrix<double> & fort_forces, int inner_threads, HostMatrix<double> & rmm_global_output)
 {
   const uint group_m = total_functions();
   const int npoints = points.size();

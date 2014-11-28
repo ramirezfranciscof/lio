@@ -114,11 +114,11 @@ class PointGroup {
         HostMatrix<double> &, int, HostMatrix<scalar_type> &, bool);
 
     void solve_closed(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, 
-        bool compute_energy, double& energy, HostMatrix<double> &, int, HostMatrix<scalar_type> &);
+        bool compute_energy, double& energy, HostMatrix<double> &, int, HostMatrix<double> &);
 
     void solve(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, 
         bool compute_energy, double& energy, double &, double &, double &, double &,
-        HostMatrix<double> &, int, HostMatrix<scalar_type> &, bool);
+        HostMatrix<double> &, int, HostMatrix<double> &, bool);
 
     bool is_significative(FunctionType, double exponent, double coeff, double d2);
     bool operator<(const PointGroup<scalar_type>& T) const;
@@ -168,7 +168,7 @@ class Partition {
     std::vector<Sphere> spheres;
 
     std::vector< HostMatrix<double> > fort_forces_ms;
-    std::vector< HostMatrix<base_scalar_type> > rmm_outputs;
+    std::vector< HostMatrix<double> > rmm_outputs;
 
     std::vector< std::vector< int > > work;
     std::vector< double > next;
