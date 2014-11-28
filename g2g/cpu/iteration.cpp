@@ -54,17 +54,10 @@ template<class scalar_type> void PointGroup<scalar_type>::solve_closed(Timers& t
   HostMatrix<scalar_type> rmm_input(group_m,group_m);
   get_rmm_input(rmm_input);
 
-  vector<vec_type3> forces;
-  vector< std::vector<vec_type3> > forces_mat;
   HostMatrix<scalar_type> factors_rmm; 
       
   if(compute_rmm || compute_forces) 
     factors_rmm.resize(points.size(), 1);
-
-  if(compute_forces) {
-    forces.resize(total_nucleii(), vec_type3(0.f,0.f,0.f)); 
-    forces_mat.resize(points.size(), vector<vec_type3>(total_nucleii(), vec_type3(0.f,0.f,0.f)));
-  }
 
   const int iexch = fortran_vars.iexch;
 
@@ -175,6 +168,11 @@ template<class scalar_type> void PointGroup<scalar_type>::solve_closed(Timers& t
 
   timers.forces.start();
   if (compute_forces) {
+    vector<vec_type3> forces;
+    vector< std::vector<vec_type3> > forces_mat;
+    forces.resize(total_nucleii(), vec_type3(0.f,0.f,0.f)); 
+    forces_mat.resize(points.size(), vector<vec_type3>(total_nucleii(), vec_type3(0.f,0.f,0.f)));
+
     HostMatrix<scalar_type> ddx,ddy,ddz;
     ddx.resize(total_nucleii(), 1); 
     ddy.resize(total_nucleii(), 1); 
