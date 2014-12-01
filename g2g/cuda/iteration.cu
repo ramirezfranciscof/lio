@@ -722,8 +722,6 @@ void PointGroup<scalar_type>::solve_opened(Timers& timers, bool compute_rmm, boo
   cudaUnbindTexture(rmm_input_gpu_tex2); //Enroque el Unbind con el Free, asi parece mas logico. Nano
   cudaFreeArray(cuArray1);
   cudaFreeArray(cuArray2);
-  cudaFree(cuArray1);
-  cudaFree(cuArray2);
 
   //uint free_memory, total_memory;
   //cudaGetMemoryInfo(free_memory, total_memory);
