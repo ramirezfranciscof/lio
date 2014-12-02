@@ -5,5 +5,5 @@ ATOM #    ATOM TYPE    POPULATION
  
  UNPAIRED SPIN MULLIKEN POPULATION ANALYSIS
 ATOM #    ATOM TYPE    POPULATION
-  1           8          1.0001
-  2           8          0.9999
+  1           8          0.9993
+  2           8          1.0007

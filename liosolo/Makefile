@@ -10,5 +10,4 @@ endif
 liosolo: main.f
 	ifort $(DBUG) -L ../lioamber/ -llio-g2g -L ../g2g/ -lg2g  -I../lioamber/ $(LIBS)  main.f -o liosolo
 clean:
-	rm liosolo
-
+	rm -rf liosolo
