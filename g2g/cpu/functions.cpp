@@ -14,11 +14,13 @@ namespace G2G {
 template<class scalar_type>
 void PointGroup<scalar_type>::compute_functions(bool forces, bool gga)
 {
-  #if !CPU_RECOMPUTE
   if (this->inGlobal) return;
-  this->inGlobal = true;
-  forces = gga = true; // Vamos a cachear asi que guardemos todo y listo
-  #endif
+  if (!globalMemoryPool::tryAlloc(size_in_cpu())) {
+    this->inGlobal = true;
+    forces = gga = true; // Vamos a cachear asi que guardemos todo y listo
+  } else {
+    this->inGlobal = false;
+  }
   /* Load group functions */
   uint group_m = total_functions();
 

@@ -34,6 +34,13 @@ ostream& operator<<(ostream& io, const Timers& t) {
  ********************/
 
 template<class scalar_type>
+size_t PointGroup<scalar_type>::size_in_cpu() const
+{
+  size_t size = number_of_points * total_functions() * sizeof(scalar_type);
+  return size + 3 * size + 6 * size + size;
+}
+
+template<class scalar_type>
 void PointGroup<scalar_type>::output_cost() const
 {
     printf("%d %d %d %lld %lld\n", number_of_points, total_functions(), rmm_bigs.size(), cost(), size_in_gpu());
@@ -225,20 +232,20 @@ size_t PointGroup<scalar_type>::size_in_gpu() const
 template<class scalar_type>
 PointGroup<scalar_type>::~PointGroup<scalar_type>()
 {
-#if !CPU_KERNELS
   if(inGlobal) {
-    globalMemoryPool::dealloc(size_in_gpu());
-    function_values.deallocate();
-    gradient_values.deallocate();
-    hessian_values.deallocate();
+    #if !CPU_KERNELS
+      globalMemoryPool::dealloc(size_in_gpu());
+      function_values.deallocate();
+      gradient_values.deallocate();
+      hessian_values.deallocate();
+    #else
+      function_values.deallocate();
+      gX.deallocate(); gY.deallocate(); gZ.deallocate();
+      hPX.deallocate(); hPY.deallocate(); hPZ.deallocate();
+      hIX.deallocate(); hIY.deallocate(); hIZ.deallocate();
+      function_values_transposed.deallocate();
+    #endif
   }
-#else
-  function_values.deallocate();
-  gX.deallocate(); gY.deallocate(); gZ.deallocate();
-  hPX.deallocate(); hPY.deallocate(); hPZ.deallocate();
-  hIX.deallocate(); hIY.deallocate(); hIZ.deallocate();
-  function_values_transposed.deallocate();
-#endif
 }
 
 void Partition::compute_functions(bool forces, bool gga) { 

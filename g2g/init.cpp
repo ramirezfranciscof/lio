@@ -196,15 +196,9 @@ void compute_new_grid(const unsigned int grid_type) {
   	t_grilla.stop_and_sync();
   	//cout << "timer grilla: " << t_grilla << endl;
 
-#if CPU_KERNELS && !CPU_RECOMPUTE
   	/** compute functions **/
   	//if (fortran_vars.do_forces) cout << "<===== computing all functions [forces] =======>" << endl;
   	//else cout << "<===== computing all functions =======>" << endl;
-
-
-  	partition.compute_functions(fortran_vars.do_forces, fortran_vars.gga);
-
-#endif
 }
 //==============================================================================================================
 extern "C" void g2g_reload_atom_positions_(const unsigned int& grid_type) {

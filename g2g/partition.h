@@ -122,6 +122,8 @@ class PointGroup {
 
     bool is_significative(FunctionType, double exponent, double coeff, double d2);
     bool operator<(const PointGroup<scalar_type>& T) const;
+
+    size_t size_in_cpu() const;
     size_t size_in_gpu() const;
     int elements() const;
 

@@ -37,9 +37,9 @@ void globalMemoryPool::init(double free_global_memory)
 
     _freeGlobalMemory=static_cast<size_t>(static_cast<double>(free_memory)*_freeFactor);
 #else
-    _totalGlobalMemory = 0;
-    _freeGlobalMemory = 0;
-    _freeFactor = 0.0f;
+    _totalGlobalMemory = 1024 * 1024 * 1024;
+    _freeGlobalMemory = _totalGlobalMemory;
+    _freeFactor = free_global_memory;
 #endif
     _init = true;
 }

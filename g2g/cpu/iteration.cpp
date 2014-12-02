@@ -39,12 +39,12 @@ template<class scalar_type> void PointGroup<scalar_type>::solve_closed(Timers& t
   const uint group_m = total_functions();
   const int npoints = points.size();
 
-  #if CPU_RECOMPUTE
   /** Compute functions **/
-  timers.functions.start();
-  compute_functions(compute_forces, !lda);
-  timers.functions.pause();
-  #endif
+  if(!this->inGlobal) {
+    timers.functions.start();
+    compute_functions(compute_forces, !lda);
+    timers.functions.pause();
+  }
 
   double localenergy = 0.0;
 
@@ -245,15 +245,16 @@ template<class scalar_type> void PointGroup<scalar_type>::solve_closed(Timers& t
   }
   timers.rmm.pause();
 
-  energy+=localenergy;
+  if (compute_energy) 
+    energy+=localenergy;
 
-#if CPU_RECOMPUTE
   /* clear functions */
-  gX.deallocate(); gY.deallocate(); gZ.deallocate();
-  hIX.deallocate(); hIY.deallocate(); hIZ.deallocate();
-  hPX.deallocate(); hPY.deallocate(); hPZ.deallocate();
-  function_values_transposed.deallocate();
-#endif
+  if(!this->inGlobal) {
+    gX.deallocate(); gY.deallocate(); gZ.deallocate();
+    hIX.deallocate(); hIY.deallocate(); hIZ.deallocate();
+    hPX.deallocate(); hPY.deallocate(); hPZ.deallocate();
+    function_values_transposed.deallocate();
+  }
 }
 
 template class PointGroup<double>;
