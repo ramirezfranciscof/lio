@@ -26,9 +26,12 @@ c       dimension d(natom,natom)
        logical  hagodiis,alloqueo, ematalloc
 c       REAL*8 , intent(in)  :: qmcoords(3,natom)
 c       REAL*8 , intent(in)  :: clcoords(4,nsolin)
-        INTEGER :: ErrID,iii,jjj
-        LOGICAL :: docholesky
-        REAL*8,ALLOCATABLE :: MatrixVec(:),TestMatrix(:)
+
+      INTEGER :: ErrID,iii,jjj
+      LOGICAL :: docholesky
+      REAL*8,ALLOCATABLE :: MatrixVec(:),TestMatrix(:)
+      INTEGER            :: LWORK2
+      REAL*8,ALLOCATABLE :: WORK2(:)
 
       call g2g_timer_start('SCF')
       if(verbose) write(*,*) '======>>>> INGRESO A SCFop <<<<=========='
@@ -224,7 +227,13 @@ c ESSL OPTION ------------------------------------------
 c
 c LAPACK OPTION -----------------------------------------
 #ifdef pack
-        call dspev('V','L',M,RMM(M5),RMM(M13),X,M,RMM(M15),info)
+        do ii=1,M; do jj=1,M
+          X(ii,jj)=Smat(ii,jj)
+        enddo; enddo
+        if (allocated(WORK2)) deallocate(WORK2); allocate(WORK2(1))
+        call dsyev('V','L',M,X,M,RMM(M13),WORK2,-1,info)
+        LWORK2=int(WORK2(1)); deallocate(WORK2); allocate(WORK2(LWORK2))
+        call dsyev('V','L',M,X,M,RMM(M13),WORK2,LWORK2,info)
 #endif
 c-----------------------------------------------------------
 c 
@@ -374,7 +383,7 @@ c
 
 c End of Starting guess (No MO , AO known)-------------------------------
 c
-      call int22()
+      call int2()
 c
 **
       if (MEMO) then
@@ -968,16 +977,16 @@ c<<<<<========================================
 c
 c-----------------------------------------
 c Construction of new density matrix and comparison with old one
-       kk=0
-       good=0.0D0
 c
-       do j=1,M
-         do i=j,M
-           kk=kk+1
-           tmp=RMM(kk)
-           RMM(kk)=0.D0
-           rhoalpha(kk)=0.D0
-           rhobeta(kk)=0.D0
+        kk=0
+        good=0.0D0
+        do j=1,M
+          do i=j,M
+            kk=kk+1
+            tmp=RMM(kk)
+            RMM(kk)=0.D0
+            rhoalpha(kk)=0.D0
+            rhobeta(kk)=0.D0
 c
            do k=1,NCOa
              k0=M18+M*(k-1)-1
@@ -1015,14 +1024,14 @@ c
 c
 c--- Damping factor update - 
        DAMP=DAMP0
-       IDAMP=0
-       if (IDAMP.EQ.1) then
-         DAMP=DAMP0
-         if (abs(D1).lt.1.D-5) then
-           fac=dmax1(0.90D0,abs(D1/D2))
-           fac=dmin1(fac,1.1D0)
-           DAMP=DAMP0*fac
-         endif
+c      IDAMP=0
+c      if (IDAMP.EQ.1) then
+c        DAMP=DAMP0
+c        if (abs(D1).lt.1.D-5) then
+c          fac=dmax1(0.90D0,abs(D1/D2))
+c          fac=dmin1(fac,1.1D0)
+c          DAMP=DAMP0*fac
+c        endif
 c
 c        E=E1+E2+En
 c        E=E+Es
@@ -1032,7 +1041,7 @@ c        D1=(E-E0)
 c
 c        E0=E
 c        DAMP0=DAMP
-       endif
+c      endif
 
        E=E1+E2+En
        E=E+Es
@@ -1055,7 +1064,7 @@ c-------------------------------------------------------------------
         write(6,*) 'NO CONVERGENCE AT ',NMAX,' ITERATIONS'
         noconverge=noconverge + 1
         converge=0
-        call write_struct()
+        call write_struct() !escribe la estructura que no convigio
       else
         write(6,*) 'CONVERGED AT',niter,'ITERATIONS'
         noconverge = 0
@@ -1069,11 +1078,14 @@ c-------------------------------------------------------------------
 
 #ifdef G2G
 #ifdef ULTIMA_CPU
-        call exchnum(NORM,natom,r,Iz,Nuc,M,ncont,nshell,c,a,RMM,
+       call exchnum(NORM,natom,r,Iz,Nuc,M,ncont,nshell,c,a,RMM,
      >              M18,NCO,Exc,nopt)
 #else
-        call g2g_new_grid(igrid)
-        call g2g_solve_groups(1, Exc, 0)
+       call g2g_new_grid(igrid)
+
+       call g2g_solve_groups(1, Exc, 0)
+
+c       write(*,*) 'g2g-Exc',Exc
 #endif
 #else
 #ifdef ULTIMA_G2G
