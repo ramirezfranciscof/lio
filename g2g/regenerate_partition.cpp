@@ -22,7 +22,11 @@ using namespace G2G;
 //Sorting the cubes in increasing order of size in bytes in GPU.
 template <typename T>
 bool comparison_by_size(const T & a, const T & b) {
+#if !CPU_KERNELS
   return a.size_in_gpu() < b.size_in_gpu();
+#else
+  return a.size_in_cpu() < b.size_in_cpu();
+#endif
 }
 
 template <typename T>
@@ -90,7 +94,10 @@ void Partition::compute_work_partition()
     if(!spheres[i].is_big_group(inner_threads))
       costs.push_back(make_pair(spheres[i].cost(), ncubes+i));
 
-  if(costs.size() == 0) return;
+  if(costs.size() == 0) {
+    work.resize(outer_threads);
+    return;
+  }
 
   sort(costs.begin(), costs.end());
   reverse(costs.begin(), costs.end());
@@ -404,14 +411,15 @@ void Partition::regenerate(void)
         }
     }
 
-    sort(spheres.begin(), spheres.end());
-    sort(cubes.begin(), cubes.end());
+    sortBySize(spheres);
+    sortBySize(cubes);
 
     //Initialize the global memory pool for CUDA, with the default safety factor
     //If it is CPU, then this doesn't matter
     globalMemoryPool::init(G2G::free_global_memory);
 
-    inner_threads = outer_threads = omp_get_max_threads();
+    inner_threads = getintenv("LIO_INNER_THREADS", omp_get_max_threads());
+    outer_threads = getintenv("LIO_OUTER_THREADS", omp_get_max_threads());
 
     G2G::MINCOST = getintenv("LIO_MINCOST_OFFSET", 250000);
     G2G::THRESHOLD = getintenv("LIO_SPLIT_THRESHOLD", 80);

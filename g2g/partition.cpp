@@ -23,7 +23,10 @@ ostream& operator<<(ostream& io, const Timers& t) {
 #ifdef TIMINGS
     ostringstream ss;
     ss << "density = " << t.density << " rmm = " << t.rmm << " forces = " << t.forces
-      << " functions = " << t.functions;
+      << " functions = " << t.functions << endl;
+    ss << "cachingdetect = " << t.load_functions << " ";
+    ss << "memorygeting = " << t.create_matrices << " ";
+    ss << "calculating = " << t.calculate_matrices << endl;
     io << ss.str() << endl;
 #endif
   return io;
@@ -252,14 +255,13 @@ void Partition::compute_functions(bool forces, bool gga) {
   Timer t1;
   t1.start_and_sync();
 
-  #pragma omp parallel for schedule(guided,8)
+  Timers ts;
   for(int i = 0; i < cubes.size(); i++){
-    cubes[i].compute_functions(forces, gga);
+    cubes[i].compute_functions(ts, forces, gga);
   }
 
-  #pragma omp parallel for schedule(guided,8)
   for(int i = 0; i < spheres.size(); i++){
-    spheres[i].compute_functions(forces, gga);
+    spheres[i].compute_functions(ts, forces, gga);
   }
 
   t1.stop_and_sync();

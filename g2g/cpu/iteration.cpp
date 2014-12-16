@@ -42,7 +42,7 @@ template<class scalar_type> void PointGroup<scalar_type>::solve_closed(Timers& t
   /** Compute functions **/
   if(!this->inGlobal) {
     timers.functions.start();
-    compute_functions(compute_forces, !lda);
+    compute_functions(timers, compute_forces, !lda);
     timers.functions.pause();
   }
 

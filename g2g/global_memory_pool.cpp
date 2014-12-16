@@ -1,5 +1,7 @@
 #include "global_memory_pool.h"
 #include <cassert>
+#include <iostream>
+#include <unistd.h>
 
 // Only include it to cudaGetMemoryInfo to accurately measure the device memory.
 #include "cuda_includes.h"
@@ -37,7 +39,9 @@ void globalMemoryPool::init(double free_global_memory)
 
     _freeGlobalMemory=static_cast<size_t>(static_cast<double>(free_memory)*_freeFactor);
 #else
-    _totalGlobalMemory = 1024 * 1024 * 1024;
+    size_t total_mem = sysconf(_SC_PHYS_PAGES) * sysconf(_SC_PAGE_SIZE);
+    _totalGlobalMemory = total_mem * free_global_memory;
+    std::cout << "Memory " << _totalGlobalMemory << std::endl;
     _freeGlobalMemory = _totalGlobalMemory;
     _freeFactor = free_global_memory;
 #endif

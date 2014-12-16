@@ -20,7 +20,8 @@ using std::pair;
 
 namespace G2G {
   struct Timers {
-    Timer rmm, density, forces, functions;
+    Timer rmm, density, forces, functions,
+          calculate_matrices, load_functions, create_matrices;
   };
 
   std::ostream& operator<<(std::ostream& io, const Timers& t);
@@ -107,7 +108,7 @@ class PointGroup {
     void add_point(const Point& p);
     void compute_weights(void);
 
-    void compute_functions(bool forces, bool gga);
+    void compute_functions(Timers&, bool forces, bool gga);
 
     void solve_opened(Timers& timers, bool compute_rmm, bool lda, bool compute_forces, 
         bool compute_energy, double& energy, double &, double &, double &, double &,
