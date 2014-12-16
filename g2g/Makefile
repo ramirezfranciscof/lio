@@ -11,6 +11,10 @@ ifeq ($(cpu),1)
   SRCS         += $(CPU_SOURCES)
   OBJ          += $(CPU_SOURCES:%.cpp=%.o)
   CXXFLAGS     += -DCPU_KERNELS=1
+ifeq ($(openmp),1)
+	CXXFLAGS += -openmp
+endif
+
 else
   include Makefile.cuda
   CUDA_LIBS    := -lcudart -lcuda
@@ -20,6 +24,10 @@ else
 endif
 
 ## Other options
+ifeq ($(print), 1)
+        CXXFLAGS += -DPRINT_MATRICES
+endif
+
 ifeq ($(time), 1)
   CXXFLAGS += -DTIMINGS
 endif
@@ -58,7 +66,7 @@ else
 endif
 
 ## Define libraries
-LIBRARIES := $(shell pkg-config gsl --libs) $(CUDA_LDFLAGS) $(CUDA_LIBS) -lrt
+LIBRARIES := $(CUDA_LDFLAGS) $(CUDA_LIBS) -lrt
 
 ## Targets
 all: $(LIBRARY)
@@ -78,8 +86,8 @@ libg2g.a: $(OBJ)
 	ranlib libg2g.a
 
 libg2g.so: $(OBJ)
-	@if [ -z "$(CUDA_HOME)" ] ; then echo "CUDA_HOME is not set. Please, check it."; exit 1; fi;
-	@if ! test -f $(CUDA_HOME)/lib/libcudart.so; then echo "libcudart.so can not be found in CUDA_HOME/lib/, current value is '"$(CUDA_HOME)/lib"'. Please check if CUDA_HOME variable is correctly set."; exit 1; fi;
+	#@if [ -z "$(CUDA_HOME)" ] ; then echo "CUDA_HOME is not set. Please, check it."; exit 1; fi;
+	#@if ! test -f $(CUDA_HOME)/lib/libcudart.so; then echo "libcudart.so can not be found in CUDA_HOME/lib/, current value is '"$(CUDA_HOME)/lib"'. Please check if CUDA_HOME variable is correctly set."; exit 1; fi;
 	$(CXX) -shared $(LDFLAGS) -o libg2g.so $(OBJ) $(LIBRARIES)
 
 clean:

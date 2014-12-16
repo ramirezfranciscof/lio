@@ -30,7 +30,7 @@
      > ighost1(ntq)
       dimension ncf(nng),lt(nng)
       real*8 e_(50,3),wang(50),e_2(116,3),wang2(116),e3(194,3), ! intg1 e intg2
-     > wang3(194),Ex                                               !
+     > wang3(194)                                               !
       integer Nr(0:54),Nr2(0:54)
       real*8 Fx, Fy, Fz, epsilon, a0,tdstep
 
@@ -58,7 +58,7 @@ c
        
        real*8, dimension (:), ALLOCATABLE :: RMM,RMM1,RMM2,RMM3
        real*8, dimension (:), ALLOCATABLE :: rhoalpha,rhobeta
-       real*8, dimension (:,:), ALLOCATABLE :: X, XX
+       real*8, dimension (:,:), ALLOCATABLE :: X,X2,XX
        real*8, dimension (:), ALLOCATABLE :: old1,old2,old3 
 
 c

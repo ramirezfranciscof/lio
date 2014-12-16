@@ -12,25 +12,23 @@ c       real*8 ftot(3)
 
          ffcl=0
          ff=0
-
+        if(noconverge.eq.0) then
         call g2g_timer_start('intsolG')
         call intsolG(ff,ffcl)
         call g2g_timer_stop('intsolG')
-         factor=1.D0
+        endif
        do i=1,natom 
         do j=1,3
-       dxyzqm(j,i)=ff(i,j)*factor+dxyzqm(j,i)
+       dxyzqm(j,i)=ff(i,j)+dxyzqm(j,i)
         enddo
          enddo
        do jj=1,nsol
         do j=1,3
-        dxyzcl(j,jj)=ffcl(natom+jj,j)*factor!+dxyzcl(j,jj)
+        dxyzcl(j,jj)=ffcl(natom+jj,j) !+dxyzcl(j,jj)
        enddo
        enddo         
-c        write(*,*) 'aca toyyyy'
        
        deallocate (ff,ffcl) 
-c       deallocate (ffs,ffcls) 
 897    format (F17.11)
 
       end
