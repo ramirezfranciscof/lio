@@ -373,12 +373,13 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
            call g2g_timer_stop('cumatmul')
 #else
 ! with matmul:
-       rho_a=matmul(ytrans,rho_a)
-       rho_a=matmul(rho_a,y)
-       rho_b=matmul(ytrans,rho_b)
-       rho_b=matmul(rho_b,y)
+!       rho_a=matmul(ytrans,rho_a)
+!       rho_a=matmul(rho_a,y)
+!       rho_b=matmul(ytrans,rho_b)
+!       rho_b=matmul(rho_b,y)
 ! with matmulnanoc
-!            call matmulnanoc(rho,Y,rho,M)
+            call matmulnanoc(rho_a,Y,rho_a,M)
+            call matmulnanoc(rho_b,Y,rho_b,M)
 !            rho=rho1
 !--------------------------------------!
 #endif
