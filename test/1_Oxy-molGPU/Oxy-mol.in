@@ -3,7 +3,7 @@
  natom=2
  charge=0
  nmax=100
- vcinp=f
+ vcinp=T
  open=t
  nunp=2
 &end
