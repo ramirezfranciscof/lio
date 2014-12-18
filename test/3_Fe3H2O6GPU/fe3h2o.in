@@ -2,7 +2,7 @@
  nsol=0
  natom=19
  charge=3
- nmax=100
+ nmax=500
  vcinp=t
  open=t
  diis=t
