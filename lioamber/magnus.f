@@ -33,9 +33,7 @@
        Omega1=(-1)*(icmplx)*(Fock)*(dt)
 ! Density matrix propagation
        DO ii=1,N
-         ConmNext=MATMUL(Omega1,ConmPrev)
-         Scratch=MATMUL(ConmPrev,Omega1)
-         ConmNext=ConmNext-Scratch
+         call conmutcc(Omega1,ConmPrev,ConmNext,M)
          RhoNew=RhoNew+factorial(ii)*ConmNext
          ConmPrev=ConmNext
        ENDDO

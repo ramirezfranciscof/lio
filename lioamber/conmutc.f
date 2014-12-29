@@ -2,52 +2,48 @@
 !========================================================================!
 !!!!!!!!  Hace C=A*B-B*A
 !------------------------------------------------------------------------!
-       REAL*8 , intent(inout)  :: A(M,M)
-       logical ta, tb
-       INTEGER :: M
+       REAL*8 , intent(in)  :: A(M,M)
+       INTEGER,intent(in) :: M
 #ifdef TD_SIMPLE
-       COMPLEX*8 , intent(inout) :: B(M,M), C(M,M)
-       COMPLEX*8, dimension (:,:), ALLOCATABLE :: scratch,scratch1,
-     > scratch2
+       COMPLEX*8 :: alpha, beta
+       COMPLEX*8 , intent(in) :: B(M,M)
+       COMPLEX*8 , intent(out) :: C(M,M)
+       COMPLEX*8, ALLOCATABLE :: scratch(:,:)
 #else
-       COMPLEX*16 , intent(inout) :: B(M,M), C(M,M)
-       COMPLEX*16, dimension (:,:), ALLOCATABLE :: scratch,scratch1,
-     > scratch2
+       COMPLEX*16 ::  alpha, beta
+       COMPLEX*16 , intent(in) :: B(M,M)
+       COMPLEX*16 , intent(out) :: C(M,M)
+       COMPLEX*16, ALLOCATABLE :: scratch(:,:)
 #endif
 !------------------------------------------------------------------------!
-       allocate (scratch(M,M),scratch1(M,M),scratch2(M,M))
-        do i=1,M
-        do j=1,M
-         scratch(i,j)=A(j,i)
-        enddo
-        enddo
-         scratch1=0
-        do i=1,M
-        do j=1,M
-         do k= 1,M
-         scratch1(i,j)= scratch1(i,j) + scratch(k,i)*B(k,j)
-         enddo
-        enddo
-        enddo
-        do i=1,M
-        do j=1,M
-         scratch(i,j)=B(j,i)
-        enddo
-        enddo
-         scratch2=0
-         C=0
-        do i=1,M
-        do j=1,M
-         do k= 1,M
-         scratch2(i,j)= scratch2(i,j) + scratch(k,i)*A(k,j)
-         enddo
-        C(i,j)= scratch1(i,j)-scratch2(i,j)
-        enddo
-        enddo
-!-----------------------------------------------------------------------!
-       deallocate (scratch,scratch1,scratch2)
+       ALLOCATE(scratch(M,M))
+       DO i=1,M
+          DO j=1,M
+             scratch(i,j)=CMPLX(A(i,j),0.0D0)
+          ENDDO
+       ENDDO
+       alpha=CMPLX(1.0D0,0.0D0)
+       beta=CMPLX(0.0D0,0.0D0)
+#ifdef TD_SIMPLE
+       call CGEMM('N','N',M,M,M,alpha,B,M,scratch,M,beta,C,M)
+       beta=CMPLX(-1.0D0,0.0D0)
+       call CGEMM('N','N',M,M,M,alpha,scratch,M,B,M,beta,C,M)
+#else       
+       call ZGEMM('N','N',M,M,M,alpha,B,M,scratch,M,beta,C,M)
+       beta=CMPLX(-1.0D0,0.0D0)
+       call ZGEMM('N','N',M,M,M,alpha,scratch,M,B,M,beta,C,M)
+#endif
+       DEALLOCATE(scratch)
        return
        end
+
+
+
+
+
+
+
+
 
 
 

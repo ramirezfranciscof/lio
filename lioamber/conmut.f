@@ -1,53 +1,15 @@
             subroutine conmut(A,B,C,M)
 !!!!!!!!  Hace C=A*B-B*A
-       REAL*8 , intent(inout)  :: A(M,M), B(M,M), C(M,M)
-       logical ta, tb
-
-       real*8, dimension (:,:), ALLOCATABLE :: scratch,scratch1,scratch2
-
-
-
-       allocate (scratch(M,M),scratch1(M,M),scratch2(M,M))
-
-        do i=1,M
-        do j=1,M
-         scratch(i,j)=A(j,i)
-        enddo
-        enddo
-         scratch1=0
-        do i=1,M
-        do j=1,M
-         do k= 1,M
-         scratch1(i,j)= scratch1(i,j) + scratch(k,i)*B(k,j)
-         enddo
-        enddo
-        enddo
-
-
-        do i=1,M
-        do j=1,M
-         scratch(i,j)=B(j,i)
-        enddo
-        enddo
-
-         scratch2=0
-         C=0
-        do i=1,M
-        do j=1,M
-         do k= 1,M
-         scratch2(i,j)= scratch2(i,j) + scratch(k,i)*A(k,j)
-         enddo
-        C(i,j)= scratch1(i,j)-scratch2(i,j)
-        enddo
-        enddo
-
-
-
-
-       deallocate (scratch,scratch1,scratch2)
+       REAL*8 , intent(in)  :: A(M,M), B(M,M)
+       REAL*8 , intent(out)  :: C(M,M)
+       REAL*8 :: alpha, beta
+!---------------------------------------------------------------------!
+       alpha=1.0D0
+       beta=0.0D0
+       call DGEMM('N','N',M,M,M,alpha,B,M,A,M,beta,C,M)
+       beta=-1.0D0
+       call DGEMM('N','N',M,M,M,alpha,A,M,B,M,beta,C,M)
        return
- 
-
        end
 
 
