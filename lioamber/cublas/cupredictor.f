@@ -161,7 +161,7 @@ c now G
        call cumagnusfac(F3,rho2_a,rho2t,M,NBCH,tdstep1,factorial)
 !
 !       call matmulnanoc(rho2t,xtrans,rho4,M)
-       call rho_on_to_ao(rho2t,devPtrX,rho4,M)
+       call rho_transform(rho2t,devPtrX,rho4,M)
        call sprepack_ctr('L',M,rhoalpha,rho4)
        call sprepack_ctr('L',M,RMM,rho4)
 !
@@ -172,7 +172,7 @@ c now G
 !
        rho4=0
 !       call matmulnanoc(rho2t,xtrans,rho4,M)
-       call rho_on_to_ao(rho2t,devPtrX,rho4,M)
+       call rho_transform(rho2t,devPtrX,rho4,M)
        call sprepack_ctr('L',M,rhobeta,rho4)
        DO i=1,MM
           RMM(i)=RMM(i)+rhobeta(i)

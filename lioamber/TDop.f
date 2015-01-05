@@ -58,7 +58,7 @@ c       USE latom
       integer sizeof_real
       parameter(sizeof_real=8)
       integer stat
-      integer*8 devPtrX, devPtrY
+      integer*8 devPtrX, devPtrYtr
       external CUBLAS_INIT, CUBLAS_SET_MATRIX
       external CUBLAS_SHUTDOWN, CUBLAS_ALLOC
       integer CUBLAS_ALLOC, CUBLAS_SET_MATRIX
@@ -342,14 +342,14 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
 !! CUBLAS ---------------------------------------------------------------------!
 #ifdef CUBLAS
             stat = CUBLAS_ALLOC(M*M, sizeof_real, devPtrX)
-            stat = CUBLAS_ALLOC(M*M, sizeof_real, devPtrY)
+            stat = CUBLAS_ALLOC(M*M, sizeof_real, devPtrYtr)
             if (stat.NE.0) then
             write(*,*) "X and/or Y memory allocation failed"
             call CUBLAS_SHUTDOWN
             stop
             endif
             stat = CUBLAS_SET_MATRIX(M,M,sizeof_real,X,M,devPtrX,M)
-            stat = CUBLAS_SET_MATRIX(M,M,sizeof_real,Y,M,devPtrY,M)
+            stat=CUBLAS_SET_MATRIX(M,M,sizeof_real,ytrans,M,devPtrYtr,M)
             if (stat.NE.0) then
             write(*,*) "X and/or Y setting failed"
             call CUBLAS_SHUTDOWN
@@ -364,25 +364,23 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
 !       write(*,*) 'fz =', fz
 !------------------------------------------------------------------------------!
 ! Rho is transformed to the orthonormal basis
-#ifdef CUBLAS
+!#ifdef CUBLAS
            call g2g_timer_start('cumatmul')
-           call cumxtp(rho_a,devPtrY,rho_a,M)
-           call cumxtp(rho_b,devPtrY,rho_b,M)
-           call cumpx(rho_a,devPtrY,rho_a,M)
-           call cumpx(rho_b,devPtrY,rho_b,M)
+           call rho_transform(rho_a,devPtrYtr,rho_a,M)
+           call rho_transform(rho_b,devPtrYtr,rho_b,M)
            call g2g_timer_stop('cumatmul')
-#else
+!#else
 ! with matmul:
 !       rho_a=matmul(ytrans,rho_a)
 !       rho_a=matmul(rho_a,y)
 !       rho_b=matmul(ytrans,rho_b)
 !       rho_b=matmul(rho_b,y)
 ! with matmulnanoc
-            call matmulnanoc(rho_a,Y,rho_a,M)
-            call matmulnanoc(rho_b,Y,rho_b,M)
+!            call rho_transform(rho_a,Y,rho_a,M)
+!            call rho_transform(rho_b,Y,rho_b,M)
 !            rho=rho1
 !--------------------------------------!
-#endif
+!#endif
             call g2g_timer_start('int22')
             call int22()
             call g2g_timer_stop('int22')
@@ -466,17 +464,21 @@ c ELECTRIC FIELD CASE - Type=gaussian (ON)
             call spunpack('L',M,RMM(M5),fock_a)
             call spunpack('L',M,RMM(M3),fock_b)
 #ifdef CUBLAS
-            call cumxtf(fock_a,devPtrX,fock_a,M)
-            call cumfx(fock_a,DevPtrX,fock_a,M)
-            call cumxtf(fock_b,devPtrX,fock_b,M)
-            call cumfx(fock_b,DevPtrX,fock_b,M)
+!            call cumxtf(fock_a,devPtrX,fock_a,M)
+!            call cumfx(fock_a,DevPtrX,fock_a,M)
+!            call cumxtf(fock_b,devPtrX,fock_b,M)
+!            call cumfx(fock_b,DevPtrX,fock_b,M)
+             call fock_ao_to_on(fock_a,devPtrX,fock_a,M)
+             call fock_ao_to_on(fock_b,devPtrX,fock_b,M)
 #else
 !            fock_a=matmul(xtrans,fock_a)
 !            fock_a=matmul(fock_a,xmm)
 !            fock_b=matmul(xtrans,fock_b)
 !            fock_b=matmul(fock_b,xmm)
-            call matmulnano(fock_a,xmm,fock_a,M)
-            call matmulnano(fock_b,xmm,fock_b,M)
+!            call matmulnano(fock_a,xmm,fock_a,M)
+!            call matmulnano(fock_b,xmm,fock_b,M)
+             call fock_ao_to_on(fock_a,xmm,fock_a,M)
+             call fock_ao_to_on(fock_b,xmm,fock_b,M)
 #endif
             call g2g_timer_stop('fock')
 c Fock triangular matrix contained in RMM(M5,M5+1,M5+2,...,M5+MM) is copied to square matrix fock.
@@ -593,7 +595,7 @@ c Density update (rhold-->rho, rho-->rhonew)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 ! DENSITY MATRIX PROPAGATION USING MAGNUS ALGORITHM
                  write(*,*) 'Magnus'
-!#ifdef CUBLAS
+#ifdef CUBLAS
                 call g2g_timer_start('cupredictor')
                 call cupredictor_op(F1a_a,F1b_a,F1a_b,F1b_b,fock_a,
      >               fock_b,rho_a,rho_b,Xtrans,factorial,devPtrX)
@@ -604,32 +606,24 @@ c Density update (rhold-->rho, rho-->rhonew)
                 call cumagnusfac(fock_b,rho_b,rhonew_b,M,NBCH,dt_magnus,
      >          factorial)
                 call g2g_timer_stop('cumagnus')
-!#else
-!                call g2g_timer_start('predictor')
-!                call predictor_op(F1a_a,F1b_a,F1a_b,F1b_b,fock_a,fock_b,
-!     >          rho_a,rho_b,Xtrans,factorial)
-!                call g2g_timer_stop('predictor')
-!                call g2g_timer_start('magnus')
-!                call magnus(fock_a,rho_a,rhonew_a,M,NBCH,dt_magnus,
-!     >          factorial)
-!                call magnus(fock_b,rho_b,rhonew_b,M,NBCH,dt_magnus,
-!     >          factorial)
-!                call g2g_timer_stop('magnus')
-!#endif
+#else
+                call g2g_timer_start('predictor')
+                call predictor_op(F1a_a,F1b_a,F1a_b,F1b_b,fock_a,fock_b,
+     >          rho_a,rho_b,Xtrans,factorial)
+                call g2g_timer_stop('predictor')
+                call g2g_timer_start('magnus')
+                call magnus(fock_a,rho_a,rhonew_a,M,NBCH,dt_magnus,
+     >          factorial)
+                call magnus(fock_b,rho_b,rhonew_b,M,NBCH,dt_magnus,
+     >          factorial)
+                call g2g_timer_stop('magnus')
+#endif
                  F1a_a=F1b_a
                  F1a_b=F1b_b
                  F1b_a=fock_a
                  F1b_b=fock_b
                  rho_a=rhonew_a
                  rho_b=rhonew_b
-!                 write(100000,*) fock_a
-!                 write(100000,*) '------------------------------'
-!                 write(100001,*) fock_b
-!                 write(100001,*) '------------------------------'
-!                 write(100002,*) rhonew_a
-!                 write(100002,*) '------------------------------'
-!                 write(100003,*) rhonew_b
-!                 write(100003,*) '------------------------------'
 ! END OF MAGNUS PROPAGATION
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
               endif
@@ -642,7 +636,8 @@ c with matmul:
              call g2g_timer_start('cumatmul')   !TODO: VER COMO HACER ESTO CON UNA SOLA MATRIZ AUXILIAR COPIANDO A LA POSICION CORRESPONDIENTE DEL RMM
 !             call cumxp(rho_a,devPtrX,rho1,M)
 !             call cumpxt(rho1,devPtrX,rho1,M)
-             call cumatmulnanoc(rho_a,devPtrX,rho1,M)
+!             call cumatmulnanoc(rho_a,devPtrX,rho1,M)
+              call rho_transform(rho_a,devPtrX,rho1,M)
 !             do j=1,M
 !                 do k=j,M
 !                     if(j.eq.k) then
@@ -656,7 +651,8 @@ c with matmul:
              call sprepack_ctr('L',M,rhoalpha,rho1)
 !             call cumxp(rho_b,devPtrX,rho1,M)
 !             call cumpxt(rho1,devPtrX,rho1,M)
-             call cumatmulnanoc(rho_b,devPtrX,rho1,M)
+!             call cumatmulnanoc(rho_b,devPtrX,rho1,M)
+             call rho_transform(rho_b,devPtrX,rho1,M)
              call sprepack_ctr('L',M,rhobeta,rho1)
              DO i=1,MM
                 RMM(i)=RMM(i)+rhobeta(i)
@@ -675,8 +671,9 @@ c with matmul:
              call g2g_timer_stop('cumatmul')
 #else
              call g2g_timer_start('matmul')
-             rho1=matmul(xmm,rho_a)
-             rho1=matmul(rho1,xtrans)
+!             rho1=matmul(xmm,rho_a)
+!             rho1=matmul(rho1,xtrans)
+              call rho_transform(rho_a,xtrans,rho1,M)
 !             do j=1,M
 !                 do k=j,M
 !                     if(j.eq.k) then
@@ -690,8 +687,9 @@ c with matmul:
 !             enddo
              call sprepack_ctr('L',M,RMM,rho1)
              call sprepack_ctr('L',M,rhoalpha,rho1)
-             rho1=matmul(xmm,rho_b)
-             rho1=matmul(rho1,xtrans)
+!             rho1=matmul(xmm,rho_b)
+!             rho1=matmul(rho1,xtrans)
+             call rho_transform(rho_b,xtrans,rho1,M)
 !             do j=1,M
 !                 do k=j,M
 !                     if(j.eq.k) then
@@ -785,7 +783,7 @@ c
 c
 #ifdef CUBLAS
          call CUBLAS_FREE ( devPtrX )
-         call CUBLAS_FREE ( devPtrY )
+         call CUBLAS_FREE ( devPtrYtr )
 #endif
          if (memo) then
             deallocate (kkind,kkinds)
