@@ -33,6 +33,11 @@
        beta=CMPLX(-1.0D0,0.0D0)
        call ZGEMM('N','N',M,M,M,alpha,scratch,M,B,M,beta,C,M)
 #endif
+!----------Testing-------------------------!
+!        scratch=matmul(B,A)
+!        scratch1=matmul(A,B)
+!        C=scratch1-scratch
+!----------End-Testing---------------------!
        DEALLOCATE(scratch)
        return
        end

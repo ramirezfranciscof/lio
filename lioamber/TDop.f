@@ -471,10 +471,12 @@ c ELECTRIC FIELD CASE - Type=gaussian (ON)
             call cumxtf(fock_b,devPtrX,fock_b,M)
             call cumfx(fock_b,DevPtrX,fock_b,M)
 #else
-            fock_a=matmul(xtrans,fock_a)
-            fock_a=matmul(fock_a,xmm)
-            fock_b=matmul(xtrans,fock_b)
-            fock_b=matmul(fock_b,xmm)
+!            fock_a=matmul(xtrans,fock_a)
+!            fock_a=matmul(fock_a,xmm)
+!            fock_b=matmul(xtrans,fock_b)
+!            fock_b=matmul(fock_b,xmm)
+            call matmulnano(fock_a,xmm,fock_a,M)
+            call matmulnano(fock_b,xmm,fock_b,M)
 #endif
             call g2g_timer_stop('fock')
 c Fock triangular matrix contained in RMM(M5,M5+1,M5+2,...,M5+MM) is copied to square matrix fock.
@@ -545,10 +547,12 @@ c           endif
 c using conmutc
               if(istep.eq.1) then
 #ifdef CUBLAS
+               call g2g_timer_start('cuconmut')
                call cuconmut(fock_a,rho_a,rhold_a,M)
                rhold_a=rho_a+dt_lpfrg*(Im*rhold_a)
                call cuconmut(fock_b,rho_b,rhold_b,M)
                rhold_b=rho_b+dt_lpfrg*(Im*rhold_b)
+               call g2g_timer_stop('cuconmut')
 #else
                call conmutc(fock_a,rho_a,rhold_a,M)
                rhold_a=rho_a+dt_lpfrg*(Im*rhold_a)
@@ -563,12 +567,14 @@ c           rhonew=rhold-(tdstep*Im*(matmul(fock,rho)))
 c           rhonew=rhonew+(tdstep*Im*(matmul(rho,fock)))
 c--------------------------------------c
 ! using conmutc:
-               call g2g_timer_start('Verlet')
+                call g2g_timer_start('Verlet')
 #ifdef CUBLAS
+               call g2g_timer_start('cuconmut')
                call cuconmut(fock_a,rho_a,rhonew_a,M)
                rhonew_a=rhold_a-dt_lpfrg*(Im*rhonew_a)
                call cuconmut(fock_b,rho_b,rhonew_b,M)
                rhonew_b=rhold_b-dt_lpfrg*(Im*rhonew_b)
+               call g2g_timer_stop('cuconmut')
 #else
                call conmutc(fock_a,rho_a,rhonew_a,M)
                rhonew_a=rhold_a-dt_lpfrg*(Im*rhonew_a)
@@ -587,12 +593,10 @@ c Density update (rhold-->rho, rho-->rhonew)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 ! DENSITY MATRIX PROPAGATION USING MAGNUS ALGORITHM
                  write(*,*) 'Magnus'
-#ifdef CUBLAS
+!#ifdef CUBLAS
                 call g2g_timer_start('cupredictor')
-                call cupredictor(F1a,F1b,fock_a,rho_a,devPtrX,factorial,
-     >          fxx,fyy,fzz,g)
-                call cupredictor(F1a,F1b,fock_b,rho_b,devPtrX,factorial,
-     >          fxx,fyy,fzz,g)
+                call cupredictor_op(F1a_a,F1b_a,F1a_b,F1b_b,fock_a,
+     >               fock_b,rho_a,rho_b,Xtrans,factorial,devPtrX)
                 call g2g_timer_stop('cupredictor')
                 call g2g_timer_start('cumagnus')
                 call cumagnusfac(fock_a,rho_a,rhonew_a,M,NBCH,dt_magnus,
@@ -600,18 +604,18 @@ c Density update (rhold-->rho, rho-->rhonew)
                 call cumagnusfac(fock_b,rho_b,rhonew_b,M,NBCH,dt_magnus,
      >          factorial)
                 call g2g_timer_stop('cumagnus')
-#else
-                call g2g_timer_start('predictor')
-                call predictor_op(F1a_a,F1b_a,F1a_b,F1b_b,fock_a,fock_b,
-     >          rho_a,rho_b,Xtrans,factorial)
-                call g2g_timer_stop('predictor')
-                call g2g_timer_start('magnus')
-                call magnus(fock_a,rho_a,rhonew_a,M,NBCH,dt_magnus,
-     >          factorial)
-                call magnus(fock_b,rho_b,rhonew_b,M,NBCH,dt_magnus,
-     >          factorial)
-                call g2g_timer_stop('magnus')
-#endif
+!#else
+!                call g2g_timer_start('predictor')
+!                call predictor_op(F1a_a,F1b_a,F1a_b,F1b_b,fock_a,fock_b,
+!     >          rho_a,rho_b,Xtrans,factorial)
+!                call g2g_timer_stop('predictor')
+!                call g2g_timer_start('magnus')
+!                call magnus(fock_a,rho_a,rhonew_a,M,NBCH,dt_magnus,
+!     >          factorial)
+!                call magnus(fock_b,rho_b,rhonew_b,M,NBCH,dt_magnus,
+!     >          factorial)
+!                call g2g_timer_stop('magnus')
+!#endif
                  F1a_a=F1b_a
                  F1a_b=F1b_b
                  F1b_a=fock_a
@@ -636,28 +640,38 @@ c the real part of the complex density matrix. (This won't be true in the case o
 c with matmul:
 #ifdef CUBLAS
              call g2g_timer_start('cumatmul')   !TODO: VER COMO HACER ESTO CON UNA SOLA MATRIZ AUXILIAR COPIANDO A LA POSICION CORRESPONDIENTE DEL RMM
-             call cumxp(rho_a,devPtrX,rho1,M)
-             call cumpxt(rho1,devPtrX,rho1,M)
-             do j=1,M
-                 do k=j,M
-                     if(j.eq.k) then
-                       RMM(k+(M2-j)*(j-1)/2)=REAL(rho1(j,k))
-                     else
-                       RMM(k+(M2-j)*(j-1)/2)=(REAL(rho1(j,k)))*2
-                     endif
-                 enddo
-             enddo
-             call cumxp(rho_b,devPtrX,rho1,M)
-             call cumpxt(rho1,devPtrX,rho1,M)
-             do j=1,M
-                 do k=j,M
-                     if(j.eq.k) then
-                       RMM(k+(M2-j)*(j-1)/2)=RMM(k+(M2-j)*(j-1)/2) + REAL(rho1(j,k))
-                     else
-                       RMM(k+(M2-j)*(j-1)/2)=RMM(k+(M2-j)*(j-1)/2) + (REAL(rho1(j,k)))*2
-                     endif
-                 enddo
-             enddo
+!             call cumxp(rho_a,devPtrX,rho1,M)
+!             call cumpxt(rho1,devPtrX,rho1,M)
+             call cumatmulnanoc(rho_a,devPtrX,rho1,M)
+!             do j=1,M
+!                 do k=j,M
+!                     if(j.eq.k) then
+!                       RMM(k+(M2-j)*(j-1)/2)=REAL(rho1(j,k))
+!                     else
+!                       RMM(k+(M2-j)*(j-1)/2)=(REAL(rho1(j,k)))*2
+!                     endif
+!                 enddo
+!             enddo
+             call sprepack_ctr('L',M,RMM,rho1)
+             call sprepack_ctr('L',M,rhoalpha,rho1)
+!             call cumxp(rho_b,devPtrX,rho1,M)
+!             call cumpxt(rho1,devPtrX,rho1,M)
+             call cumatmulnanoc(rho_b,devPtrX,rho1,M)
+             call sprepack_ctr('L',M,rhobeta,rho1)
+             DO i=1,MM
+                RMM(i)=RMM(i)+rhobeta(i)
+             ENDDO
+!             do j=1,M
+!                 do k=j,M
+!                     if(j.eq.k) then
+!                         RMM(k+(M2-j)*(j-1)/2)=RMM(k+(M2-j)*(j-1)/2) 
+!     >                   + REAL(rho1(j,k))
+!                     else
+!                         RMM(k+(M2-j)*(j-1)/2)=RMM(k+(M2-j)*(j-1)/2) 
+!     >                   + (REAL(rho1(j,k)))*2
+!                     endif
+!                 enddo
+!             enddo
              call g2g_timer_stop('cumatmul')
 #else
              call g2g_timer_start('matmul')

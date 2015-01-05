@@ -37,10 +37,25 @@
       scratch2=AIMAG(A)
 !--------------------------------------------------------------------!
       stat= CUBLAS_ALLOC(M*M, sizeof_real, devPtrScratch1)
+      if (stat.NE.0) then
+        write(*,*) "Allocation failed -cumpxt-1"
+        call CUBLAS_SHUTDOWN
+        stop
+      endif
       stat= CUBLAS_ALLOC(M*M, sizeof_real, devPtrScratch2)
+      if (stat.NE.0) then
+        write(*,*) "Allocation failed -cumpxt-2"
+        call CUBLAS_SHUTDOWN
+        stop
+      endif
 !--------------------------------------------------------------------!
       stat = CUBLAS_SET_MATRIX(M,M,sizeof_real,scratch1,M,
      > devPtrScratch1,M)
+      if (stat.NE.0) then
+        write(*,*) "Matrix setting failed -cumpxt-1"
+        call CUBLAS_SHUTDOWN
+        stop
+      endif
 !-----------------------REAL-----------------------------------------!
       call CUBLAS_DGEMM ('N','T',M,M,M,alpha,devPtrScratch1
      > ,M ,devPtrX,M, beta, devPtrScratch2,M)
