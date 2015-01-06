@@ -383,6 +383,7 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
 !------------------------------------------------------------------------------!
 #ifdef CUBLAS
             call CUBLAS_FREE(devPtrYtr)
+            deallocate(xtrans)
 #endif
             deallocate(y,ytrans)
 !------------------------------------------------------------------------------!
@@ -894,7 +895,11 @@ c      write(*,*) 'Exc, integrated and calculated',Exc,Ex
 c      write(*,*) 'Coulomb energy',E2-Ex
 c
        call g2g_timer_stop('TD Open Shell')
+#ifdef CUBLAS
+       deallocate(xnano,rho_a,fock_a,rho_b,fock_b,rho1)
+#else
        deallocate(xnano,rho_a,fock_a,rho_b,fock_b,rho1,xtrans)
+#endif
        DEALLOCATE(factorial)
 !------------------------------------------------------------------------------!
  500  format('SCF TIME ',I6,' sec')

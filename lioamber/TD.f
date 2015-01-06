@@ -366,6 +366,7 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
             deallocate(ytrans,y)
 #ifdef CUBLAS
             call CUBLAS_FREE(devPtrYtr)
+            deallocate(xtrans)
 #endif
             call g2g_timer_stop('inicio')
 !##############################################################################!
