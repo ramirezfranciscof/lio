@@ -31,7 +31,7 @@ c       USE latom
        INTEGER :: istep
        REAL*8 :: t,E2
        REAL*8,ALLOCATABLE,DIMENSION(:,:) :: 
-     >   xnano2,xmm,xtrans,ytrans,Y,fock_a,fock_b,
+     >   xnano2,xtrans,ytrans,Y,fock_a,fock_b,
      >   F1a_a,F1a_b,F1b_a,F1b_b
        real*8, dimension (:,:), ALLOCATABLE :: elmu
        DIMENSION q(natom)
@@ -120,7 +120,7 @@ c       USE latom
        M2=2*M
 !
        ALLOCATE(xnano(M,M),xnano2(M,M),
-     >   rhold_a(M,M),xmm(M,M),xtrans(M,M),Y(M,M),ytrans(M,M),
+     >   rhold_a(M,M),xtrans(M,M),Y(M,M),ytrans(M,M),
      >   rho1(M,M),rho_a(M,M),rho_b(M,M),rhonew_a(M,M),rhonew_b(M,M),
      >   rhold_b(M,M),fock_a(M,M),fock_b(M,M))
 !
@@ -229,7 +229,6 @@ c RAM storage of two-electron integrals (if MEMO=T)
 c
             Nel=2*NCO+Nunp
 c Initializations/Defaults
-c xmm es la primer matriz de (M,M) en el vector X
        write(*,*) ' TD CALCULATION  '
 !--------------------------------------!
            niter=0
@@ -325,13 +324,6 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
               endif
             enddo
 !------------------------------------------------------------------------------!
-! the transformation matrices is copied in xmm
-!
-            do i=1,M
-               do j=1,M
-                  xmm(i,j)=X(i,j)
-               enddo
-            enddo
 ! the tranposed matrixes are calculated
             do i=1,M
                do j=1,M
@@ -364,23 +356,23 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
 !       write(*,*) 'fz =', fz
 !------------------------------------------------------------------------------!
 ! Rho is transformed to the orthonormal basis
-!#ifdef CUBLAS
+#ifdef CUBLAS
            call g2g_timer_start('cumatmul')
            call rho_transform(rho_a,devPtrYtr,rho_a,M)
            call rho_transform(rho_b,devPtrYtr,rho_b,M)
            call g2g_timer_stop('cumatmul')
-!#else
+#else
 ! with matmul:
 !       rho_a=matmul(ytrans,rho_a)
 !       rho_a=matmul(rho_a,y)
 !       rho_b=matmul(ytrans,rho_b)
 !       rho_b=matmul(rho_b,y)
 ! with matmulnanoc
-!            call rho_transform(rho_a,Y,rho_a,M)
-!            call rho_transform(rho_b,Y,rho_b,M)
+            call rho_transform(rho_a,Y,rho_a,M)
+            call rho_transform(rho_b,Y,rho_b,M)
 !            rho=rho1
 !--------------------------------------!
-!#endif
+#endif
             call g2g_timer_start('int22')
             call int22()
             call g2g_timer_stop('int22')
@@ -388,6 +380,11 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
             call int3mem()
             call int3mems()
             call g2g_timer_stop('int3mmem')
+!------------------------------------------------------------------------------!
+#ifdef CUBLAS
+            call CUBLAS_FREE(devPtrYtr)
+#endif
+            deallocate(y,ytrans)
 !------------------------------------------------------------------------------!
             call g2g_timer_stop('inicio')
 !##############################################################################!
@@ -472,13 +469,13 @@ c ELECTRIC FIELD CASE - Type=gaussian (ON)
              call fock_ao_to_on(fock_b,devPtrX,fock_b,M)
 #else
 !            fock_a=matmul(xtrans,fock_a)
-!            fock_a=matmul(fock_a,xmm)
+!            fock_a=matmul(fock_a,x)
 !            fock_b=matmul(xtrans,fock_b)
-!            fock_b=matmul(fock_b,xmm)
-!            call matmulnano(fock_a,xmm,fock_a,M)
-!            call matmulnano(fock_b,xmm,fock_b,M)
-             call fock_ao_to_on(fock_a,xmm,fock_a,M)
-             call fock_ao_to_on(fock_b,xmm,fock_b,M)
+!            fock_b=matmul(fock_b,x)
+!            call matmulnano(fock_a,x,fock_a,M)
+!            call matmulnano(fock_b,x,fock_b,M)
+             call fock_ao_to_on(fock_a,x,fock_a,M)
+             call fock_ao_to_on(fock_b,x,fock_b,M)
 #endif
             call g2g_timer_stop('fock')
 c Fock triangular matrix contained in RMM(M5,M5+1,M5+2,...,M5+MM) is copied to square matrix fock.
@@ -671,7 +668,7 @@ c with matmul:
              call g2g_timer_stop('cumatmul')
 #else
              call g2g_timer_start('matmul')
-!             rho1=matmul(xmm,rho_a)
+!             rho1=matmul(x,rho_a)
 !             rho1=matmul(rho1,xtrans)
               call rho_transform(rho_a,xtrans,rho1,M)
 !             do j=1,M
@@ -687,7 +684,7 @@ c with matmul:
 !             enddo
              call sprepack_ctr('L',M,RMM,rho1)
              call sprepack_ctr('L',M,rhoalpha,rho1)
-!             rho1=matmul(xmm,rho_b)
+!             rho1=matmul(x,rho_b)
 !             rho1=matmul(rho1,xtrans)
              call rho_transform(rho_b,xtrans,rho1,M)
 !             do j=1,M
@@ -783,7 +780,6 @@ c
 c
 #ifdef CUBLAS
          call CUBLAS_FREE ( devPtrX )
-         call CUBLAS_FREE ( devPtrYtr )
 #endif
          if (memo) then
             deallocate (kkind,kkinds)
@@ -898,8 +894,7 @@ c      write(*,*) 'Exc, integrated and calculated',Exc,Ex
 c      write(*,*) 'Coulomb energy',E2-Ex
 c
        call g2g_timer_stop('TD Open Shell')
-       deallocate(xnano,rho_a,fock_a,rho_b,fock_b,rho1,xtrans,xmm,y,
-     > ytrans)
+       deallocate(xnano,rho_a,fock_a,rho_b,fock_b,rho1,xtrans)
        DEALLOCATE(factorial)
 !------------------------------------------------------------------------------!
  500  format('SCF TIME ',I6,' sec')

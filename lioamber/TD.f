@@ -31,7 +31,7 @@ c       USE latom
        INTEGER :: istep
        REAL*8 :: t,E2
        REAL*8,ALLOCATABLE,DIMENSION(:,:) :: 
-     >   xnano2,xmm,xtrans,ytrans,Y,fock,
+     >   xnano2,xtrans,ytrans,Y,fock,
      >   F1a,F1b
        real*8, dimension (:,:), ALLOCATABLE :: elmu
        DIMENSION q(natom)
@@ -56,7 +56,7 @@ c       USE latom
       integer sizeof_real
       parameter(sizeof_real=8)
       integer stat
-      integer*8 devPtrX, devPtrY
+      integer*8 devPtrX, devPtrYtr
       external CUBLAS_INIT, CUBLAS_SET_MATRIX
       external CUBLAS_SHUTDOWN, CUBLAS_ALLOC
       integer CUBLAS_ALLOC, CUBLAS_SET_MATRIX
@@ -118,7 +118,7 @@ c       USE latom
        M2=2*M
 !
        ALLOCATE(xnano(M,M),xnano2(M,M),fock(M,M),rhonew(M,M),
-     >   rhold(M,M),rho(M,M),xmm(M,M),xtrans(M,M),Y(M,M),ytrans(M,M),
+     >   rhold(M,M),rho(M,M),xtrans(M,M),Y(M,M),ytrans(M,M),
      >   rho1(M,M))
 !
       if(propagator.eq.2) allocate (F1a(M,M),F1b(M,M))
@@ -137,7 +137,6 @@ c       USE latom
                read(1544,*) rho(j,k)
             enddo
          enddo
-         write(*,*) '1'
          do j=1,M
             do k=j,M
                if(j.eq.k) then
@@ -178,16 +177,17 @@ c       USE latom
 !--------------------------------------------------------------------!
 ! We read the density matrix stored in RMM(1,2,3,...,MM) and it is copied in rho matrix.
          else
-          do j=1,M
-             do k=1,j-1
-                rho(j,k)=RMM(j+(M2-k)*(k-1)/2)/2
-             enddo
-             rho(j,j)=RMM(j+(M2-k)*(j-1)/2)
-             do k=j+1,M
-                rho(j,k)=RMM(k+(M2-j)*(j-1)/2)/2
-             enddo
-           enddo
-         endif
+!          do j=1,M
+!             do k=1,j-1
+!                rho(j,k)=RMM(j+(M2-k)*(k-1)/2)/2
+!             enddo
+!             rho(j,j)=RMM(j+(M2-k)*(j-1)/2)
+!             do k=j+1,M
+!                rho(j,k)=RMM(k+(M2-j)*(j-1)/2)/2
+!             enddo
+!           enddo
+            call spunpack_rtc('L',M,RMM,rho)
+          endif
 !------------------------------------------------------------------------------!
 c first i
             M1=1
@@ -216,7 +216,6 @@ c RAM storage of two-electron integrals (if MEMO=T)
 c
             Nel=2*NCO+Nunp
 c Initializations/Defaults
-c xmm es la primer matriz de (M,M) en el vector X
        write(*,*) ' TD CALCULATION  '
 !--------------------------------------!
            niter=0
@@ -308,13 +307,6 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
               endif
             enddo
 !------------------------------------------------------------------------------!
-! the transformation matrices is copied in xmm
-!
-            do i=1,M
-               do j=1,M
-                  xmm(i,j)=X(i,j)
-               enddo
-            enddo
 ! the tranposed matrixes are calculated
             do i=1,M
                do j=1,M
@@ -325,14 +317,14 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
 !! CUBLAS ---------------------------------------------------------------------!
 #ifdef CUBLAS
             stat = CUBLAS_ALLOC(M*M, sizeof_real, devPtrX)
-            stat = CUBLAS_ALLOC(M*M, sizeof_real, devPtrY)
+            stat = CUBLAS_ALLOC(M*M, sizeof_real, devPtrYtr)
             if (stat.NE.0) then
             write(*,*) "X and/or Y memory allocation failed"
             call CUBLAS_SHUTDOWN
             stop
             endif
             stat = CUBLAS_SET_MATRIX(M,M,sizeof_real,X,M,devPtrX,M)
-            stat = CUBLAS_SET_MATRIX(M,M,sizeof_real,Y,M,devPtrY,M)
+            stat=CUBLAS_SET_MATRIX(M,M,sizeof_real,ytrans,M,devPtrYtr,M)
             if (stat.NE.0) then
             write(*,*) "X and/or Y setting failed"
             call CUBLAS_SHUTDOWN
@@ -348,14 +340,16 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
 !------------------------------------------------------------------------------!
 ! Rho is transformed to the orthonormal basis
 #ifdef CUBLAS
-           call g2g_timer_start('cumatmul')
-           call cumxtp(rho,devPtrY,rho,M)
-           call cumpx(rho,devPtrY,rho,M)
-           call g2g_timer_stop('cumatmul')
+!           call g2g_timer_start('cumatmul')
+!           call cumxp(rho,devPtrYtr,rho,M)
+!           call cumpxt(rho,devPtrYtr,rho,M)
+!           call g2g_timer_stop('cumatmul')
+            call rho_transform(rho,devPtrYtr,rho,M)
 #else
 ! with matmul:
-       rho=matmul(ytrans,rho)
-       rho=matmul(rho,y)
+!       rho=matmul(ytrans,rho)
+!       rho=matmul(rho,y)
+           call rho_transform(rho,y,rho,M)
 ! with matmulnanoc
 !            call matmulnanoc(rho,Y,rho,M)
 !            rho=rho1
@@ -369,6 +363,10 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
             call int3mems()
             call g2g_timer_stop('int3mmem')
 !------------------------------------------------------------------------------!
+            deallocate(ytrans,y)
+#ifdef CUBLAS
+            call CUBLAS_FREE(devPtrYtr)
+#endif
             call g2g_timer_stop('inicio')
 !##############################################################################!
 ! HERE STARTS THE TIME EVOLUTION
@@ -430,31 +428,35 @@ c ELECTRIC FIELD CASE - Type=gaussian (ON)
 ! where U matrix with eigenvectors of S , and s is vector with
 ! eigenvalues
            call g2g_timer_start('fock')
-            do j=1,M
-              do k=1,j
-                 fock(k,j)=RMM(M5+j+(M2-k)*(k-1)/2-1)
-              enddo
-              do k=j+1,M
-                 fock(k,j)=RMM(M5+k+(M2-j)*(j-1)/2-1)
-              enddo
-            enddo
+!            do j=1,M
+!              do k=1,j
+!                 fock(k,j)=RMM(M5+j+(M2-k)*(k-1)/2-1)
+!              enddo
+!              do k=j+1,M
+!                 fock(k,j)=RMM(M5+k+(M2-j)*(j-1)/2-1)
+!              enddo
+!            enddo
+             call spunpack('L',M,RMM(M5),fock)
 #ifdef CUBLAS
-            call cumxtf(fock,devPtrX,fock,M)
-            call cumfx(fock,DevPtrX,fock,M)
+!            call cumxtf(fock,devPtrX,fock,M)
+!            call cumfx(fock,DevPtrX,fock,M)
+             call fock_ao_to_on(fock,devPtrX,fock,M)
 #else
-            fock=matmul(xtrans,fock)
-            fock=matmul(fock,xmm)
+!            fock=matmul(xtrans,fock)
+!            fock=matmul(fock,x)
+             call fock_ao_to_on(fock,x,fock,M)
 #endif
             call g2g_timer_stop('fock')
 c Fock triangular matrix contained in RMM(M5,M5+1,M5+2,...,M5+MM) is copied to square matrix fock.
-            do j=1,M
-               do k=1,j
-                  RMM(M5+j+(M2-k)*(k-1)/2-1)=fock(j,k)
-               enddo
-               do k=j+1,M
-                  RMM(M5+k+(M2-j)*(j-1)/2-1)=fock(j,k)
-               enddo
-            enddo
+!            do j=1,M
+!               do k=1,j
+!                  RMM(M5+j+(M2-k)*(k-1)/2-1)=fock(j,k)
+!               enddo
+!               do k=j+1,M
+!                  RMM(M5+k+(M2-j)*(j-1)/2-1)=fock(j,k)
+!               enddo
+!            enddo
+             call sprepack('L',M,RMM(M5),fock)
 c Now fock is stored in molecular orbital basis.
 c
 !  stores F1a and F1b for magnus propagation
@@ -508,11 +510,11 @@ c           endif
 c using conmutc
               if(istep.eq.1) then
 #ifdef CUBLAS
-               call cuconmut(fock,rho,rhold,M)
+                call cuconmut(fock,rho,rhold,M)
                 rhold=rho+dt_lpfrg*(Im*rhold)
 #else
                 call conmutc(fock,rho,rhold,M)
-                 rhold=rho+dt_lpfrg*(Im*rhold)
+                rhold=rho+dt_lpfrg*(Im*rhold)
 #endif
               endif
 !####################################################################!
@@ -570,13 +572,15 @@ c the real part of the complex density matrix. (This won't be true in the case o
 c with matmul:
 #ifdef CUBLAS
              call g2g_timer_start('cumatmul')
-             call cumxp(rho,devPtrX,rho1,M)
-             call cumpxt(rho1,devPtrX,rho1,M)
+!             call cumxp(rho,devPtrX,rho1,M)
+!             call cumpxt(rho1,devPtrX,rho1,M)
+             call rho_transform(rho,devPtrX,rho1,M)
              call g2g_timer_stop('cumatmul')
 #else
              call g2g_timer_start('matmul')
-             rho1=matmul(xmm,rho)
-             rho1=matmul(rho1,xtrans)
+!             rho1=matmul(x,rho)
+!             rho1=matmul(rho1,xtrans)
+             call rho_transform(rho,xtrans,rho1,M)
              call g2g_timer_stop('matmul')
 #endif
 !       rho1=REAL(rho1)
@@ -584,15 +588,16 @@ c with matmulnanoc:
 c          call matmulnanoc(rho,xtrans,rho1,M)
 c          rho1 = REAL(rho1)
 c The real part of the density matrix in the atomic orbital basis is copied in RMM(1,2,3,...,MM) to compute the corresponding fock matrix.
-              do j=1,M
-                  do k=j,M
-                      if(j.eq.k) then
-                        RMM(k+(M2-j)*(j-1)/2)=REAL(rho1(j,k))
-                      else
-                        RMM(k+(M2-j)*(j-1)/2)=(REAL(rho1(j,k)))*2
-                      endif
-                  enddo
-              enddo
+!              do j=1,M
+!                  do k=j,M
+!                      if(j.eq.k) then
+!                        RMM(k+(M2-j)*(j-1)/2)=REAL(rho1(j,k))
+!                      else
+!                        RMM(k+(M2-j)*(j-1)/2)=(REAL(rho1(j,k)))*2
+!                      endif
+!                  enddo
+!              enddo
+               call sprepack_ctr('L',M,RMM,rho1)
 ! Stores the density matrix each 500 steps to be able to restart the dynamics
               if(writedens) then
                  if(mod (istep,500) == 0) then
@@ -663,7 +668,6 @@ c
 c
 #ifdef CUBLAS
          call CUBLAS_FREE ( devPtrX )
-         call CUBLAS_FREE ( devPtrY )
 #endif
          if (memo) then
             deallocate (kkind,kkinds)
