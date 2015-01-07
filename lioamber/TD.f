@@ -32,7 +32,7 @@ c       USE latom
        REAL*8 :: t,E2
        REAL*8,ALLOCATABLE,DIMENSION(:,:) :: 
      >   xnano2,xtrans,ytrans,Y,fock,
-     >   F1a,F1b
+     >   F1a,F1b,overlap,rhoscratch
        real*8, dimension (:,:), ALLOCATABLE :: elmu
        DIMENSION q(natom)
        REAL*8,dimension(:),ALLOCATABLE :: factorial
@@ -61,13 +61,21 @@ c       USE latom
       external CUBLAS_SHUTDOWN, CUBLAS_ALLOC
       integer CUBLAS_ALLOC, CUBLAS_SET_MATRIX
 #endif
-!!
-
+!!   GROUP OF CHARGES
+       LOGICAL             :: groupcharge
+       INTEGER             :: ngroup
+       INTEGER,ALLOCATABLE :: group(:)
+       REAL*8,ALLOCATABLE  :: qgr(:)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
        call g2g_timer_start('TD')
        call g2g_timer_start('inicio')
        just_int3n = false
        ALLOCATE(factorial(NBCH))
+!!------------------------------------!!
+! Mulliken
+       ipop=1
+! Group of charges
+       groupcharge=.false.
 !!------------------------------------!!
 #ifdef CUBLAS
        write(*,*) 'USING CUBLAS'
@@ -267,6 +275,10 @@ c Initializations/Defaults
             do k=1,MM
               E1=E1+RMM(k)*RMM(M11+k-1)
             enddo
+            if(ipop.eq.1)then
+              allocate(overlap(M,M),rhoscratch(M,M))
+              call spunpack('L',M,RMM(M5),overlap)
+            endif
 !--------------------------------------!
 c Diagonalization of S matrix, after this is not needed anymore
 c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
@@ -650,12 +662,74 @@ c The real part of the density matrix in the atomic orbital basis is copied in R
               endif
 c u in Debyes
 !# END OF DIPOLE MOMENT CALCULATION
-c------------------------------------------------------------------------------------
-!       if (nopt.ne.3) then
-!       write(*,300) niter,DAMP,E
-!       endif
-c
-c      write(*,*) 'Coulomb E',E2-Ex,Ex
+c-------------------------MULLIKEN CHARGES-----------------------------------------------!
+                if(istep.eq.1) then
+                  open(unit=1111111,file='Mulliken')
+                  if (groupcharge) then
+                      open(unit=678,file='Mullikin')
+                      allocate(group(natom))
+                      ngroup=0
+                      do n=1,natom
+                        read(678,*) kk
+                        group(n)=kk
+                        if (kk.gt.ngroup) ngroup=kk
+                      enddo
+                      allocate(qgr(ngroup))
+                      close(unit=678)
+                      open(unit=678,file='MullikenGroup')
+                  endif
+                endif
+!
+              if ((propagator.eq.2).and.(istep.lt.lpfrg_steps)
+     >      .and. (.not.tdrestart)) then
+                if(mod ((istep-1),10) == 0) then
+                   rhoscratch=REAL(rho1)
+                   rhoscratch=matmul(overlap,rhoscratch)
+                   do n=1,natom
+                      q(n)=Iz(n)
+                   enddo
+                   do i=1,M
+                      q(Nuc(i))=q(Nuc(i))-rhoscratch(i,i)
+                   enddo
+                   if(groupcharge) qgr=0.0d0
+                   do n=1,natom
+                      write(1111111,760) n,Iz(n),q(n)
+                      if(groupcharge) then
+                        qgr(group(n))=qgr(group(n))+q(n)
+                      endif
+                   enddo
+                   if(groupcharge) then
+                    do n=1,ngroup
+                       write(678,761) n,n,qgr(n)
+                    enddo
+                    write(678,*) '------------------------------------'
+                   endif
+                 endif
+              else
+                 rhoscratch=REAL(rho1)
+                 rhoscratch=matmul(overlap,rhoscratch)
+                 do n=1,natom
+                    q(n)=Iz(n)
+                 enddo
+                 do i=1,M
+                    q(Nuc(i))=q(Nuc(i))-rhoscratch(i,i)
+                 enddo
+                 if(groupcharge) qgr=0.0d0
+                 do n=1,natom
+                    write(1111111,760) n,Iz(n),q(n)
+                    if(groupcharge) then
+                       qgr(group(n))=qgr(group(n))+q(n)
+                    endif
+                 enddo
+                 if(groupcharge) then
+                   do n=1,ngroup
+                       write(678,761) n,n,qgr(n)
+                   enddo
+                 endif
+                 write(678,*) '------------------------------------'
+              endif
+!-----------------------------------------------------------------------------------!
+
                call g2g_timer_stop('iteration')
                write(*,*)
  999           continue
@@ -796,6 +870,7 @@ c
  620  format(F14.7,4x,F14.7,4x,F14.7)
  625  format(F14.7)
  760  format(I3,9x,I3,6x,F10.4)
+ 761  format(I3,9x,I3,6x,F14.8)
  770  format('ATOM #',4x,'ATOM TYPE',4x,'POPULATION')
  850  format('MOLECULAR ORBITAL #',2x,I3,3x,'ORBITAL ENERGY ',F14.7)
  851  format('MOLECULAR ORBITAL #',2x,I3,3x,'ORBITAL ENERGY ',F14.7,

@@ -74,6 +74,47 @@
 
 
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+       SUBROUTINE spunpack_rho(UPLO,NM,Vector,Matrix)
+       IMPLICIT NONE
+       CHARACTER(LEN=1)   :: UPLO
+       INTEGER,INTENT(IN) :: NM
+       REAL*8,INTENT(IN)  :: Vector(NM*(NM+1)/2)
+       REAL*8,INTENT(OUT) :: Matrix(NM,NM)
+       INTEGER            :: ii,jj,idx
+!
+!------------------------------------------------------------------------------!
+!
+       IF (UPLO.EQ.'U') THEN
+         DO jj=1,NM
+            DO ii=1,jj-1
+               idx=ii+(jj*(jj-1)/2)
+               Matrix(ii,jj)=Vector(idx)/2
+               Matrix(jj,ii)=Vector(idx)/2
+            ENDDO
+               idx=jj+(jj*(jj-1)/2)
+               Matrix(jj,jj)=Vector(idx)
+         ENDDO
+
+       ELSE IF (UPLO.EQ.'L') THEN
+         DO ii=1,NM
+            DO jj=1,ii-1
+               idx=ii+(2*NM-jj)*(jj-1)/2
+               Matrix(ii,jj)=Vector(idx)/2
+               Matrix(jj,ii)=Vector(idx)/2
+            ENDDO
+               idx=jj+(2*NM-jj)*(jj-1)/2
+               Matrix(jj,jj)=Vector(idx)
+         ENDDO
+
+       ELSE
+         PRINT*,'NOT GOOD INPUT FOR UPLO'
+       ENDIF
+!
+!------------------------------------------------------------------------------!
+       RETURN;END SUBROUTINE
+
+
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
        SUBROUTINE sprepack(UPLO,NM,Vector,Matrix)
        IMPLICIT NONE
        CHARACTER(LEN=1)   :: UPLO

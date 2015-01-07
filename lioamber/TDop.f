@@ -32,7 +32,7 @@ c       USE latom
        REAL*8 :: t,E2
        REAL*8,ALLOCATABLE,DIMENSION(:,:) :: 
      >   xnano2,xtrans,ytrans,Y,fock_a,fock_b,
-     >   F1a_a,F1a_b,F1b_a,F1b_b
+     >   F1a_a,F1a_b,F1b_a,F1b_b,overlap,rhoscratch
        real*8, dimension (:,:), ALLOCATABLE :: elmu
        DIMENSION q(natom)
        REAL*8,dimension(:),ALLOCATABLE :: factorial
@@ -64,12 +64,21 @@ c       USE latom
       integer CUBLAS_ALLOC, CUBLAS_SET_MATRIX
 #endif
 !!
-
+!!   GROUP OF CHARGES
+       LOGICAL             :: groupcharge
+       INTEGER             :: ngroup
+       INTEGER,ALLOCATABLE :: group(:)
+       REAL*8,ALLOCATABLE  :: qgr(:)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
        call g2g_timer_start('TD Open Shell')
        call g2g_timer_start('inicio')
        just_int3n = false
        ALLOCATE(factorial(NBCH))
+!!------------------------------------!!
+! Mulliken
+       ipop=1
+! Group of charges
+       groupcharge=.false.
 !!------------------------------------!!
 #ifdef CUBLAS
        write(*,*) 'USING CUBLAS'
@@ -84,9 +93,9 @@ c       USE latom
           dt_lpfrg=tdstep*0.10D0
           factorial(1)=1.0D0
 #ifdef CUBLAS
-          DO ii=1,NBCH
-             factorial(ii)=1.0D0/ii
-          ENDDO
+       DO ii=1,NBCH
+          factorial(ii)=1.0D0/ii
+       ENDDO
 #else     
        DO ii=2,NBCH
          factorial(ii)=factorial(ii-1)/ii
@@ -284,6 +293,10 @@ c Initializations/Defaults
             do k=1,MM
               E1=E1+RMM(k)*RMM(M11+k-1)
             enddo
+            if(ipop.eq.1)then
+              allocate(overlap(M,M),rhoscratch(M,M))
+              call spunpack('L',M,RMM(M5),overlap)
+            endif
 !--------------------------------------!
 c Diagonalization of S matrix, after this is not needed anymore
 c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
@@ -766,7 +779,74 @@ c-------------------------------------------------------------------------------
 !       if (nopt.ne.3) then
 !       write(*,300) niter,DAMP,E
 !       endif
-c
+c-------------------------MULLIKEN CHARGES-----------------------------------------------!
+                if(istep.eq.1) then
+                  open(unit=1111111,file='Mulliken')
+                  if (groupcharge) then
+                      open(unit=678,file='Mullikin')
+                      allocate(group(natom))
+                      ngroup=0
+                      do n=1,natom
+                        read(678,*) kk
+                        group(n)=kk
+                        if (kk.gt.ngroup) ngroup=kk
+                      enddo
+                      allocate(qgr(ngroup))
+                      close(unit=678)
+                      open(unit=678,file='MullikenGroup')
+                  endif
+                endif
+!
+              if ((propagator.eq.2).and.(istep.lt.lpfrg_steps)
+     >      .and. (.not.tdrestart)) then
+                if(mod ((istep-1),10) == 0) then
+                   call spunpack_rho('L',M,RMM,rhoscratch)
+                   rhoscratch=matmul(overlap,rhoscratch)
+                   do n=1,natom
+                      q(n)=Iz(n)
+                   enddo
+                   do i=1,M
+                      q(Nuc(i))=q(Nuc(i))-rhoscratch(i,i)
+                   enddo
+                   if(groupcharge) qgr=0.0d0
+                   do n=1,natom
+                      write(1111111,760) n,Iz(n),q(n)
+                      if(groupcharge) then
+                        qgr(group(n))=qgr(group(n))+q(n)
+                      endif
+                   enddo
+                   if(groupcharge) then
+                    do n=1,ngroup
+                       write(678,761) n,n,qgr(n)
+                    enddo
+                    write(678,*) '------------------------------------'
+                   endif
+                 endif
+              else
+                 call spunpack_rho('L',M,RMM,rhoscratch)
+                 rhoscratch=matmul(overlap,rhoscratch)
+                 do n=1,natom
+                    q(n)=Iz(n)
+                 enddo
+                 do i=1,M
+                    q(Nuc(i))=q(Nuc(i))-rhoscratch(i,i)
+                 enddo
+                 if(groupcharge) qgr=0.0d0
+                 do n=1,natom
+                    write(1111111,760) n,Iz(n),q(n)
+                    if(groupcharge) then
+                       qgr(group(n))=qgr(group(n))+q(n)
+                    endif
+                 enddo
+                 if(groupcharge) then
+                   do n=1,ngroup
+                       write(678,761) n,n,qgr(n)
+                   enddo
+                 endif
+                 write(678,*) '------------------------------------'
+              endif
+!-----------------------------------------------------------------------------------!
+
 c      write(*,*) 'Coulomb E',E2-Ex,Ex
                call g2g_timer_stop('iteration')
                write(*,*)
@@ -823,35 +903,6 @@ c
  309  continue
  307   continue
 c
-          if (nopt.eq.0) then
-c calculates Mulliken poputations
-             if (ipop.eq.1) then
-                call int1(En)
-                do n=1,natom
-                   q(n)=Iz(n)
-                enddo
-                do i=1,M
-                   do j=1,i-1
-                      kk=i+(M2-j)*(j-1)/2
-                      t0=RMM(kk)*RMM(M5+kk-1)/2.D0
-                      q(Nuc(i))=q(Nuc(i))-t0
-                   enddo
-                   kk=i+(M2-i)*(i-1)/2
-                   t0=RMM(kk)*RMM(M5+kk-1)
-                   q(Nuc(i))=q(Nuc(i))-t0
-                   do j=i+1,M
-                      kk=j+(M2-i)*(i-1)/2
-                      t0=RMM(kk)*RMM(M5+kk-1)/2.D0
-                      q(Nuc(i))=q(Nuc(i))-t0
-                   enddo
-                 enddo
-                 write(*,*) 'MULLIKEN POPULATION ANALYSIS'
-                 write(*,770)
-                 do n=1,natom
-                    write(*,760) n,Iz(n),q(n)
-                 enddo
-                 write(*,*)
-             endif
 c ELECTRICAL POTENTIAL AND POINT CHARGES EVALUATION
 c
 c        if (icharge.eq.1) then
@@ -887,7 +938,6 @@ c      do n=1,NCO+3
 !       enddo
 !       close(29)
 !--------------------------------------!
-      endif
 c
 c
 c---- DEBUGGINGS
@@ -901,6 +951,7 @@ c
        deallocate(xnano,rho_a,fock_a,rho_b,fock_b,rho1,xtrans)
 #endif
        DEALLOCATE(factorial)
+       if(ipop.eq.1) deallocate(rhoscratch,overlap)
 !------------------------------------------------------------------------------!
  500  format('SCF TIME ',I6,' sec')
  450  format ('FINAL ENERGY = ',F19.12)
@@ -912,6 +963,7 @@ c
  620  format(F14.7,4x,F14.7,4x,F14.7)
  625  format(F14.7)
  760  format(I3,9x,I3,6x,F10.4)
+ 761  format(I3,9x,I3,6x,F14.8)
  770  format('ATOM #',4x,'ATOM TYPE',4x,'POPULATION')
  850  format('MOLECULAR ORBITAL #',2x,I3,3x,'ORBITAL ENERGY ',F14.7)
  851  format('MOLECULAR ORBITAL #',2x,I3,3x,'ORBITAL ENERGY ',F14.7,
