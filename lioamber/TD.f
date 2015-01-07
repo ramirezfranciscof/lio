@@ -104,7 +104,7 @@ c       USE latom
        endif
 !!------------------------------------!!
 !! FFR ADD:
-       pert_steps=100
+       pert_steps=195
        lpfrg_steps=200
        chkpntF1a=185
        chkpntF1b=195
@@ -406,8 +406,8 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
               write(*,*) '! step & energy', istep,E
               E1=0.0D0
 c ELECTRIC FIELD CASE - Type=gaussian (ON)
-            if(istep.lt.pert_steps) then
                if (field) then
+                 write(*,*) 'FIELD ON'
                  call dip(ux,uy,uz)
                  if (exter) then
                    g=1.0D0
@@ -427,9 +427,10 @@ c ELECTRIC FIELD CASE - Type=gaussian (ON)
                  endif
                  call dip2(g,Fxx,Fyy,Fzz)
                  E1=-1.00D0*g*(Fx*ux+Fy*uy+Fz*uz)/fac -
-     >        0.50D0*(1.0D0-1.0D0/epsilon)*Qc2/a0
+     >           0.50D0*(1.0D0-1.0D0/epsilon)*Qc2/a0
+                 if((istep.gt.pert_steps).and.(fxx.eq.0.0D0).and.
+     >           (fyy.eq.0.0D0).and.(fzz.eq.0.0D0)) field=.false.
               endif
-            endif
 !------------------------------------------------------------------------------!
 ! E1 includes solvent 1 electron contributions
             do k=1,MM
@@ -566,7 +567,8 @@ c Density update (rhold-->rho, rho-->rhonew)
                 call g2g_timer_stop('cumagnus')
 #else
                 call g2g_timer_start('predictor')
-                call predictor(F1a,F1b,fock,rho,Xtrans,factorial)
+                call predictor(F1a,F1b,fock,rho,Xtrans,factorial,
+     > fxx,fyy,fzz,g)
                 call g2g_timer_stop('predictor')
                 call g2g_timer_start('magnus')
                 call magnus(fock,rho,rhonew,M,NBCH,dt_magnus,factorial)

@@ -94,6 +94,7 @@ c xmm es la primer matriz de (M,M) en el
         stop
       endif
       if (field) then
+         write(*,*) 'FIELD PREDICTOR'
          call dip2(g,Fxx,Fyy,Fzz)
       endif
 !------------------------------------------------------------------------------!
@@ -119,7 +120,7 @@ c xmm es la primer matriz de (M,M) en el
        RETURN;END
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
        subroutine cupredictor_op(F1a_a,F1b_a,F1a_b,F1b_b,FON_a,FON_b,
-     > rho2_a,rho2_b,xtrans,factorial,devPtrX)
+     > rho2_a,rho2_b,xtrans,factorial,devPtrX,Fxx,Fyy,Fzz,g)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 ! This routine recives: F1a,F1b,rho2
 ! And gives: F5 = F(t+(deltat/2))      
@@ -128,6 +129,7 @@ c xmm es la primer matriz de (M,M) en el
      > F1a_b(M,M),F1b_b(M,M),FON_a(M,M),FON_b(M,M)
        REAL*8,intent(in) :: Xtrans(M,M)
        integer*8,intent(in) :: devPtrX
+       REAL*8,intent(in) :: g,Fxx,Fyy,Fzz
        REAL*8, intent(in) :: factorial(NBCH)
        REAL*8,allocatable :: F3(:,:),FBA(:,:)
        integer :: i,j,k,kk,stat
@@ -180,6 +182,10 @@ c now G
 ! Step4: Density matrix 4 is used to calculate F5
        call int3lu(E2)
        call g2g_solve_groups(0,Ex,0)
+      if (field) then
+         write(*,*) 'FIELD PREDICTOR'
+         call dip2(g,Fxx,Fyy,Fzz)
+      endif
 !
        call spunpack('L',M,RMM(M5),FBA)
 !       call matmulnano(FBA,X,FON_a,M)

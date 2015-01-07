@@ -1,11 +1,13 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-       subroutine predictor(F1a,F1b,FON,rho2,xtrans,factorial)
+       subroutine predictor(F1a,F1b,FON,rho2,xtrans,factorial,
+     > Fxx,Fyy,Fzz,g)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 ! This routine recives: F1a,F1b,rho2
 ! And gives: F5 = F(t+(deltat/2))      
        use garcha_mod
        REAL*8,intent(inout) :: F1a(M,M),F1b(M,M),FON(M,M)
        REAL*8,intent(in) :: Xtrans(M,M)
+       REAL*8,intent(in) :: Fxx,Fyy,Fzz,g
        REAL*8, intent(in) :: factorial(NBCH)
        REAL*8,allocatable :: F3(:,:),FBA(:,:)
        integer :: i,j,k,kk
@@ -66,10 +68,14 @@ c Initializations/Defaults
                 RMM(k+(M2-j)*(j-1)/2)=REAL(rho2t(j,k))*2
              endif
           enddo
-       enddo
+       enddo       
 ! Step4: Density matrix 4 is used to calculate F5
        call int3lu(E2)
        call g2g_solve_groups(0,Ex,0)
+       if (field) then
+         write(*,*) 'FIELD PREDICTOR'
+         call dip2(g,Fxx,Fyy,Fzz)
+       endif
        do j=1,M
           do k=1,j
              FBA(j,k)=RMM(M5+j+(M2-k)*(k-1)/2-1)
@@ -83,7 +89,7 @@ c Initializations/Defaults
        RETURN;END
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
        subroutine predictor_op(F1a_a,F1b_a,F1a_b,F1b_b,FON_a,FON_b,
-     > rho2_a,rho2_b,xtrans,factorial)
+     > rho2_a,rho2_b,xtrans,factorial,Fxx,Fyy,Fzz,g)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 ! This routine recives: F1a,F1b,rho2
 ! And gives: F5 = F(t+(deltat/2))      
@@ -91,6 +97,7 @@ c Initializations/Defaults
        REAL*8,intent(inout) :: F1a_a(M,M),F1b_a(M,M),
      > F1a_b(M,M),F1b_b(M,M),FON_a(M,M),FON_b(M,M)
        REAL*8,intent(in) :: Xtrans(M,M)
+       REAL*8,intent(in) :: Fxx,Fyy,Fzz,g
        REAL*8, intent(in) :: factorial(NBCH)
        REAL*8,allocatable :: F3(:,:),FBA(:,:)
        integer :: i,j,k,kk
@@ -172,9 +179,12 @@ c now G
 !               enddo
 !            enddo
 !
-            call spunpack('L',M,RMM(M5),FBA)
-!
-            call matmulnano(FBA,X,FON_a,M)
+       if (field) then
+         write(*,*) 'FIELD PREDICTOR'
+         call dip2(g,Fxx,Fyy,Fzz)
+       endif
+       call spunpack('L',M,RMM(M5),FBA)
+       call matmulnano(FBA,X,FON_a,M)
 !
 !            do j=1,M
 !               do k=1,j
@@ -184,8 +194,7 @@ c now G
 !                  FBA(j,k)=RMM(M3+k+(M2-j)*(j-1)/2-1)
 !               enddo
 !            enddo
-            call spunpack('L',M,RMM(M3),FBA)
-!
+       call spunpack('L',M,RMM(M3),FBA)
        call matmulnano(FBA,X,FON_b,M)
        DEALLOCATE(rho4,rho2t,F3,FBA)
        RETURN;END
