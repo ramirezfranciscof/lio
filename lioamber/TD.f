@@ -31,7 +31,7 @@ c       USE latom
        INTEGER :: istep
        REAL*8 :: t,E2
        REAL*8,ALLOCATABLE,DIMENSION(:,:) :: 
-     >   xnano2,xtrans,ytrans,Y,fock,
+     >   xnano2,Y,fock,
      >   F1a,F1b,overlap,rhoscratch
        real*8, dimension (:,:), ALLOCATABLE :: elmu
        DIMENSION q(natom)
@@ -56,7 +56,7 @@ c       USE latom
       integer sizeof_real
       parameter(sizeof_real=8)
       integer stat
-      integer*8 devPtrX, devPtrYtr
+      integer*8 devPtrX, devPtrY
       external CUBLAS_INIT, CUBLAS_SET_MATRIX
       external CUBLAS_SHUTDOWN, CUBLAS_ALLOC
       integer CUBLAS_ALLOC, CUBLAS_SET_MATRIX
@@ -126,8 +126,7 @@ c       USE latom
        M2=2*M
 !
        ALLOCATE(xnano(M,M),xnano2(M,M),fock(M,M),rhonew(M,M),
-     >   rhold(M,M),rho(M,M),xtrans(M,M),Y(M,M),ytrans(M,M),
-     >   rho1(M,M))
+     >   rhold(M,M),rho(M,M),Y(M,M),rho1(M,M))
 !
       if(propagator.eq.2) allocate (F1a(M,M),F1b(M,M))
 !--------------------------------------------------------------------!
@@ -318,25 +317,17 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
                 enddo
               endif
             enddo
-!------------------------------------------------------------------------------!
-! the tranposed matrixes are calculated
-            do i=1,M
-               do j=1,M
-                 xtrans(j,i)=X(i,j)
-                 ytrans(j,i)=Y(i,j)
-               enddo
-            enddo
 !! CUBLAS ---------------------------------------------------------------------!
 #ifdef CUBLAS
             stat = CUBLAS_ALLOC(M*M, sizeof_real, devPtrX)
-            stat = CUBLAS_ALLOC(M*M, sizeof_real, devPtrYtr)
+            stat = CUBLAS_ALLOC(M*M, sizeof_real, devPtrY)
             if (stat.NE.0) then
             write(*,*) "X and/or Y memory allocation failed"
             call CUBLAS_SHUTDOWN
             stop
             endif
             stat = CUBLAS_SET_MATRIX(M,M,sizeof_real,X,M,devPtrX,M)
-            stat=CUBLAS_SET_MATRIX(M,M,sizeof_real,ytrans,M,devPtrYtr,M)
+            stat=CUBLAS_SET_MATRIX(M,M,sizeof_real,y,M,devPtrY,M)
             if (stat.NE.0) then
             write(*,*) "X and/or Y setting failed"
             call CUBLAS_SHUTDOWN
@@ -353,15 +344,18 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
 ! Rho is transformed to the orthonormal basis
 #ifdef CUBLAS
 !           call g2g_timer_start('cumatmul')
-!           call cumxp(rho,devPtrYtr,rho,M)
-!           call cumpxt(rho,devPtrYtr,rho,M)
+!           call cumxp(rho,devPtrY,rho,M)
+!           call cumpxt(rho,devPtrY,rho,M)
 !           call g2g_timer_stop('cumatmul')
-            call rho_transform(rho,devPtrYtr,rho,M)
+!            call rho_transform(rho,devPtrY,rho,M)
+            call complex_rho_ao_to_on(rho,devPtrY,rho,M)
 #else
 ! with matmul:
 !       rho=matmul(ytrans,rho)
 !       rho=matmul(rho,y)
-           call rho_transform(rho,y,rho,M)
+!           call rho_transform(rho,y,rho,M)
+            call complex_rho_ao_to_on(rho,y,rho,M)
+          
 ! with matmulnanoc
 !            call matmulnanoc(rho,Y,rho,M)
 !            rho=rho1
@@ -375,10 +369,9 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
             call int3mems()
             call g2g_timer_stop('int3mmem')
 !------------------------------------------------------------------------------!
-            deallocate(ytrans,y)
+            deallocate(y)
 #ifdef CUBLAS
-            call CUBLAS_FREE(devPtrYtr)
-            deallocate(xtrans)
+            call CUBLAS_FREE(devPtrY)
 #endif
             call g2g_timer_stop('inicio')
 !##############################################################################!
@@ -567,7 +560,7 @@ c Density update (rhold-->rho, rho-->rhonew)
                 call g2g_timer_stop('cumagnus')
 #else
                 call g2g_timer_start('predictor')
-                call predictor(F1a,F1b,fock,rho,Xtrans,factorial,
+                call predictor(F1a,F1b,fock,rho,factorial,
      > fxx,fyy,fzz,g)
                 call g2g_timer_stop('predictor')
                 call g2g_timer_start('magnus')
@@ -589,13 +582,15 @@ c with matmul:
              call g2g_timer_start('cumatmul')
 !             call cumxp(rho,devPtrX,rho1,M)
 !             call cumpxt(rho1,devPtrX,rho1,M)
-             call rho_transform(rho,devPtrX,rho1,M)
+!             call rho_transform(rho,devPtrX,rho1,M)
+             call complex_rho_on_to_ao(rho,devPtrX,rho1,M)
              call g2g_timer_stop('cumatmul')
 #else
              call g2g_timer_start('matmul')
 !             rho1=matmul(x,rho)
 !             rho1=matmul(rho1,xtrans)
-             call rho_transform(rho,xtrans,rho1,M)
+!             call rho_transform(rho,xtrans,rho1,M)
+             call complex_rho_on_to_ao(rho,X,rho1,M)
              call g2g_timer_stop('matmul')
 #endif
 !       rho1=REAL(rho1)

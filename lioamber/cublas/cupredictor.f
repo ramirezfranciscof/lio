@@ -71,19 +71,21 @@ c xmm es la primer matriz de (M,M) en el
        rho2t=rho2
        call cumagnusfac(F3,rho2,rho4,M,NBCH,tdstep1,factorial)
 ! Paso3: Escribimos rho4 en el RMM para poder obtener F5 en el siguiente paso.
-       call g2g_timer_start('cumatmul_predictor')
-       call cumxp(rho4,devPtrX,rho2t,M)
-       call cumpxt(rho2t,devPtrX,rho2t,M)
-       call g2g_timer_stop('cumatmul_predictor')
-       do j=1,M
-       do k=j,M
-         if(j.eq.k) then
-           RMM(k+(M2-j)*(j-1)/2)=REAL(rho2t(j,k))
-         else
-           RMM(k+(M2-j)*(j-1)/2)=REAL(rho2t(j,k))*2
-         endif
-       enddo
-       enddo
+!       call g2g_timer_start('cumatmul_predictor')
+!       call cumxp(rho4,devPtrX,rho2t,M)
+!       call cumpxt(rho2t,devPtrX,rho2t,M)
+!       call g2g_timer_stop('cumatmul_predictor')
+       call complex_rho_on_to_ao(rho4,devPtrX,rho2t,M)
+!       do j=1,M
+!       do k=j,M
+!         if(j.eq.k) then
+!           RMM(k+(M2-j)*(j-1)/2)=REAL(rho2t(j,k))
+!         else
+!           RMM(k+(M2-j)*(j-1)/2)=REAL(rho2t(j,k))*2
+!         endif
+!       enddo
+!       enddo
+      call sprepack_ctr('L',M,RMM,rho2t)
 ! Paso4: La matriz densidad 4 es usada para calcular F5------> Corrector
       call int3lu(E2)
       call g2g_solve_groups(0,Ex,0)
@@ -101,33 +103,34 @@ c xmm es la primer matriz de (M,M) en el
 ! Escritura de fock cuadrada
 !------------------------------------------------------------------------------!
 ! Parte Inferior Izquierda (con diagonal)
-       do j=1,M
-         do k=1,j
-           FBA(j,k)=RMM(M5+j+(M2-k)*(k-1)/2-1)
-         enddo
+!       do j=1,M
+!         do k=1,j
+!           FBA(j,k)=RMM(M5+j+(M2-k)*(k-1)/2-1)
+!         enddo
 ! Parte Superior Derecha (sin diagonal)
-         do k=j+1,M
-           FBA(j,k)=RMM(M5+k+(M2-j)*(j-1)/2-1)
-         enddo
-       enddo
+!         do k=j+1,M
+!           FBA(j,k)=RMM(M5+k+(M2-j)*(j-1)/2-1)
+!         enddo
+!       enddo
+       call spunpack('L',M,RMM(M5),FBA)
 ! Ahora tenemos F5 transformada en base de ON y en su forma cuadrada
-       call g2g_timer_start('cumatmul2_predictor')
-       call cumxtf(FBA,devPtrX,FON,M)
-       call cumfx(FON,DevPtrX,FON,M)
-       call g2g_timer_stop('cumatmul2_predictor')
+!       call g2g_timer_start('cumatmul2_predictor')
+!       call cumxtf(FBA,devPtrX,FON,M)
+!       call cumfx(FON,DevPtrX,FON,M)
+!       call g2g_timer_stop('cumatmul2_predictor')
+       call fock_ao_to_on(FBA,devPtrX,FON,M)
        call CUBLAS_SHUTDOWN
        DEALLOCATE(rho4,rho2t,F3,FBA)
        RETURN;END
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
        subroutine cupredictor_op(F1a_a,F1b_a,F1a_b,F1b_b,FON_a,FON_b,
-     > rho2_a,rho2_b,xtrans,factorial,devPtrX,Fxx,Fyy,Fzz,g)
+     > rho2_a,rho2_b,factorial,devPtrX,Fxx,Fyy,Fzz,g)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 ! This routine recives: F1a,F1b,rho2
 ! And gives: F5 = F(t+(deltat/2))      
        use garcha_mod
        REAL*8,intent(inout) :: F1a_a(M,M),F1b_a(M,M),
      > F1a_b(M,M),F1b_b(M,M),FON_a(M,M),FON_b(M,M)
-       REAL*8,intent(in) :: Xtrans(M,M)
        integer*8,intent(in) :: devPtrX
        REAL*8,intent(in) :: g,Fxx,Fyy,Fzz
        REAL*8, intent(in) :: factorial(NBCH)
@@ -163,7 +166,8 @@ c now G
        call cumagnusfac(F3,rho2_a,rho2t,M,NBCH,tdstep1,factorial)
 !
 !       call matmulnanoc(rho2t,xtrans,rho4,M)
-       call rho_transform(rho2t,devPtrX,rho4,M)
+!       call rho_transform(rho2t,devPtrX,rho4,M)
+       call complex_rho_on_to_ao(rho2t,devPtrX,rho4,M)
        call sprepack_ctr('L',M,rhoalpha,rho4)
        call sprepack_ctr('L',M,RMM,rho4)
 !
@@ -174,7 +178,8 @@ c now G
 !
        rho4=0
 !       call matmulnanoc(rho2t,xtrans,rho4,M)
-       call rho_transform(rho2t,devPtrX,rho4,M)
+!       call rho_transform(rho2t,devPtrX,rho4,M)
+       call complex_rho_on_to_ao(rho2t,devPtrX,rho4,M)
        call sprepack_ctr('L',M,rhobeta,rho4)
        DO i=1,MM
           RMM(i)=RMM(i)+rhobeta(i)

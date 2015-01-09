@@ -1,12 +1,11 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-       subroutine predictor(F1a,F1b,FON,rho2,xtrans,factorial,
+       subroutine predictor(F1a,F1b,FON,rho2,factorial,
      > Fxx,Fyy,Fzz,g)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 ! This routine recives: F1a,F1b,rho2
 ! And gives: F5 = F(t+(deltat/2))      
        use garcha_mod
        REAL*8,intent(inout) :: F1a(M,M),F1b(M,M),FON(M,M)
-       REAL*8,intent(in) :: Xtrans(M,M)
        REAL*8,intent(in) :: Fxx,Fyy,Fzz,g
        REAL*8, intent(in) :: factorial(NBCH)
        REAL*8,allocatable :: F3(:,:),FBA(:,:)
@@ -59,16 +58,18 @@ c Initializations/Defaults
        call magnus(F3,rho2,rho4,M,NBCH,tdstep1,factorial)
 ! Paso3: Escribimos rho4 en el RMM para poder obtener F5 en el siguiente paso.
 ! Step3: rho4 is copied to RMM(1,2,3,...,MM)
-       call matmulnanoc(rho4,xtrans,rho2t,M)
-       do j=1,M
-          do k=j,M
-             if(j.eq.k) then
-                RMM(k+(M2-j)*(j-1)/2)=REAL(rho2t(j,k))
-             else
-                RMM(k+(M2-j)*(j-1)/2)=REAL(rho2t(j,k))*2
-             endif
-          enddo
-       enddo       
+!       call matmulnanoc(rho4,xtrans,rho2t,M)
+       call complex_rho_on_to_ao(rho4,x,rho2t,M)
+!       do j=1,M
+!          do k=j,M
+!             if(j.eq.k) then
+!                RMM(k+(M2-j)*(j-1)/2)=REAL(rho2t(j,k))
+!             else
+!                RMM(k+(M2-j)*(j-1)/2)=REAL(rho2t(j,k))*2
+!             endif
+!          enddo
+!       enddo 
+        call sprepack_ctr('L',M,RMM,rho2t)      
 ! Step4: Density matrix 4 is used to calculate F5
        call int3lu(E2)
        call g2g_solve_groups(0,Ex,0)
@@ -76,27 +77,28 @@ c Initializations/Defaults
          write(*,*) 'FIELD PREDICTOR'
          call dip2(g,Fxx,Fyy,Fzz)
        endif
-       do j=1,M
-          do k=1,j
-             FBA(j,k)=RMM(M5+j+(M2-k)*(k-1)/2-1)
-          enddo
-          do k=j+1,M
-             FBA(j,k)=RMM(M5+k+(M2-j)*(j-1)/2-1)
-          enddo
-       enddo
-       call matmulnano(FBA,X,FON,M)
+!       do j=1,M
+!          do k=1,j
+!             FBA(j,k)=RMM(M5+j+(M2-k)*(k-1)/2-1)
+!          enddo
+!          do k=j+1,M
+!             FBA(j,k)=RMM(M5+k+(M2-j)*(j-1)/2-1)
+!          enddo
+!       enddo
+       call spunpack('L',M,RMM(M5),FBA)       
+!       call matmulnano(FBA,X,FON,M)
+       call fock_ao_to_on(FBA,X,FON,M)
        DEALLOCATE(rho4,rho2t,F3,FBA)
        RETURN;END
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
        subroutine predictor_op(F1a_a,F1b_a,F1a_b,F1b_b,FON_a,FON_b,
-     > rho2_a,rho2_b,xtrans,factorial,Fxx,Fyy,Fzz,g)
+     > rho2_a,rho2_b,factorial,Fxx,Fyy,Fzz,g)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 ! This routine recives: F1a,F1b,rho2
 ! And gives: F5 = F(t+(deltat/2))      
        use garcha_mod
        REAL*8,intent(inout) :: F1a_a(M,M),F1b_a(M,M),
      > F1a_b(M,M),F1b_b(M,M),FON_a(M,M),FON_b(M,M)
-       REAL*8,intent(in) :: Xtrans(M,M)
        REAL*8,intent(in) :: Fxx,Fyy,Fzz,g
        REAL*8, intent(in) :: factorial(NBCH)
        REAL*8,allocatable :: F3(:,:),FBA(:,:)
@@ -128,7 +130,8 @@ c now G
 !
        call magnus(F3,rho2_a,rho2t,M,NBCH,tdstep1,factorial)
 !
-       call matmulnanoc(rho2t,xtrans,rho4,M)
+!       call matmulnanoc(rho2t,xtrans,rho4,M)
+       call complex_rho_on_to_ao(rho2t,x,rho4,M)
 !       do j=1,M
 !          do k=1,M
 !             if(k.eq.j) then
@@ -148,7 +151,8 @@ c now G
        call magnus(F3,rho2_b,rho2t,M,NBCH,tdstep1,factorial)
 !
        rho4=0
-       call matmulnanoc(rho2t,xtrans,rho4,M)
+!       call matmulnanoc(rho2t,xtrans,rho4,M)
+       call complex_rho_on_to_ao(rho2t,x,rho4,M) 
 !
 !          do j=1,M
 !             do k=1,M
@@ -184,7 +188,8 @@ c now G
          call dip2(g,Fxx,Fyy,Fzz)
        endif
        call spunpack('L',M,RMM(M5),FBA)
-       call matmulnano(FBA,X,FON_a,M)
+!       call matmulnano(FBA,X,FON_a,M)
+       call fock_ao_to_on(FBA,devPtrX,FON_a,M)
 !
 !            do j=1,M
 !               do k=1,j
@@ -195,7 +200,8 @@ c now G
 !               enddo
 !            enddo
        call spunpack('L',M,RMM(M3),FBA)
-       call matmulnano(FBA,X,FON_b,M)
+!       call matmulnano(FBA,X,FON_b,M)
+       call fock_ao_to_on(FBA,devPtrX,FON_b,M)
        DEALLOCATE(rho4,rho2t,F3,FBA)
        RETURN;END
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!

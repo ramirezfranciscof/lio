@@ -31,7 +31,7 @@ c       USE latom
        INTEGER :: istep
        REAL*8 :: t,E2
        REAL*8,ALLOCATABLE,DIMENSION(:,:) :: 
-     >   xnano2,xtrans,ytrans,Y,fock_a,fock_b,
+     >   xnano2,Y,fock_a,fock_b,
      >   F1a_a,F1a_b,F1b_a,F1b_b,overlap,rhoscratch
        real*8, dimension (:,:), ALLOCATABLE :: elmu
        DIMENSION q(natom)
@@ -58,7 +58,7 @@ c       USE latom
       integer sizeof_real
       parameter(sizeof_real=8)
       integer stat
-      integer*8 devPtrX, devPtrYtr
+      integer*8 devPtrX, devPtrY
       external CUBLAS_INIT, CUBLAS_SET_MATRIX
       external CUBLAS_SHUTDOWN, CUBLAS_ALLOC
       integer CUBLAS_ALLOC, CUBLAS_SET_MATRIX
@@ -129,7 +129,7 @@ c       USE latom
        M2=2*M
 !
        ALLOCATE(xnano(M,M),xnano2(M,M),
-     >   rhold_a(M,M),xtrans(M,M),Y(M,M),ytrans(M,M),
+     >   rhold_a(M,M),Y(M,M),
      >   rho1(M,M),rho_a(M,M),rho_b(M,M),rhonew_a(M,M),rhonew_b(M,M),
      >   rhold_b(M,M),fock_a(M,M),fock_b(M,M))
 !
@@ -336,25 +336,17 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
                 enddo
               endif
             enddo
-!------------------------------------------------------------------------------!
-! the tranposed matrixes are calculated
-            do i=1,M
-               do j=1,M
-                 xtrans(j,i)=X(i,j)           !hay que dejar de guardar las trans en memoria, es al pedo!!!!!!!
-                 ytrans(j,i)=Y(i,j)
-               enddo
-            enddo
 !! CUBLAS ---------------------------------------------------------------------!
 #ifdef CUBLAS
             stat = CUBLAS_ALLOC(M*M, sizeof_real, devPtrX)
-            stat = CUBLAS_ALLOC(M*M, sizeof_real, devPtrYtr)
+            stat = CUBLAS_ALLOC(M*M, sizeof_real, devPtrY)
             if (stat.NE.0) then
             write(*,*) "X and/or Y memory allocation failed"
             call CUBLAS_SHUTDOWN
             stop
             endif
             stat = CUBLAS_SET_MATRIX(M,M,sizeof_real,X,M,devPtrX,M)
-            stat=CUBLAS_SET_MATRIX(M,M,sizeof_real,ytrans,M,devPtrYtr,M)
+            stat=CUBLAS_SET_MATRIX(M,M,sizeof_real,y,M,devPtrY,M)
             if (stat.NE.0) then
             write(*,*) "X and/or Y setting failed"
             call CUBLAS_SHUTDOWN
@@ -371,8 +363,9 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
 ! Rho is transformed to the orthonormal basis
 #ifdef CUBLAS
            call g2g_timer_start('cumatmul')
-           call rho_transform(rho_a,devPtrYtr,rho_a,M)
-           call rho_transform(rho_b,devPtrYtr,rho_b,M)
+!           call rho_transform(rho_b,devPtrY,rho_b,M)
+           call complex_rho_ao_to_on(rho_a,devPtrY,rho_a,M)
+           call complex_rho_ao_to_on(rho_b,devPtrY,rho_b,M)
            call g2g_timer_stop('cumatmul')
 #else
 ! with matmul:
@@ -381,8 +374,10 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
 !       rho_b=matmul(ytrans,rho_b)
 !       rho_b=matmul(rho_b,y)
 ! with matmulnanoc
-            call rho_transform(rho_a,Y,rho_a,M)
-            call rho_transform(rho_b,Y,rho_b,M)
+          call complex_rho_ao_to_on(rho_a,Y,rho_a,M)
+          call complex_rho_ao_to_on(rho_b,Y,rho_b,M)
+!            call rho_transform(rho_a,Y,rho_a,M)
+!            call rho_transform(rho_b,Y,rho_b,M)
 !            rho=rho1
 !--------------------------------------!
 #endif
@@ -395,10 +390,9 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
             call g2g_timer_stop('int3mmem')
 !------------------------------------------------------------------------------!
 #ifdef CUBLAS
-            call CUBLAS_FREE(devPtrYtr)
-            deallocate(xtrans)
+            call CUBLAS_FREE(devPtrY)
 #endif
-            deallocate(y,ytrans)
+            deallocate(y)
 !------------------------------------------------------------------------------!
             call g2g_timer_stop('inicio')
 !##############################################################################!
@@ -612,7 +606,7 @@ c Density update (rhold-->rho, rho-->rhonew)
 #ifdef CUBLAS
                 call g2g_timer_start('cupredictor')
                 call cupredictor_op(F1a_a,F1b_a,F1a_b,F1b_b,fock_a,
-     >               fock_b,rho_a,rho_b,Xtrans,factorial,devPtrX,Fxx,
+     >               fock_b,rho_a,rho_b,factorial,devPtrX,Fxx,
      >               Fyy,Fzz,g)
                 call g2g_timer_stop('cupredictor')
                 call g2g_timer_start('cumagnus')
@@ -624,7 +618,7 @@ c Density update (rhold-->rho, rho-->rhonew)
 #else
                 call g2g_timer_start('predictor')
                 call predictor_op(F1a_a,F1b_a,F1a_b,F1b_b,fock_a,fock_b,
-     >          rho_a,rho_b,Xtrans,factorial,Fxx,Fyy,Fzz,g)
+     >          rho_a,rho_b,factorial,Fxx,Fyy,Fzz,g)
                 call g2g_timer_stop('predictor')
                 call g2g_timer_start('magnus')
                 call magnus(fock_a,rho_a,rhonew_a,M,NBCH,dt_magnus,
@@ -652,7 +646,8 @@ c with matmul:
 !             call cumxp(rho_a,devPtrX,rho1,M)
 !             call cumpxt(rho1,devPtrX,rho1,M)
 !             call cumatmulnanoc(rho_a,devPtrX,rho1,M)
-              call rho_transform(rho_a,devPtrX,rho1,M)
+!              call rho_transform(rho_a,devPtrX,rho1,M)
+              call complex_rho_on_to_ao(rho_a,devPtrX,rho1,M)
 !             do j=1,M
 !                 do k=j,M
 !                     if(j.eq.k) then
@@ -667,7 +662,8 @@ c with matmul:
 !             call cumxp(rho_b,devPtrX,rho1,M)
 !             call cumpxt(rho1,devPtrX,rho1,M)
 !             call cumatmulnanoc(rho_b,devPtrX,rho1,M)
-             call rho_transform(rho_b,devPtrX,rho1,M)
+!             call rho_transform(rho_b,devPtrX,rho1,M)
+             call complex_rho_on_to_ao(rho_b,devPtrX,rho1,M)
              call sprepack_ctr('L',M,rhobeta,rho1)
              DO i=1,MM
                 RMM(i)=RMM(i)+rhobeta(i)
@@ -688,7 +684,8 @@ c with matmul:
              call g2g_timer_start('matmul')
 !             rho1=matmul(x,rho_a)
 !             rho1=matmul(rho1,xtrans)
-              call rho_transform(rho_a,xtrans,rho1,M)
+!              call rho_transform(rho_a,xtrans,rho1,M)
+              call complex_rho_on_to_ao(rho_a,x,rho1,M)
 !             do j=1,M
 !                 do k=j,M
 !                     if(j.eq.k) then
@@ -704,7 +701,8 @@ c with matmul:
              call sprepack_ctr('L',M,rhoalpha,rho1)
 !             rho1=matmul(x,rho_b)
 !             rho1=matmul(rho1,xtrans)
-             call rho_transform(rho_b,xtrans,rho1,M)
+!             call rho_transform(rho_b,xtrans,rho1,M)
+             call complex_rho_on_to_ao(rho_b,x,rho1,M)
 !             do j=1,M
 !                 do k=j,M
 !                     if(j.eq.k) then
@@ -952,7 +950,7 @@ c
 #ifdef CUBLAS
        deallocate(xnano,rho_a,fock_a,rho_b,fock_b,rho1)
 #else
-       deallocate(xnano,rho_a,fock_a,rho_b,fock_b,rho1,xtrans)
+       deallocate(xnano,rho_a,fock_a,rho_b,fock_b,rho1)
 #endif
        DEALLOCATE(factorial)
        if(ipop.eq.1) deallocate(rhoscratch,overlap)
