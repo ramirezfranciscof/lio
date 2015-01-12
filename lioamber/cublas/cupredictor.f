@@ -1,13 +1,13 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
        subroutine cupredictor(F1a,F1b,FON,rho2,devPtrX,factorial,
-     > Fxx,Fyy,Fzz,g)
+     > Fxx,Fyy,Fzz,g,devPtrXc)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 !Predictor-Corrector Cheng, V.Vooris.PhysRevB.2006.74.155112
 ! Esta rutina recibe: F1a,F1b,rho2
 ! Tira: F5 = F(t+(deltat/2))      
        use garcha_mod
        REAL*8,intent(inout) :: F1a(M,M),F1b(M,M),FON(M,M)
-       integer*8,intent(in) :: devPtrX
+       integer*8,intent(in) :: devPtrX,devPtrXc
        REAL*8,allocatable :: F3(:,:),FBA(:,:)
        integer :: i,j,k,kk,stat
        real*8 :: E2, tdstep1
@@ -75,7 +75,7 @@ c xmm es la primer matriz de (M,M) en el
 !       call cumxp(rho4,devPtrX,rho2t,M)
 !       call cumpxt(rho2t,devPtrX,rho2t,M)
 !       call g2g_timer_stop('cumatmul_predictor')
-       call complex_rho_on_to_ao(rho4,devPtrX,rho2t,M)
+       call complex_rho_on_to_ao(rho4,devPtrXc,rho2t,M)
 !       do j=1,M
 !       do k=j,M
 !         if(j.eq.k) then
@@ -124,14 +124,14 @@ c xmm es la primer matriz de (M,M) en el
        RETURN;END
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
        subroutine cupredictor_op(F1a_a,F1b_a,F1a_b,F1b_b,FON_a,FON_b,
-     > rho2_a,rho2_b,factorial,devPtrX,Fxx,Fyy,Fzz,g)
+     > rho2_a,rho2_b,factorial,devPtrX,Fxx,Fyy,Fzz,g,devPtrXc)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 ! This routine recives: F1a,F1b,rho2
 ! And gives: F5 = F(t+(deltat/2))      
        use garcha_mod
        REAL*8,intent(inout) :: F1a_a(M,M),F1b_a(M,M),
      > F1a_b(M,M),F1b_b(M,M),FON_a(M,M),FON_b(M,M)
-       integer*8,intent(in) :: devPtrX
+       integer*8,intent(in) :: devPtrX,devPtrXc
        REAL*8,intent(in) :: g,Fxx,Fyy,Fzz
        REAL*8, intent(in) :: factorial(NBCH)
        REAL*8,allocatable :: F3(:,:),FBA(:,:)
@@ -167,7 +167,7 @@ c now G
 !
 !       call matmulnanoc(rho2t,xtrans,rho4,M)
 !       call rho_transform(rho2t,devPtrX,rho4,M)
-       call complex_rho_on_to_ao(rho2t,devPtrX,rho4,M)
+       call complex_rho_on_to_ao(rho2t,devPtrXc,rho4,M)
        call sprepack_ctr('L',M,rhoalpha,rho4)
        call sprepack_ctr('L',M,RMM,rho4)
 !
@@ -179,7 +179,7 @@ c now G
        rho4=0
 !       call matmulnanoc(rho2t,xtrans,rho4,M)
 !       call rho_transform(rho2t,devPtrX,rho4,M)
-       call complex_rho_on_to_ao(rho2t,devPtrX,rho4,M)
+       call complex_rho_on_to_ao(rho2t,devPtrXc,rho4,M)
        call sprepack_ctr('L',M,rhobeta,rho4)
        DO i=1,MM
           RMM(i)=RMM(i)+rhobeta(i)

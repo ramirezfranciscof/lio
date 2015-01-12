@@ -1,69 +1,90 @@
             subroutine cumxp(A,devPtrX,C,M)
-!==========================================================================!
-!!!!!!!!  Hace C=Bt*(A*B) para matrices cuadradas
-!==========================================================================!
+!========================================================================!
+!!!!!!!!  Hace C=A*X para matrices cuadradas
+!========================================================================!
       implicit none
-      integer sizeof_real
       integer*8 devPtrA
-      integer*8,intent(in) :: devPtrX
-      integer*8 devPtrScratch1
-      integer*8 devPtrScratch2
-      parameter(sizeof_real=8)
+      integer*8 devPtrScratch
       integer,intent(in) :: M
-      REAL*8 alpha,beta
-      REAL*8, dimension (:,:), ALLOCATABLE :: scratch,scratch1,scratch2
+      integer*8,intent(in) :: devPtrX
+      REAL*8, dimension (:,:), ALLOCATABLE :: scratch1,scratch2
       integer i,j,stat
       external CUBLAS_INIT, CUBLAS_SET_MATRIX, CUBLAS_GET_MATRIX
-      external CUBLAS_SHUTDOWN, CUBLAS_ALLOC
+      external CUBLAS_SHUTDOWN, CUBLAS_ALLOC, CUBLAS_ZGEMM,CUBLAS_CGEMM
       integer CUBLAS_ALLOC, CUBLAS_SET_MATRIX, CUBLAS_GET_MATRIX
-      integer CUBLAS_INIT
+      integer CUBLAS_INIT,CUBLAS_ZGEMM,CUBLAS_CGEMM
+      integer sizeof_complex
 #ifdef TD_SIMPLE
       COMPLEX*8 , intent(in) :: A(M,M)
       COMPLEX*8, intent(out) :: C(M,M)
+      COMPLEX*8 :: alpha,beta
+      parameter(sizeof_complex=8)
 #else
       COMPLEX*16 , intent(in) :: A(M,M)
       COMPLEX*16, intent(out) :: C(M,M)
+      COMPLEX*16 :: alpha,beta
+      parameter(sizeof_complex=16)
 #endif
-!-------------------------------------------------------------------------!
-      allocate(scratch1(M,M),scratch2(M,M))
+!---------------------------------------------------------------------!
       stat=CUBLAS_INIT()
       if (stat.NE.0) then
-        write(*,*) "initialization failed -cumxp"
+        write(*,*) "initialization failed -cumpx"
         call CUBLAS_SHUTDOWN
         stop
       endif
-      alpha=1.0D0
-      beta=0.0D0
-      scratch1=REAL(A)
-      scratch2=AIMAG(A)
+      alpha=cmplx(1.0D0,0.0D0)
+      beta=cmplx(0.0D0,0.0D0)
+!-------------------------ALLOCATION---------------------------------!
+      stat= CUBLAS_ALLOC(M*M, sizeof_complex, devPtrA)
+      if (stat.NE.0) then
+        write(*,*) "Matrix allocation failed -cumpx-1"
+        call CUBLAS_SHUTDOWN
+        stop
+      endif
+      stat= CUBLAS_ALLOC(M*M, sizeof_complex, devPtrScratch)
+      if (stat.NE.0) then
+        write(*,*) "Matrix allocation failed -cumpx-2"
+        call CUBLAS_SHUTDOWN
+        stop
+      endif
 !--------------------------------------------------------------------!
-      stat= CUBLAS_ALLOC(M*M, sizeof_real, devPtrScratch1)
-      stat= CUBLAS_ALLOC(M*M, sizeof_real, devPtrScratch2)
+      stat = CUBLAS_SET_MATRIX(M,M,sizeof_complex,A,M,
+     > devPtrA,M)
+      if (stat.NE.0) then
+        write(*,*) "Matrix setting on device -cumpx-1"
+        call CUBLAS_SHUTDOWN
+        stop
+      endif
+!-----------------------GEMM-----------------------------------------!
+#ifdef TD_SIMPLE
+      stat=CUBLAS_CGEMM ('N','N',M,M,M,alpha,devPtrX
+     > ,M ,devPtrA,M, beta, devPtrScratch,M)
+      if (stat.NE.0) then
+        write(*,*) "CGEMM failed -cumpx"
+        call CUBLAS_SHUTDOWN
+        stop
+      endif
+#else
+      stat=CUBLAS_ZGEMM ('N','N',M,M,M,alpha,devPtrX
+     > ,M ,devPtrA,M, beta, devPtrScratch,M)
+      if (stat.NE.0) then
+        write(*,*) "ZGEMM failed -cumpx"
+        call CUBLAS_SHUTDOWN
+        stop
+      endif
+#endif
+!-----------------GETTING MATRIX FROM DEVICE-------------------------!
+      stat = CUBLAS_GET_MATRIX(M,M,sizeof_complex,devPtrScratch,M,
+     > C,M)
+      if (stat.NE.0) then
+        write(*,*) "Getting matrix from device failed -cumpx"
+        call CUBLAS_SHUTDOWN
+        stop
+      endif
 !--------------------------------------------------------------------!
-      stat = CUBLAS_SET_MATRIX(M,M,sizeof_real,scratch1,M,
-     > devPtrScratch1,M)
-!-----------------------REAL-----------------------------------------!
-      call CUBLAS_DGEMM ('N','N',M,M,M,alpha,devPtrX
-     > ,M ,devPtrScratch1,M, beta, devPtrScratch2,M)
-!--------------------------------------------------------------------!
-      stat = CUBLAS_GET_MATRIX(M,M,sizeof_real,devPtrScratch2,M,
-     > scratch1,M)
-!----------------------COMPLEX---------------------------------------!
-      stat = CUBLAS_SET_MATRIX(M,M,sizeof_real,scratch2,M,
-     > devPtrScratch1,M)
-!--------------------------------------------------------------------!
-      call CUBLAS_DGEMM ('N','N',M,M,M,alpha,devPtrX
-     > ,M ,devPtrScratch1,M, beta, devPtrScratch2,M)
-!--------------------------------------------------------------------!      
-      stat = CUBLAS_GET_MATRIX(M,M,sizeof_real,devPtrScratch2,M,
-     > scratch2,M)
-!--------------------------------------------------------------------!
-      C=CMPLX(scratch1,scratch2)
-!--------------------------------------------------------------------!
-      call CUBLAS_FREE ( devPtrScratch1 )
-      call CUBLAS_FREE ( devPtrScratch2 )
+      call CUBLAS_FREE ( devPtrA )
+      call CUBLAS_FREE ( devPtrScratch )
       call CUBLAS_SHUTDOWN
-      DEALLOCATE(scratch1,scratch2)
       return
       end
 

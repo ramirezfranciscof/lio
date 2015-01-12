@@ -57,8 +57,14 @@ c       USE latom
 #ifdef CUBLAS
       integer sizeof_real
       parameter(sizeof_real=8)
+      integer sizeof_complex
+#ifdef TD_SIMPLE
+      parameter(sizeof_complex=8)
+#else
+      parameter(sizeof_complex=16)
+#endif
       integer stat
-      integer*8 devPtrX, devPtrY
+      integer*8 devPtrX, devPtrY,devPtrXc
       external CUBLAS_INIT, CUBLAS_SET_MATRIX
       external CUBLAS_SHUTDOWN, CUBLAS_ALLOC
       integer CUBLAS_ALLOC, CUBLAS_SET_MATRIX
@@ -338,20 +344,33 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
             enddo
 !! CUBLAS ---------------------------------------------------------------------!
 #ifdef CUBLAS
+            DO i=1,M
+               DO j=1,M
+                  rho1(i,j)=cmplx(X(i,j),0.0D0)
+               ENDDO
+            ENDDO
             stat = CUBLAS_ALLOC(M*M, sizeof_real, devPtrX)
-            stat = CUBLAS_ALLOC(M*M, sizeof_real, devPtrY)
+            stat = CUBLAS_ALLOC(M*M, sizeof_complex, devPtrXc)
+            stat = CUBLAS_ALLOC(M*M, sizeof_complex, devPtrY)
             if (stat.NE.0) then
             write(*,*) "X and/or Y memory allocation failed"
             call CUBLAS_SHUTDOWN
             stop
             endif
-            stat = CUBLAS_SET_MATRIX(M,M,sizeof_real,X,M,devPtrX,M)
-            stat=CUBLAS_SET_MATRIX(M,M,sizeof_real,y,M,devPtrY,M)
+            stat=CUBLAS_SET_MATRIX(M,M,sizeof_real,X,M,devPtrX,M)
+            stat=CUBLAS_SET_MATRIX(M,M,sizeof_complex,rho1,M,devPtrXc,M)
+            DO i=1,M
+               DO j=1,M
+                  rho1(i,j)=cmplx(Y(i,j),0.0D0)
+               ENDDO
+            ENDDO
+            stat=CUBLAS_SET_MATRIX(M,M,sizeof_complex,rho1,M,devPtrY,M)
             if (stat.NE.0) then
             write(*,*) "X and/or Y setting failed"
             call CUBLAS_SHUTDOWN
             stop
             endif
+            rho1=0
 #endif
 !------------------------------------------------------------------------------!
 ! External Electric Field components
@@ -607,7 +626,7 @@ c Density update (rhold-->rho, rho-->rhonew)
                 call g2g_timer_start('cupredictor')
                 call cupredictor_op(F1a_a,F1b_a,F1a_b,F1b_b,fock_a,
      >               fock_b,rho_a,rho_b,factorial,devPtrX,Fxx,
-     >               Fyy,Fzz,g)
+     >               Fyy,Fzz,g,devPtrXc)
                 call g2g_timer_stop('cupredictor')
                 call g2g_timer_start('cumagnus')
                 call cumagnusfac(fock_a,rho_a,rhonew_a,M,NBCH,dt_magnus,
@@ -642,12 +661,12 @@ c can be descarted since for a basis set of purely real functions the fock matri
 c the real part of the complex density matrix. (This won't be true in the case of hybrid functionals)
 c with matmul:
 #ifdef CUBLAS
-             call g2g_timer_start('cumatmul')   !TODO: VER COMO HACER ESTO CON UNA SOLA MATRIZ AUXILIAR COPIANDO A LA POSICION CORRESPONDIENTE DEL RMM
+             call g2g_timer_start('complex_rho_on_to_ao-cu')   !TODO: VER COMO HACER ESTO CON UNA SOLA MATRIZ AUXILIAR COPIANDO A LA POSICION CORRESPONDIENTE DEL RMM
 !             call cumxp(rho_a,devPtrX,rho1,M)
 !             call cumpxt(rho1,devPtrX,rho1,M)
 !             call cumatmulnanoc(rho_a,devPtrX,rho1,M)
 !              call rho_transform(rho_a,devPtrX,rho1,M)
-              call complex_rho_on_to_ao(rho_a,devPtrX,rho1,M)
+              call complex_rho_on_to_ao(rho_a,devPtrXc,rho1,M)
 !             do j=1,M
 !                 do k=j,M
 !                     if(j.eq.k) then
@@ -663,7 +682,7 @@ c with matmul:
 !             call cumpxt(rho1,devPtrX,rho1,M)
 !             call cumatmulnanoc(rho_b,devPtrX,rho1,M)
 !             call rho_transform(rho_b,devPtrX,rho1,M)
-             call complex_rho_on_to_ao(rho_b,devPtrX,rho1,M)
+             call complex_rho_on_to_ao(rho_b,devPtrXc,rho1,M)
              call sprepack_ctr('L',M,rhobeta,rho1)
              DO i=1,MM
                 RMM(i)=RMM(i)+rhobeta(i)
@@ -679,9 +698,9 @@ c with matmul:
 !                     endif
 !                 enddo
 !             enddo
-             call g2g_timer_stop('cumatmul')
+             call g2g_timer_stop('complex_rho_on_to_ao-cu')
 #else
-             call g2g_timer_start('matmul')
+             call g2g_timer_start('complex_rho_on_to_ao')
 !             rho1=matmul(x,rho_a)
 !             rho1=matmul(rho1,xtrans)
 !              call rho_transform(rho_a,xtrans,rho1,M)
@@ -720,7 +739,7 @@ c with matmul:
              DO i=1,MM
                 RMM(i)=RMM(i)+rhobeta(i)
              ENDDO
-             call g2g_timer_stop('matmul')
+             call g2g_timer_stop('complex_rho_on_to_ao')
 #endif
 !       rho1=REAL(rho1)
 c with matmulnanoc:

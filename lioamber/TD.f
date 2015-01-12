@@ -55,17 +55,24 @@ c       USE latom
 #ifdef CUBLAS
       integer sizeof_real
       parameter(sizeof_real=8)
+      integer sizeof_complex
+#ifdef TD_SIMPLE
+      parameter(sizeof_complex=8)
+#else
+      parameter(sizeof_complex=16)
+#endif
       integer stat
-      integer*8 devPtrX, devPtrY
+      integer*8 devPtrX, devPtrY,devPtrXc
       external CUBLAS_INIT, CUBLAS_SET_MATRIX
-      external CUBLAS_SHUTDOWN, CUBLAS_ALLOC
-      integer CUBLAS_ALLOC, CUBLAS_SET_MATRIX
+      external CUBLAS_SHUTDOWN, CUBLAS_ALLOC,CUBLAS_GET_MATRIX
+      integer CUBLAS_ALLOC, CUBLAS_SET_MATRIX,CUBLAS_GET_MATRIX
 #endif
 !!   GROUP OF CHARGES
        LOGICAL             :: groupcharge
        INTEGER             :: ngroup
        INTEGER,ALLOCATABLE :: group(:)
        REAL*8,ALLOCATABLE  :: qgr(:)
+!!
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
        call g2g_timer_start('TD')
        call g2g_timer_start('inicio')
@@ -319,20 +326,45 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
             enddo
 !! CUBLAS ---------------------------------------------------------------------!
 #ifdef CUBLAS
+            DO i=1,M
+               DO j=1,M
+                  rho1(i,j)=cmplx(X(i,j),0.0D0)
+               ENDDO
+            ENDDO            
             stat = CUBLAS_ALLOC(M*M, sizeof_real, devPtrX)
-            stat = CUBLAS_ALLOC(M*M, sizeof_real, devPtrY)
+            stat = CUBLAS_ALLOC(M*M, sizeof_complex, devPtrXc)
+            stat = CUBLAS_ALLOC(M*M, sizeof_complex, devPtrY)
             if (stat.NE.0) then
             write(*,*) "X and/or Y memory allocation failed"
             call CUBLAS_SHUTDOWN
             stop
             endif
-            stat = CUBLAS_SET_MATRIX(M,M,sizeof_real,X,M,devPtrX,M)
-            stat=CUBLAS_SET_MATRIX(M,M,sizeof_real,y,M,devPtrY,M)
+            stat=CUBLAS_SET_MATRIX(M,M,sizeof_complex,rho1,M,devPtrXc,M)
+            stat=CUBLAS_SET_MATRIX(M,M,sizeof_real,x,M,devPtrX,M)
+            DO i=1,M
+               DO j=1,M
+                  rho1(i,j)=cmplx(Y(i,j),0.0D0)
+               ENDDO
+            ENDDO
+            stat=CUBLAS_SET_MATRIX(M,M,sizeof_complex,rho1,M,devPtrY,M)
             if (stat.NE.0) then
             write(*,*) "X and/or Y setting failed"
             call CUBLAS_SHUTDOWN
             stop
             endif
+!--Prueba--!
+            rho1=0
+!            stat=CUBLAS_GET_MATRIX(M,M,sizeof_complex,devPtrY,M,
+!     > rho1,M)
+!            write(10000,*) rho1
+!            write(10001,*) Y
+!            rho1=0
+!            stat=CUBLAS_GET_MATRIX(M,M,sizeof_complex,devPtrX,M,
+!     > rho1,M)
+!            write(10002,*) rho1
+!            write(10003,*) X
+!            stop 'fort.10000,fort.10001,fort.10002,fort.10003'
+!----------!           
 #endif
 !------------------------------------------------------------------------------!
 ! External Electric Field components
@@ -343,19 +375,21 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
 !------------------------------------------------------------------------------!
 ! Rho is transformed to the orthonormal basis
 #ifdef CUBLAS
-!           call g2g_timer_start('cumatmul')
+           call g2g_timer_start('complex_rho_ao_to_on-cu')
 !           call cumxp(rho,devPtrY,rho,M)
 !           call cumpxt(rho,devPtrY,rho,M)
 !           call g2g_timer_stop('cumatmul')
 !            call rho_transform(rho,devPtrY,rho,M)
             call complex_rho_ao_to_on(rho,devPtrY,rho,M)
+            call g2g_timer_stop('complex_rho_ao_to_on-cu')
 #else
 ! with matmul:
 !       rho=matmul(ytrans,rho)
 !       rho=matmul(rho,y)
 !           call rho_transform(rho,y,rho,M)
+            call g2g_timer_start('complex_rho_ao_to_on')
             call complex_rho_ao_to_on(rho,y,rho,M)
-          
+            call g2g_timer_stop('complex_rho_ao_to_on')
 ! with matmulnanoc
 !            call matmulnanoc(rho,Y,rho,M)
 !            rho=rho1
@@ -453,7 +487,6 @@ c ELECTRIC FIELD CASE - Type=gaussian (ON)
 !            fock=matmul(fock,x)
              call fock_ao_to_on(fock,x,fock,M)
 #endif
-            call g2g_timer_stop('fock')
 c Fock triangular matrix contained in RMM(M5,M5+1,M5+2,...,M5+MM) is copied to square matrix fock.
 !            do j=1,M
 !               do k=1,j
@@ -464,6 +497,7 @@ c Fock triangular matrix contained in RMM(M5,M5+1,M5+2,...,M5+MM) is copied to s
 !               enddo
 !            enddo
              call sprepack('L',M,RMM(M5),fock)
+             call g2g_timer_stop('fock')
 c Now fock is stored in molecular orbital basis.
 c
 !  stores F1a and F1b for magnus propagation
@@ -517,11 +551,15 @@ c           endif
 c using conmutc
               if(istep.eq.1) then
 #ifdef CUBLAS
+                call g2g_timer_start('cuconmut')
                 call cuconmut(fock,rho,rhold,M)
                 rhold=rho+dt_lpfrg*(Im*rhold)
+                call g2g_timer_stop('cuconmut')
 #else
+                call g2g_timer_start('conmutc')
                 call conmutc(fock,rho,rhold,M)
                 rhold=rho+dt_lpfrg*(Im*rhold)
+                call g2g_timer_stop('conmutc')
 #endif
               endif
 !####################################################################!
@@ -533,11 +571,15 @@ c--------------------------------------c
 ! using conmutc:
                call g2g_timer_start('Verlet')
 #ifdef CUBLAS
+               call g2g_timer_start('cuconmut')
                call cuconmut(fock,rho,rhonew,M)
                rhonew=rhold-dt_lpfrg*(Im*rhonew)
+               call g2g_timer_stop('cuconmut')
 #else
+              call g2g_timer_start('conmutc')
               call conmutc(fock,rho,rhonew,M)
               rhonew=rhold-dt_lpfrg*(Im*rhonew)
+              call g2g_timer_stop('conmutc')
 #endif
               call g2g_timer_stop('Verlet')
 c Density update (rhold-->rho, rho-->rhonew)
@@ -552,7 +594,7 @@ c Density update (rhold-->rho, rho-->rhonew)
 #ifdef CUBLAS
                 call g2g_timer_start('cupredictor')
                 call cupredictor(F1a,F1b,fock,rho,devPtrX,factorial,
-     > fxx,fyy,fzz,g)
+     > fxx,fyy,fzz,g,devPtrXc)
                 call g2g_timer_stop('cupredictor')
                 call g2g_timer_start('cumagnus')
                 call cumagnusfac(fock,rho,rhonew,M,NBCH,dt_magnus,
@@ -579,19 +621,19 @@ c can be descarted since for a basis set of purely real functions the fock matri
 c the real part of the complex density matrix. (This won't be true in the case of hybrid functionals)
 c with matmul:
 #ifdef CUBLAS
-             call g2g_timer_start('cumatmul')
+             call g2g_timer_start('complex_rho_on_to_ao-cu')
 !             call cumxp(rho,devPtrX,rho1,M)
 !             call cumpxt(rho1,devPtrX,rho1,M)
 !             call rho_transform(rho,devPtrX,rho1,M)
-             call complex_rho_on_to_ao(rho,devPtrX,rho1,M)
-             call g2g_timer_stop('cumatmul')
+             call complex_rho_on_to_ao(rho,devPtrXc,rho1,M)
+             call g2g_timer_stop('complex_rho_on_to_ao-cu')
 #else
-             call g2g_timer_start('matmul')
+             call g2g_timer_start('complex_rho_on_to_ao')
 !             rho1=matmul(x,rho)
 !             rho1=matmul(rho1,xtrans)
 !             call rho_transform(rho,xtrans,rho1,M)
              call complex_rho_on_to_ao(rho,X,rho1,M)
-             call g2g_timer_stop('matmul')
+             call g2g_timer_stop('complex_rho_on_to_ao')
 #endif
 !       rho1=REAL(rho1)
 c with matmulnanoc:
