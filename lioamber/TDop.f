@@ -442,26 +442,27 @@ c ELECTRIC FIELD CASE - Type=gaussian (ON)
 !            if(istep.lt.pert_steps) then
                if (field) then
                  write(*,*) 'FIELD ON'
-                 call dip(ux,uy,uz)
-                 if (exter) then
-                   g=1.0D0
-                   fac=2.54D0
-                   fxx=fx*exp(-0.2*(real(istep-50))**2)
-                   fyy=fy*exp(-0.2*(real(istep-50))**2)
-                   fzz=fz*exp(-0.2*(real(istep-50))**2)
+!                 call dip(ux,uy,uz)
+!                 if (exter) then
+!                   g=1.0D0
+!                   fac=2.54D0
+!                   fxx=fx*exp(-0.2*(real(istep-50))**2)
+!                   fyy=fy*exp(-0.2*(real(istep-50))**2)
+!                   fzz=fz*exp(-0.2*(real(istep-50))**2)
 !                   write(*,*) fxx,fyy,fzz
 !
-                 else
-                   g=2.0D0*(epsilon-1.0D0)/((2.0D0*epsilon+1.0D0)*a0**3)
-                   Fx=ux/2.54D0
-                   Fy=uy/2.54D0
-                   Fz=uz/2.54D0
-                   fac=(2.54D0*2.00D0)
+!                 else
+!                   g=2.0D0*(epsilon-1.0D0)/((2.0D0*epsilon+1.0D0)*a0**3)
+!                   Fx=ux/2.54D0
+!                   Fy=uy/2.54D0
+!                   Fz=uz/2.54D0
+!                   fac=(2.54D0*2.00D0)
 !
-                 endif
-                 call dip2(g,Fxx,Fyy,Fzz)             !VER SI ANDA!!
-                 E1=-1.00D0*g*(Fx*ux+Fy*uy+Fz*uz)/fac -
-     >           0.50D0*(1.0D0-1.0D0/epsilon)*Qc2/a0
+!                 endif
+!                 call dip2(g,Fxx,Fyy,Fzz)             !VER SI ANDA!!
+!                 E1=-1.00D0*g*(Fx*ux+Fy*uy+Fz*uz)/fac -
+!     >           0.50D0*(1.0D0-1.0D0/epsilon)*Qc2/a0
+                 call efield(istep,fxx,fyy,fzz)
                  if((istep.gt.pert_steps).and.(fxx.eq.0.0D0).and.
      >           (fyy.eq.0.0D0).and.(fzz.eq.0.0D0)) field=.false.
                endif
