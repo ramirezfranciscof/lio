@@ -89,12 +89,6 @@ c xmm es la primer matriz de (M,M) en el
 ! Paso4: La matriz densidad 4 es usada para calcular F5------> Corrector
       call int3lu(E2)
       call g2g_solve_groups(0,Ex,0)
-      stat=CUBLAS_INIT()
-      if (stat.NE.0) then
-        write(*,*) "initialization failed -predictor"
-        call CUBLAS_SHUTDOWN
-        stop
-      endif
       if (field) then
          write(*,*) 'FIELD PREDICTOR'
          call dip2(g,Fxx,Fyy,Fzz)
@@ -119,7 +113,6 @@ c xmm es la primer matriz de (M,M) en el
 !       call cumfx(FON,DevPtrX,FON,M)
 !       call g2g_timer_stop('cumatmul2_predictor')
        call fock_ao_to_on(FBA,devPtrX,FON,M)
-       call CUBLAS_SHUTDOWN
        DEALLOCATE(rho4,rho2t,F3,FBA)
        RETURN;END
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!

@@ -414,7 +414,7 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
             write(*,*) 'PROPAGATION'
             do 999 istep=1, ntdstep
 !--------------------------------------!
-              call g2g_timer_start('iteration')
+              call g2g_timer_start('TD step')
               if ((propagator.eq.2).and.(istep.lt.lpfrg_steps)
      >      .and. (.not.tdrestart)) then
                  t=(istep-1)*tdstep*0.1
@@ -674,103 +674,103 @@ c The real part of the density matrix in the atomic orbital basis is copied in R
               endif
 !###################################################################!
 !# DIPOLE MOMENT CALCULATION
-              if(istep.eq.1) then
-                open(unit=134,file='x.dip')
-                open(unit=135,file='y.dip')
-                open(unit=136,file='z.dip')
-        write(134,*) '#Time (fs) vs DIPOLE MOMENT, X COMPONENT (DEBYES)'
-        write(135,*) '#Time (fs) vs DIPOLE MOMENT, Y COMPONENT (DEBYES)'
-        write(136,*) '#Time (fs) vs DIPOLE MOMENT, Z COMPONENT (DEBYES)'
-              endif
-              if ((propagator.eq.2).and.(istep.lt.lpfrg_steps)
-     >      .and. (.not.tdrestart)) then
-                  if(mod ((istep-1),10) == 0) then
-                     call g2g_timer_start('DIPOLE') 
-                     call dip(ux,uy,uz)
-                     call g2g_timer_stop('DIPOLE')
-                     write(134,901) t,ux
-                     write(135,901) t,uy
-                     write(136,901) t,uz
-                  endif
-              else
-                  call g2g_timer_start('DIPOLE')
-                  call dip(ux,uy,uz)
-                  call g2g_timer_stop('DIPOLE')
-                  write(134,901) t,ux
-                  write(135,901) t,uy
-                  write(136,901) t,uz
-              endif
-c u in Debyes
+!              if(istep.eq.1) then
+!                open(unit=134,file='x.dip')
+!                open(unit=135,file='y.dip')
+!                open(unit=136,file='z.dip')
+!        write(134,*) '#Time (fs) vs DIPOLE MOMENT, X COMPONENT (DEBYES)'
+!        write(135,*) '#Time (fs) vs DIPOLE MOMENT, Y COMPONENT (DEBYES)'
+!        write(136,*) '#Time (fs) vs DIPOLE MOMENT, Z COMPONENT (DEBYES)'
+!              endif
+!              if ((propagator.eq.2).and.(istep.lt.lpfrg_steps)
+!     >      .and. (.not.tdrestart)) then
+!                  if(mod ((istep-1),10) == 0) then
+!                     call g2g_timer_start('DIPOLE') 
+!                     call dip(ux,uy,uz)
+!                     call g2g_timer_stop('DIPOLE')
+!                     write(134,901) t,ux
+!                     write(135,901) t,uy
+!                     write(136,901) t,uz
+!                  endif
+!              else
+!                  call g2g_timer_start('DIPOLE')
+!                  call dip(ux,uy,uz)
+!                  call g2g_timer_stop('DIPOLE')
+!                  write(134,901) t,ux
+!                  write(135,901) t,uy
+!                  write(136,901) t,uz
+!              endif
+!c u in Debyes
 !# END OF DIPOLE MOMENT CALCULATION
 c-------------------------MULLIKEN CHARGES-----------------------------------------------!
-                if(istep.eq.1) then
-                  open(unit=1111111,file='Mulliken')
-                  if (groupcharge) then
-                      open(unit=678,file='Mullikin')
-                      allocate(group(natom))
-                      ngroup=0
-                      do n=1,natom
-                        read(678,*) kk
-                        group(n)=kk
-                        if (kk.gt.ngroup) ngroup=kk
-                      enddo
-                      allocate(qgr(ngroup))
-                      close(unit=678)
-                      open(unit=678,file='MullikenGroup')
-                  endif
-                endif
+!                if(istep.eq.1) then
+!                  open(unit=1111111,file='Mulliken')
+!                  if (groupcharge) then
+!                      open(unit=678,file='Mullikin')
+!                      allocate(group(natom))
+!                      ngroup=0
+!                      do n=1,natom
+!                        read(678,*) kk
+!                        group(n)=kk
+!                        if (kk.gt.ngroup) ngroup=kk
+!                      enddo
+!                      allocate(qgr(ngroup))
+!                      close(unit=678)
+!                      open(unit=678,file='MullikenGroup')
+!                  endif
+!                endif
 !
-              if ((propagator.eq.2).and.(istep.lt.lpfrg_steps)
-     >      .and. (.not.tdrestart)) then
-                if(mod ((istep-1),10) == 0) then
-                   rhoscratch=REAL(rho1)
-                   rhoscratch=matmul(overlap,rhoscratch)
-                   do n=1,natom
-                      q(n)=Iz(n)
-                   enddo
-                   do i=1,M
-                      q(Nuc(i))=q(Nuc(i))-rhoscratch(i,i)
-                   enddo
-                   if(groupcharge) qgr=0.0d0
-                   do n=1,natom
-                      write(1111111,760) n,Iz(n),q(n)
-                      if(groupcharge) then
-                        qgr(group(n))=qgr(group(n))+q(n)
-                      endif
-                   enddo
-                   if(groupcharge) then
-                    do n=1,ngroup
-                       write(678,761) n,n,qgr(n)
-                    enddo
-                    write(678,*) '------------------------------------'
-                   endif
-                 endif
-              else
-                 rhoscratch=REAL(rho1)
-                 rhoscratch=matmul(overlap,rhoscratch)
-                 do n=1,natom
-                    q(n)=Iz(n)
-                 enddo
-                 do i=1,M
-                    q(Nuc(i))=q(Nuc(i))-rhoscratch(i,i)
-                 enddo
-                 if(groupcharge) qgr=0.0d0
-                 do n=1,natom
-                    write(1111111,760) n,Iz(n),q(n)
-                    if(groupcharge) then
-                       qgr(group(n))=qgr(group(n))+q(n)
-                    endif
-                 enddo
-                 if(groupcharge) then
-                   do n=1,ngroup
-                       write(678,761) n,n,qgr(n)
-                   enddo
-                 endif
-                 write(678,*) '------------------------------------'
-              endif
-!-----------------------------------------------------------------------------------!
+!              if ((propagator.eq.2).and.(istep.lt.lpfrg_steps)
+!     >      .and. (.not.tdrestart)) then
+!                if(mod ((istep-1),10) == 0) then
+!                   rhoscratch=REAL(rho1)
+!                   rhoscratch=matmul(overlap,rhoscratch)
+!                   do n=1,natom
+!                      q(n)=Iz(n)
+!                   enddo
+!                   do i=1,M
+!                      q(Nuc(i))=q(Nuc(i))-rhoscratch(i,i)
+!                   enddo
+!                   if(groupcharge) qgr=0.0d0
+!                   do n=1,natom
+!                      write(1111111,760) n,Iz(n),q(n)
+!                      if(groupcharge) then
+!                        qgr(group(n))=qgr(group(n))+q(n)
+!                      endif
+!                   enddo
+!                   if(groupcharge) then
+!                    do n=1,ngroup
+!                       write(678,761) n,n,qgr(n)
+!                    enddo
+!                    write(678,*) '------------------------------------'
+!                   endif
+!                 endif
+!              else
+!                 rhoscratch=REAL(rho1)
+!                 rhoscratch=matmul(overlap,rhoscratch)
+!                 do n=1,natom
+!                    q(n)=Iz(n)
+!                 enddo
+!                 do i=1,M
+!                    q(Nuc(i))=q(Nuc(i))-rhoscratch(i,i)
+!                 enddo
+!                 if(groupcharge) qgr=0.0d0
+!                 do n=1,natom
+!                    write(1111111,760) n,Iz(n),q(n)
+!                    if(groupcharge) then
+!                       qgr(group(n))=qgr(group(n))+q(n)
+!                    endif
+!                 enddo
+!                 if(groupcharge) then
+!                   do n=1,ngroup
+!                       write(678,761) n,n,qgr(n)
+!                   enddo
+!                 endif
+!                 write(678,*) '------------------------------------'
+!              endif
+!!-----------------------------------------------------------------------------------!
 
-               call g2g_timer_stop('iteration')
+               call g2g_timer_stop('TD step')
                write(*,*)
  999           continue
 !
