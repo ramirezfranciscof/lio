@@ -53,7 +53,8 @@
        call g2g_timer_start('intnew_')
        ffnew=CMPLX(0.0d0,0.0d0)
        print*,'About to get in'
-!       call fzaDS2
+       call fzaDS2(natom,M,nshell(0),nshell(1),ncont,nl,
+     >             MatT,MatD,nr,nv,as,cs,nucof,Bmat,ffnew)
        call g2g_timer_stop('intnew_')
 
        do ii=1,natom

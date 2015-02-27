@@ -30,8 +30,6 @@
        integer    :: ii,ni,nki,jj,nj,nkj
 !--------------------------------------------------------------------!
 
-       PRINT*,'I AM HERE MODAFAKA'
-       STOP
        do jj=1,nbs
        nkj=nucof(jj)
        do nj=1,Nconts(jj)
@@ -684,7 +682,6 @@
 
        enddo
        enddo
-
 
        return;end subroutine
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
