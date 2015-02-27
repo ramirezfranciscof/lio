@@ -20,7 +20,7 @@ c
        real*8, dimension (:), ALLOCATABLE :: rmm5,rmm15,
      >   bcoef, suma, FP_PFv
       real*8, dimension (:,:), allocatable :: fock,fockm,rho,FP_PF,
-     >   FP_PFm,EMAT,Y,Ytrans,Xtrans,rho1,EMAT2
+     >   FP_PFm,EMAT,Y,Ytrans,Xtrans,Xcpy,rho1,EMAT2
 c
        integer ndiist
 c       dimension d(natom,natom)
@@ -33,6 +33,9 @@ c       REAL*8 , intent(in)  :: clcoords(4,nsolin)
         REAL*8,ALLOCATABLE :: WORK2(:)
         INTEGER, ALLOCATABLE :: IWORK2(:),IPIV(:)
         logical :: just_int3n,ematalloct
+
+        real*8     :: Sinv(M,M),Fmtx(M,M)
+        complex*16 :: Pmtx(M,M)
 !--------------------------------------------------------------------!
 
 
@@ -182,7 +185,7 @@ c test ---------------------------------------------------------
 c
 c Diagonalization of S matrix, after this is not needed anymore
 c
-      docholesky=.false.
+      docholesky=.true.
       call g2g_timer_start('cholesky')
 
       IF (docholesky) THEN
@@ -215,7 +218,7 @@ c
 
 #else
         PRINT*,'DOING CHOLESKY'
-        ALLOCATE(Y(M,M),Ytrans(M,M),Xtrans(M,M))
+        ALLOCATE(Y(M,M),Ytrans(M,M),Xtrans(M,M),Xcpy(M,M))
 
         Y=Smat
         CALL dpotrf('L',M,Y,M,info)
@@ -233,6 +236,7 @@ c
             Xtrans(iii,jjj)=0.0d0
           ENDIF
           X(jjj,iii)=Xtrans(iii,jjj)
+          Xcpy(jjj,iii)=Xtrans(iii,jjj)
         ENDDO;ENDDO
 #endif
       ELSE
@@ -1068,7 +1072,6 @@ c u in Debyes
 c
 
 
-
 ! MULLIKEN POPULATION ANALYSIS (FFR - Simplified)
 !--------------------------------------------------------------------!
        call int1(En)
@@ -1077,6 +1080,26 @@ c
        call fixrho(M,RealRho)
        call mulliken_calc(natom,M,RealRho,Smat,Nuc,Iz,q)
        call mulliken_write(85,natom,Iz,q)
+
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+! TESTIN THE FORCE
+       deallocate (kkind,kkinds)
+       deallocate(cool,cools)
+
+       print*,'-------------------------------------IGNORE FROM HERE'
+       call intsol(E1s,Ens,.true.)
+       call int2()
+       call int3mem()
+       call int3mems()
+       call int3lu(E2)
+       call g2g_solve_groups(0,Ex,0)
+       print*,'----------------------------------------------TO HERE'
+       call spunpack('L',M,RMM(M5),Fmtx)
+       Sinv=matmul(Xcpy,Xtrans)
+       Pmtx=CMPLX(RealRho,0.0d0)
+       call testforce(Sinv,Fmtx,Pmtx)
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+
 
 ! NOTE: If 'mulliken_calc' is renamed as 'mulliken', the code will
 ! malfunction. I DON'T KNOW WHY.

@@ -1,8 +1,8 @@
 ######################################################################
 # INTERNAL DEPENDENCIES
 INCLUDES :=
-INCLUDES += setim.f sumit.f
 INCLUDES += fzaDS2.f
+INCLUDES += setim.f sumit.f
 
-$(obj_path)/mathsubs.o : $(INCLUDES) intmod.mk
+$(obj_path)/intmod.o : $(INCLUDES) intmod.mk
 ######################################################################

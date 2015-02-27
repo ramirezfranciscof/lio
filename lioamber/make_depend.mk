@@ -4,6 +4,7 @@
 src_paths += liomods
 src_paths += maskrmm
 src_paths += mathsubs
+src_paths += intmod
 
 #
 ######################################################################
@@ -13,6 +14,7 @@ src_paths += mathsubs
 include liomods/liomods.mk
 include maskrmm/maskrmm.mk
 include mathsubs/mathsubs.mk
+include intmod/intmod.mk
 
 #
 ######################################################################
@@ -35,6 +37,8 @@ objects += liokeys.o
 objects += sysdata.o
 objects += mathsubs.o
 objects += maskrmm.o
+objects += intmod.o
+objects += testforce.o
 
 #
 ######################################################################
@@ -53,6 +57,7 @@ objlist += int1.o int2.o int3lu.o int3mem.o int3mems.o intfld.o intsol.o
 objlist += int1G.o int2G.o int3G.o intSG.o intsolG.o intsolGs.o
 objlist += jarz.o lio_finalize.o predictor.o
 objlist += SCF.o SCF_in.o SCFop.o TD.o
+objlist += testforce.o
 $(objlist:%.o=$(obj_path)/%.o) : $(obj_path)/garcha_mod.o
 $(objlist:%.o=$(obj_path)/%.o) : $(obj_path)/garcha_mod.mod
 
@@ -61,5 +66,10 @@ $(objlist:%.o=$(obj_path)/%.o) : $(obj_path)/garcha_mod.mod
 objlist := SCF.o SCFop.o
 $(objlist:%.o=$(obj_path)/%.o) : $(obj_path)/mathsubs.o
 $(objlist:%.o=$(obj_path)/%.o) : $(obj_path)/mathsubs.mod
+
+# intmod
+objlist := testforce.o
+$(objlist:%.o=$(obj_path)/%.o) : $(obj_path)/intmod.o
+$(objlist:%.o=$(obj_path)/%.o) : $(obj_path)/intmod.mod
 
 ######################################################################

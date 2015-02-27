@@ -1,7 +1,7 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-       subroutine fzaDS2 (Natoms,Nbasis,nbs,nbp,Nconts,Ncontm,
-     >                    MatT,MatD,nucpos,nucvel,alpha,coefs,nucof,
-     >                    Bmat,force)
+       subroutine fzaDS2(Natoms,Nbasis,nbs,nbp,Nconts,Ncontm,
+     >                   MatT,MatD,nucpos,nucvel,alpha,coefs,nucof,
+     >                   Bmat,force)
 !--------------------------------------------------------------------!
 !
 !
@@ -25,11 +25,13 @@
        complex*16,intent(out) :: force(3,Natoms)
 
        real*8     :: IMTX(3,4,4)
-       complex*16 ::itrm(3)
+       complex*16 :: itrm(3)
        real*8     :: shrd,cij
        integer    :: ii,ni,nki,jj,nj,nkj
 !--------------------------------------------------------------------!
 
+       PRINT*,'I AM HERE MODAFAKA'
+       STOP
        do jj=1,nbs
        nkj=nucof(jj)
        do nj=1,Nconts(jj)

@@ -18,6 +18,7 @@
          force(kk)=force(kk)+TermT*orbint(kk)
          force(kk)=force(kk)+TermD*conjg(orbint(kk))
          bij=bij+nvel(kk)*orbint(kk)
+         print*,kk,force(kk)
        enddo
 
        return;end subroutine
