@@ -6,13 +6,31 @@ import re
 import multiprocessing
 import optparse
 
-import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
-
 import itertools as it
-
 from datetime import datetime
+
+try:
+    import numpy as np
+    import matplotlib
+    import matplotlib.pyplot as plt
+
+    def plot_scalability(speedups, expname):
+        plt.clf()
+        plt.xlabel("Cantidad de threads")
+        plt.ylabel("Speedup")
+        plt.title("Prueba de escalabilidad en cores para %s" % expname)
+        threads = xrange(1,len(speedups)+1)
+        plt.plot(threads, speedups, "ro-", label="Experimental")
+        plt.plot(threads, threads, "bo-", label="Teorico")
+        plt.legend(loc=2)
+
+        name = replace_special("escalabilidad-%s-%s" % (expname,timestamp()))
+        plt.savefig(os.path.join("escalabilidad","%s.png" % name))
+
+except ImportError:
+
+    def plot_scalability(speedups, expname):
+        print "ERROR!!: Para graficar la escalabilidad es necesario tener matplotlib instalado"
 
 MSECS_IN_SEC = 1000000.0
 def time2nanos(spec):
@@ -51,19 +69,6 @@ def replace_special(s):
 
 def timestamp():
     return replace_special('-'.join(str(datetime.today()).split(" ")))
-
-def plot_scalability(speedups, expname):
-    plt.clf()
-    plt.xlabel("Cantidad de threads")
-    plt.ylabel("Speedup")
-    plt.title("Prueba de escalabilidad en cores para %s" % expname)
-    threads = xrange(1,len(speedups)+1)
-    plt.plot(threads, speedups, "ro-", label="Experimental")
-    plt.plot(threads, threads, "bo-", label="Teorico")
-    plt.legend(loc=2)
-
-    name = replace_special("escalabilidad-%s-%s" % (expname,timestamp()))
-    plt.savefig(os.path.join("escalabilidad","%s.png" % name))
 
 def get_enviroments(dic, keylist=None):
     if keylist is None:
