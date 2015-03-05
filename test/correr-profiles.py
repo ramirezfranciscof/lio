@@ -92,7 +92,7 @@ def save_lio_output(name, output):
     with open(filename, "w") as f:
         print >> f, output
 
-def benchmark(regex, gpu_opts, threadlist, thresholdlist, offsetlist, plot_scale, g2gpath, save_outputs):
+def benchmark(regex, gpu_opts, threadlist, thresholdlist, offsetlist, splitpointslist, plot_scale, g2gpath, save_outputs):
     """ 
     Correr los correr-profile.sh de todas las carpetas que lo posean, 
     y generar un reporte de cada uno.
@@ -108,6 +108,7 @@ def benchmark(regex, gpu_opts, threadlist, thresholdlist, offsetlist, plot_scale
         "KMP_AFFINITY": ["granularity=fine,scatter"],
         "LIO_OPTIONS_FILE": [gpu_opts],
         "LIO_SPLIT_THRESHOLD": thresholdlist,
+        "LIO_SPLIT_POINTS": splitpointslist,
         "LIO_MINCOST_OFFSET": offsetlist,
         "LD_LIBRARY_PATH": [ldpath],
         "OMP_NESTED": ["false"],
@@ -180,6 +181,7 @@ if __name__ == "__main__":
     parser.add_option("-r", "--regex", dest="regex", default=".*", help="Filtrar los test con expresion regular")
     parser.add_option("-g", "--gpu_opts", dest="gpu_opts", help="Archivo gpu_options a usar (local a la carpeta)")
     parser.add_option("-t", "--threads", dest="threads",default="[1,%s]" % multiprocessing.cpu_count(), help="Lista de threads a usar, como rango (N:M:J)")
+    parser.add_option("-p", "--split_points", dest="split_points",default="600:600", help="Division de puntos a utilizar, como rango (N:M:J)")
     parser.add_option("-a", "--plot_threadscale", action="store_true", default=False, help="Graficar escalabilidad intermedia")
     parser.add_option("-s", "--thresholds", dest="thresholds", default="150:150", help="Threshold para considerar un grupo como chico, como rango (N:M:J)")
     parser.add_option("-o", "--offsets", dest="offsets", default="200000:200000", help="Compensacion de costo para cubos chicos, como rango (N:M:J)")
@@ -190,7 +192,8 @@ if __name__ == "__main__":
     threadlist = parse_range_string(options.threads)
     thresholdlist = parse_range_string(options.thresholds)
     offsetlist = parse_range_string(options.offsets)
+    splitpointslist = parse_range_string(options.split_points)
 
     g2g_path = os.path.abspath(options.g2g_path)
     benchmark(options.regex,options.gpu_opts, threadlist, thresholdlist,\
-        offsetlist, options.plot_threadscale, g2g_path, options.save_outputs)
+        offsetlist, splitpointslist, options.plot_threadscale, g2g_path, options.save_outputs)
