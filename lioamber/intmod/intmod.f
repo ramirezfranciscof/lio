@@ -14,7 +14,6 @@
        include 'fzaDS2.f'
 !       include 'fzaDDS.f'
        include 'setim.f'
-       include 'sumit.f'
        end module
 !
 !

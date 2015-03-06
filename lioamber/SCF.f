@@ -1096,7 +1096,11 @@ c
        print*,'----------------------------------------------TO HERE'
        call spunpack('L',M,RMM(M5),Fmtx)
        Sinv=matmul(Xcpy,Xtrans)
-       Pmtx=CMPLX(RealRho,0.0d0)
+       do iii=1,M
+       do jjj=1,M
+         Pmtx(iii,jjj)=CMPLX(RealRho(iii,jjj),0.0d0)
+       enddo
+       enddo
        call testforce(Sinv,Fmtx,Pmtx)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 
