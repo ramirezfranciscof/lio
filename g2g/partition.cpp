@@ -392,7 +392,7 @@ void Partition::rebalance(vector<double> & times, vector<double> & finishes)
 }
 
 void Partition::solve(Timers& timers, bool compute_rmm,bool lda,bool compute_forces,
-                      bool compute_energy, double* fort_energy_ptr, double* fort_forces_ptr, bool OPEN){
+                      bool compute_energy, double* fort_energy_ptr, double* fort_forces_ptr, bool OPEN, bool verbose){
   double energy = 0.0;
 
   double cubes_energy = 0, spheres_energy = 0;
@@ -481,7 +481,7 @@ void Partition::solve(Timers& timers, bool compute_rmm,bool lda,bool compute_for
     }
   }
 
-  if(OPEN && compute_energy) {
+  if(OPEN && compute_energy && verbose) {
     std::cout << "Ei: " << cubes_energy_i+spheres_energy_i;
     std::cout << " Ec: " << cubes_energy_c+spheres_energy_c;
     std::cout << " Ec1: " << cubes_energy_c1+spheres_energy_c1;

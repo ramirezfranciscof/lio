@@ -82,7 +82,7 @@ __global__ void gpu_compute_density_opened(const scalar_type* const point_weight
     }
 
 
-    for (int bj = min_i2; bj >= 0; bj -= DENSITY_BLOCK_SIZE)
+    for (int bj = 0; bj <= min_i2; bj += DENSITY_BLOCK_SIZE)
     {
         //Density deberia ser GET_DENSITY_BLOCK_SIZE
 
@@ -112,9 +112,27 @@ __global__ void gpu_compute_density_opened(const scalar_type* const point_weight
                 vec_type<scalar_type, 3> fh1jreg = fh1j_sh[j];
                 vec_type<scalar_type, 3> fh2jreg = fh2j_sh[j];
                 //fetch es una macro para tex2D
+                 if ((bj+j) <= i) {
                 scalar_type rdm_this_thread_a = fetch(rmm_input_gpu_tex, (float)(bj+j), (float)i);
                 scalar_type rdm_this_thread_b = fetch(rmm_input_gpu_tex2, (float)(bj+j), (float)i);
-                if(valid_thread2)
+  
+                w_a += rdm_this_thread_a * fjreg;
+
+                w_b += rdm_this_thread_b * fjreg;
+                if(!lda)
+                {
+                    w3_a += fgjreg* rdm_this_thread_a ;
+                    ww1_a += fh1jreg * rdm_this_thread_a;
+                    ww2_a += fh2jreg * rdm_this_thread_a;
+
+                    w3_b += fgjreg* rdm_this_thread_b ;
+                    ww1_b += fh1jreg * rdm_this_thread_b;
+                    ww2_b += fh2jreg * rdm_this_thread_b;
+                }
+
+                 }
+
+                if(valid_thread2 && ((bj+j) <= i2))
                 {
                     scalar_type rdm_this_thread2_a = fetch(rmm_input_gpu_tex, (float)(bj+j), (float)i2);
                     scalar_type rdm_this_thread2_b = fetch(rmm_input_gpu_tex2, (float)(bj+j), (float)i2);
@@ -131,18 +149,7 @@ __global__ void gpu_compute_density_opened(const scalar_type* const point_weight
                         ww22_b += fh2jreg * rdm_this_thread2_b;
                     }
                 }
-                w_a += rdm_this_thread_a * fjreg;
-                w_b += rdm_this_thread_b * fjreg;
-                if(!lda)
-                {
-                    w3_a += fgjreg* rdm_this_thread_a ;
-                    ww1_a += fh1jreg * rdm_this_thread_a;
-                    ww2_a += fh2jreg * rdm_this_thread_a;
 
-                    w3_b += fgjreg* rdm_this_thread_b ;
-                    ww1_b += fh1jreg * rdm_this_thread_b;
-                    ww2_b += fh2jreg * rdm_this_thread_b;
-                }
 
             }
         }

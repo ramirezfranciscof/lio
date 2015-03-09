@@ -41,11 +41,14 @@ c       REAL*8 , intent(in)  :: clcoords(4,nsolin)
 #endif
 
       call g2g_timer_start('SCF')
+      if(verbose) write(*,*) '======>>>> INGRESO A SCF <<<<=========='
+
       just_int3n = .false.
       alloqueo = .true.
       ematalloc=.false.
       hagodiis=.false.
-c     if(verbose)  write(6,*) 'ntatom',ntatom,nsol,natom
+      if(verbose)  write(*,"(A,I8,I8,I8)") 
+     >  'ntatom,nsol,natom: ',ntatom,nsol,natom
 
 c------------------------------------------------------------------
 c
@@ -55,7 +58,7 @@ c chequeo -----------
 c
       Ndens=1
 c---------------------
-c       write(*,*) 'M=',M
+      if(verbose)  write(*,*) 'M=',M
       allocate (znano(M,M),xnano(M,M))
 
       npas=npas+1
@@ -241,7 +244,6 @@ c
 c ESSL OPTION ------------------------------------------
         do i=1,MM
          rmm5(i)=RMM(M5+i-1)
-c        write(56,*) RMM(M15+1)
         enddo
 #ifdef essl
         call DSPEV(1,RMM(M5),RMM(M13),X,M,M,RMM(M15),M2)
@@ -433,14 +435,14 @@ c
 c
       if (DIIS.and.alloqueo) then
         alloqueo=.false.
-c       write(*,*) 'eme=', M
+
        allocate(rho1(M,M),rho(M,M),fock(M,M),fockm(MM,ndiis),FP_PF(M,M),
      >  FP_PFv(MM),FP_PFm(MM,ndiis),EMAT(ndiis+1,ndiis+1),bcoef(ndiis+1)
      >  ,suma(MM))
       endif
 c-------------------------------------------------------------------
 c-------------------------------------------------------------------
-c      write(*,*) 'empiezo el loop',NMAX
+      if(verbose) write(*,*) 'empiezo el loop ',NMAX
 c-------------------------------------------------------------------
 c-------------------------------------------------------------------
       do 999 while (good.ge.told.and.niter.le.NMAX)
@@ -453,7 +455,6 @@ c-------------------------------------------------------------------
           ndiist=ndiis
         endif
 
-c      if (MEMO) then
         call int3lu(E2)
         call g2g_solve_groups(0,Ex,0)
 c-------------------------------------------------------
@@ -813,10 +814,7 @@ c---------------------
 c       do ik=1,M
 c         do jk=1,M
 c         write(45,*) X(ik,M+jk),fock(ik,jk)
-c
-c
 c         enddo
-c
 c       enddo
        call g2g_timer_start('coeff')
 
@@ -872,6 +870,7 @@ c
           xnano(k,i)  = X(i,M2+k)
         enddo
       enddo
+      
 c
 c Construction of new density matrix and comparison with old one
        kk=0
@@ -944,7 +943,13 @@ c
 c
         call g2g_timer_stop('otras cosas')
 
-        if(verbose) write(6,*) 'iter',niter,'QM Energy=',E+Ex
+        if(verbose) then
+          write(*,*) 'iter',niter,'QM Energy=',E+Ex
+          write(*,"(A,X,F23.16,X,F23.16,X,F23.16,X,F23.16)")
+     >         'En,E1,E2,Ex',En,E1,E2,Ex
+          write(*,"(A,F10.7,A,F10.7,A)") 'good= ',good,' (told= ',told,
+     >          ')'
+	endif
 c
         call g2g_timer_stop('Total iter')
  999  continue
@@ -956,6 +961,7 @@ c-------------------------------------------------------------------
         write(6,*) 'NO CONVERGENCE AT ',NMAX,' ITERATIONS'
         noconverge=noconverge + 1
         converge=0
+        call write_struct() !escribe la estructura no-convergida
       else
         write(6,*) 'CONVERGED AT',niter,'ITERATIONS'
         noconverge = 0
@@ -965,7 +971,6 @@ c-------------------------------------------------------------------
       old3=old2
 
       old2=old1
-c        write(*,*) 'good final',good
 
       do i=1,MM
         old1(i)=RMM(i)
@@ -1001,7 +1006,6 @@ c       call g2g_timer_start('exchnum')
 #else
         call g2g_new_grid(igrid)
         call g2g_solve_groups(1, Exc, 0)
-c       write(*,*) 'g2g-Exc',Exc
 #endif
 #else
 #ifdef ULTIMA_G2G
@@ -1016,7 +1020,7 @@ c       write(*,*) 'g2g-Exc',Exc
           write(6,*)
           write(6,600)
           write(6,610)
-          write(6,620) E1,E2-Ex,En
+          write(6,620) E1,E2,En,Exc
 c         if (sol) then
 c          write(6,615)
 c          write(6,625) Es
@@ -1047,7 +1051,7 @@ c
         enddo
       enddo
 c
-c      if (nopt.eq.1) then
+c-----------------------------------------------------------------
 c
 c PROPERTIES CALCULATION
 c calculates dipole moment
@@ -1149,9 +1153,9 @@ c       E=E*627.509391D0
  400  format(4(E14.7E2,2x))
  300  format(I3,E14.6,2x,F14.7)
  600  format('  ENERGY CONTRIBUTIONS IN A.U.')
- 610  format(2x,'ONE ELECTRON',9x,'COULOMB',11x,'NUCLEAR')
+ 610  format(2x,'ONE ELECTRON',9x,'COULOMB',11x,'NUCLEAR',10x,'EX/CORR')
  615  format(2x,'SOLVENT')
- 620  format(F14.7,4x,F14.7,4x,F14.7)
+ 620  format(F14.7,4x,F14.7,4x,F14.7,4x,F14.7)
  625  format(F14.7)
  760  format(I3,9x,I3,6x,F10.4)
  770  format('ATOM #',4x,'ATOM TYPE',4x,'POPULATION')

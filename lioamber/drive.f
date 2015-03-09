@@ -184,7 +184,7 @@ c
       allocate(natomc(natom),nnps(natom),nnpp(natom),nnp(natom))
       allocate(nnpd(natom),nns(natom),nnd(natom),atmin(natom))
       allocate(jatc(natom,natom))
-      
+     
       do i=1,natom
         natomc(i)=0 
       enddo
@@ -629,6 +629,13 @@ c variables defined in namelist cannot be in common ?
 c      NCO2=NCO
       Nunp2=Nunp
 c
+
+      if(OPEN) then
+        allocate(rhoalpha(M*(M+1)/2),rhobeta(M*(M+1)/2))
+      else
+        allocate(rhoalpha(1),rhobeta(1))
+      endif
+
       idip1=idip
       ipop1=ipop
       icharge1=icharge
@@ -727,6 +734,31 @@ c
                 X(i,j)=X(i,j)+XX(i,k)*XX(j,k)
  139          continue
  331      continue
+
+          k=0
+          do j=1,M
+            do i=j,M
+              k=k+1
+              rhoalpha(k)=X(indexii(i),indexii(j))
+              if (i.ne.j) then
+                rhoalpha(k)=rhoalpha(k)*2.D0
+              endif
+            enddo
+          enddo
+c
+c          kk=0
+c          do j=1,M
+c            do i=j,M
+c              kk=kk+1
+c              rhoalpha(kk)=0.D0
+c              do k=1,NCOa
+c                rhoalpha(kk)=rhoalpha(kk)+XX(i,k)*XX(j,k)
+c              enddo
+c              if (i.ne.j) then
+c                rhoalpha(kk)=2.0D0*rhoalpha(kk)
+c              endif
+c            enddo
+c          enddo
 c
 c beta
           do l=1,M
@@ -743,15 +775,44 @@ c
 c 
 c Density Matrix
 c
+          
           do i=1,M
             do j=1,M
+              X2(i,j)=0.0D0
               do k=1,NCOb
                 X(i,j)=X(i,j)+XX(i,k)*XX(j,k)
+                X2(i,j)=X2(i,j)+XX(i,k)*XX(j,k)
               enddo
             enddo
           enddo
+
+          k=0
+          do j=1,M
+            do i=j,M
+              k=k+1
+              rhobeta(k)=X2(indexii(i),indexii(j))
+              if (i.ne.j) then
+                rhobeta(k)=rhobeta(k)*2.D0
+              endif
+            enddo
+          enddo
 c
+c          kk=0
+c          do j=1,M
+c            do i=j,M
+c              kk=kk+1
+c              rhobeta(kk)=0.D0
+c              do k=1,NCOb
+c                rhobeta(kk)=rhobeta(kk)+XX(i,k)*XX(j,k)
+c              enddo
+c              if (i.ne.j) then
+c                rhobeta(kk)=2.0D0*rhobeta(kk)
+c              endif
+c            enddo
+c          enddo
+
         endif
+    
       endif
 c
 c density matrix kept temporarily in S
@@ -882,20 +943,12 @@ c
       ngpru=ng0*natom
 c      write(*,*) 'estoooo',ngpru, ngDyn, ng0, natom
 
-      if(OPEN) then
-        allocate(rhoalpha(M*(M+1)/2),rhobeta(M*(M+1)/2))
-      else
-        allocate(rhoalpha(1),rhobeta(1))
-      endif
-
       call g2g_parameter_init(NORM,natom,natom,ngDyn,
      >                        rqm,Rm2,Iz,Nr,Nr2,Nuc,
      >                        M,ncont,nshell,c,a, 
      >                        RMM,M18,M5,M3,rhoalpha,rhobeta,
      >                        NCO,OPEN,Nunp,nopt,Iexch,
-     >                        e_, e_2, e3, wang, wang2, wang3)
-
-c      write(*,*) '======>>>> SALIENDO DE DRIVE <<<<=========='
+     >                        e_, e_2, e3, wang, wang2, wang3,verbose)
 
 c      if (parsearch) then
 c        call g2g_reload_atom_positions(igrid2)
@@ -1001,12 +1054,14 @@ c      call system(date)
 c
 c---------------------------------------------------
 c---------------------------------------------------
-       deallocate(X,XX)
+       deallocate(X,X2,XX)
        allocate(X(M,4*M),XX(Md,Md))
        allocate(old1(MM))
 
        allocate(old2(MM))
        allocate(old3(MM))
+      
+      if(verbose )write(*,*) '======>>>> SALIENDO DE DRIVE <<<<========'
 
  100  format (A8)
  200  format ('basis set corresponding to Z ',I3,' was not used')

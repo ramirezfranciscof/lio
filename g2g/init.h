@@ -16,6 +16,7 @@ namespace G2G {
   struct FortranVars {
     uint atoms, max_atoms, gaussians;
     bool normalize;
+    bool verbose;
 #if FULL_DOUBLE
     double normalization_factor;
 #else

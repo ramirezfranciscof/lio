@@ -11,9 +11,10 @@ c---------------------------------------------------
       subroutine SCFOP(E,dipxyz)
       use garcha_mod
       use mathsubs
-      REAL*8:: En,E2,E,Es,Ex,Exc
+      implicit real*8 (a-h,o-z)
+      REAL*8:: En,E2,E,Es,Ex,Exc,E1
 
-      dimension work(1000)
+      dimension q(natom),work(1000)
       real*8, dimension (:,:), ALLOCATABLE ::xnano,znano
       real*8, dimension (:), ALLOCATABLE :: rmm5,rmm15,rmm13,
      >   bcoef_a, bcoef_b, suma, FP_PFa_v, FP_PFb_v
@@ -22,11 +23,12 @@ c---------------------------------------------------
      >   FP_PFa_m,FP_PFb_m,EMATa,EMATb,EMAT2_a,EMAT2_b,
      >   Y,Ytrans,Xtrans
 c
-      integer ndiist
+       integer ndiist
 c       dimension d(natom,natom)
-      logical  hagodiis,alloqueo, ematalloc
+       logical  hagodiis,alloqueo, ematalloc
 c       REAL*8 , intent(in)  :: qmcoords(3,natom)
 c       REAL*8 , intent(in)  :: clcoords(4,nsolin)
+
       INTEGER :: ErrID,iii,jjj
       LOGICAL :: docholesky
       REAL*8,ALLOCATABLE :: MatrixVec(:),TestMatrix(:)
@@ -35,13 +37,17 @@ c       REAL*8 , intent(in)  :: clcoords(4,nsolin)
         logical :: just_int3n,ematalloct
 
       call g2g_timer_start('SCF')
-      write(*,*) '======>>>> INGRESO A SCFop <<<<=========='
+      if(verbose) write(*,*) '======>>>> INGRESO A SCFop <<<<=========='
+      if(verbose)  write(*,"(A,I8,I8,I8)") 
+     >  'ntatom,nsol,natom: ',ntatom,nsol,natom
+
 c------------------------------------------------------------------
 c
 c Pointers
 c
+      if(verbose)  write(*,*) 'M=',M
 c first P
-      MM=M*(M+1)/2 
+      MM=M*(M+1)/2
       MM2=M**2
       MMd=Md*(Md+1)/2
       Md2=2*Md
@@ -92,7 +98,6 @@ c------------------------------------------------
 c Initializations/Defaults
 c------------------------------------------------
       allocate (znano(M,M),xnano(M,M))
-c      allocate(rmm5(MM),rmm13(m),rmm15(mm))
 
       just_int3n = .false.
       alloqueo = .true.
@@ -127,8 +132,7 @@ c      Qc=Qc-Nel
 c      Qc2=Qc**2
 C----------------------------------------
 c Para hacer lineal la integral de 2 electrone con lista de vecinos. Nano
-c        write(*,*) 'que pasa?'
-  
+
       do i=1,natom
         natomc(i)=0
         do j=1,natom
@@ -142,22 +146,23 @@ c        write(*,*) 'que pasa?'
           if (rexp.lt.rmax) then
             natomc(i)=natomc(i)+1
             jatc(natomc(i),i)=j
-          endif 
+          endif
         enddo
       enddo
 
-       do iij=nshell(0),1,-1
-         nnps(nuc(iij))=iij
-       enddo
-       do iik=nshell(0)+nshell(1),nshell(0)+1,-1
-         nnpp(nuc(iik))=iik
-       enddo
+      do iij=nshell(0),1,-1
+        nnps(nuc(iij))=iij
+      enddo
 
-       do iikk=M,nshell(0)+nshell(1)+1,-1
-         nnpd(nuc(iikk))=iikk
-       enddo
- 
-       call g2g_reload_atom_positions(igrid2)
+      do iik=nshell(0)+nshell(1),nshell(0)+1,-1
+        nnpp(nuc(iik))=iik
+      enddo
+
+      do iikk=M,nshell(0)+nshell(1)+1,-1
+        nnpd(nuc(iikk))=iikk
+      enddo
+
+      call g2g_reload_atom_positions(igrid2)
 
 c
 c H H core, 1 electron matrix elements
@@ -210,6 +215,7 @@ c          IF (jjj.LE.iii) THEN
 c            Xtrans(iii,jjj)=MatrixVec(iii+(2*M-jjj)*(jjj-1)/2)
 c          ENDIF
 c            X(jjj,iii)=Xtrans(iii,jjj)
+c            X(jjj,M2a+iii)=Xtrans(iii,jjj)
 c        ENDDO;ENDDO
 
 c        DEALLOCATE(MatrixVec)
@@ -240,7 +246,7 @@ c LINEAR DEPENDENCY ELIMINATION
 c
         do j=1,M
           if (RMM(M13+j-1).lt.1.0D-06) then
-            write(*,*) 'LINEAR DEPENDENCY DETECTED ACA !!!!'
+            write(*,*) 'LINEAR DEPENDENCY DETECTED'
             do i=1,M
               X(i,j)=0.0D0
               Y(i,j)=0.0D0
@@ -265,9 +271,9 @@ c
 c ======>>>>>> CASE OF NO STARTING GUESS PROVIDED,  <<<<<=========
 c   1 E FOCK MATRIX USED
 c
+
       if((.not.ATRHO).and.(.not.VCINP).and.primera) then
         primera=.false.
-c QUE HACE ACA ?????
         do i=1,M
           do j=1,M
             X(i,M+j)=0.D0
@@ -282,7 +288,7 @@ c
           enddo
         enddo
 
-c Start use of RMM(M5) as Fock matrix (F')
+! Start use of RMM(M5) as Fock matrix (F')
 
         kk=0
         do j=1,M
@@ -294,7 +300,6 @@ c Start use of RMM(M5) as Fock matrix (F')
             enddo
           enddo
         enddo
-        
 c
 c diagonalization now
 c
@@ -319,17 +324,19 @@ c-----------------------------------------------------------
           do j=1,M
             X(i,M2+j)=0.D0
             do k=1,M
-c calculando  C=XC'   
+! calculando  C=XC'   
               X(i,M2+j)=X(i,M2+j) + X(i,k)*X(k,M+j)
             enddo
           enddo
         enddo
+
 c
 c Density Matrix
 c alpha and beta coefficients set equal
 c
 
         kk=0
+c
         do k=1,NCOa
           do i=1,M
             kk=kk+1
@@ -345,11 +352,13 @@ c
           enddo
         enddo
 c
+       
         kk=0
         do j=1,M
           do i=j,M
 c
             kk=kk+1
+             
             RMM(kk)=0.D0
             rhoalpha(kk)=0.D0
             rhobeta(kk)=0.D0
@@ -372,30 +381,24 @@ c
 c
           enddo
         enddo
+c
       endif
-c
-c
-#ifdef PRINT_MATRICES
-c------ IMPRIMIENDO DENSIDADES ---------------------------------
-      kk=0
-      do i=1,M
-        do j=i,M
-          kk=kk+1 
-          write(*,'(I,X,I,X,I,X,F8.5,X,F8.5,X,F8.5)') 
-     <          kk,i,j,RMM(kk),rhoalpha(kk),rhobeta(kk)
-        enddo
-      enddo
-#endif
-c
+
 c End of Starting guess (No MO , AO known)-------------------------------
-c------------------------------------------------------------------------
 c
+c        do k=1,MM
+c         read(666,*) kkk, RMM(k)
+c        enddo
+c        do k=1,MM
+c         write(400,*) RMM(k)
+c        enddo
+
       call int2()
 c
 **
       if (MEMO) then
          call g2g_timer_start('int3mem')
-         call int3mem() 
+         call int3mem()
          call int3mems()
          call g2g_timer_stop('int3mem')
       endif
@@ -415,22 +418,20 @@ c-------------------------------------------------------------------
      >           suma(MM))
       endif
 c-------------------------------------------------------------------
-c
-c      write(*,*) 'empiezo el loop=========>>>>>>',NMAX
-
+c-------------------------------------------------------------------
+      if(verbose) write(*,*) 'empiezo el loop ',NMAX
+c-------------------------------------------------------------------
+c-------------------------------------------------------------------
       do 999 while (good.ge.told.and.niter.le.NMAX)
+
         call g2g_timer_start('Total iter')
         niter=niter+1
-       
         if(niter.le.ndiis) then
           ndiist=niter
         else
           ndiist=ndiis
         endif
 
-c        write(*,*)'niter,ndiist,ndiis',niter,ndiist,ndiis
-
-c-------------------------------------------------------
         call int3lu(E2)
         call g2g_solve_groups(0,Ex,0)
 c-------------------------------------------------------
@@ -440,19 +441,23 @@ c REACTION FIELD CASE --------------------------------------------
 c
         call g2g_timer_start('actualiza rmm')
 c----------------------------------------------------------------
-c E1 includes the solvent electrostatic matrix elements (sol T)
+c E1 includes solvent 1 electron contributions
         do k=1,MM
           E1=E1+RMM(k)*RMM(M11+k-1)
+c        write(555,*) RMM(k),RMM(M11+k-1)
         enddo
+c        do k=1,MM
+c         write(401,*) RMM(k)
+c        enddo
+          write(*,"(A,X,F23.16,X,F23.16,X,F23.16,X,F23.16)")
+     >         'En,E1,E2,Ex',En,E1,E2,Ex
 c
 c      DAMP=gold
         if (niter.eq.1) then
           DAMP=0.0D0
         endif
 
-c        write(*,*)"ENTRANDO A DIIS: ",DIIS 
         if (DIIS) then
-c
 c----  Pasamos matriz de densidad a base ON, antes copio la matriz densidad en la matriz rho  ------
 c aca vamos a tener que dividir por dos los terminos no diagonales
 c 
@@ -550,8 +555,15 @@ c
         endif
 c
 c-------------Decidiendo cual critero de convergencia usar-----------
+c
+c ACA CONVIENE PONER ALGUNA ESTRATEGIA PARA CUANDO SE NIEGA A CONVERGER !!!
+c
         if (niter.gt.2.and.(DIIS)) then
-          hagodiis=.true.
+c          if (good.le.(50*told)) then
+c            hagodiis=.false.
+c          else
+            hagodiis=.true.
+c          endif
         endif
 
 c<============================
@@ -575,7 +587,7 @@ c
             RMM(M20+k-1)=RMM(M5+k-1)
           enddo
 
-c calculates F'=Xt F X
+! calculates F'=Xt F X
 
           do i=1,M
             do j=1,M
@@ -729,17 +741,6 @@ c
           RMM(M13+i-1)=0.D0
         enddo
 c
-c         if (SHFT) then
-c           if (niter.ge.2) then
-c adition of level shifts
-c constant to diagonal (virtual) elements
-c             do i=NCOa+1,M
-c               ii=i+(i-1)*(M2-i)/2
-c               RMM(M5+ii-1)=RMM(M5+ii-1)+shi
-c             enddo
-c           endif
-c         endif
-                 
 c ESSL OPTION ------------------------------------------------
         call g2g_timer_start('dspev')
 #ifdef essl
@@ -769,7 +770,6 @@ c
           enddo
         enddo
 c
-c
         kk=0
         do k=1,NCOa
           do i=1,M
@@ -778,34 +778,6 @@ c
           enddo
         enddo
 c
-c xxxxxxx aca poner que escriba ------------------------------
-c        if ((good.le.5.0D0*told.and.nopt.eq.0).or.niter.eq.nmax) then
-c          do l=1,M
-c            do n=1,M
-c              X(indexii(l),M+n)=X(l,M2+n)
-c            enddo
-c          enddo
-
-c          write(29,*) 'ORBITAL COEFFICIENTS AND ENERGIES, SPIN ALPHA'
-c this option in order to look orbitals
-c      do n=1,NCO+5
-c this other if one is interested in fargment  populations
-c          do n=1,M
-c            write(29,850) n,RMM(M13+n-1)
-c            write(29,400) (X(l,M+n),l=1,M)
-c          enddo
-c        endif
-c--------------------------------------------------------------
-c        if (SHFT) then
-c          if (niter.ge.2) then
-c Level Shifting
-c            do i=1,M
-c              do j=1,M
-c                X(i,j)=X(i,M2+j)
-c              enddo
-c            enddo
-c         endif
-c        endif
 
 c<============================
 c<======= Beta case =======
@@ -828,7 +800,7 @@ c
             RMM(M21+k-1)=RMM(M3+k-1)
           enddo
 
-c calculates F'=Xt F X
+! calculates F'=Xt F X
 
           do i=1,M
             do j=1,M
@@ -982,16 +954,6 @@ c
           RMM(M22+i-1)=0.D0
         enddo
 c
-c        if (SHFT) then
-c          if (niter.ge.2) then
-c adition of level shifts
-c constant to diagonal (virtual) elements
-c            do i=NCOb+1,M
-c              ii=i+(i-1)*(M2-i)/2
-c              RMM(M3+ii-1)=RMM(M3+ii-1)+shi
-c            enddo
-c          endif
-c        endif
 c
 c ESSL OPTION------------------------------------------------------
 #ifdef essl
@@ -1024,38 +986,6 @@ c
           enddo
         enddo
 c
-c xxxxxxx  aca poner que escriba -------------------------------
-c       if ((good.le.5.0D0*told.and.nopt.eq.0).or.niter.eq.nmax) then
-c         do l=1,M
-c           do n=1,M
-c             X(indexii(l),M+n)=X(l,M2+n)
-c           enddo
-c         enddo
-c
-c         write(29,*)
-c         write(29,*) 'ORBITAL COEFFICIENTS AND ENERGIES, SPIN BETA'
-c this option is for looking orbitals
-c      do n=1,NCO+5
-c this other for fragment populations
-c         do n=1,M
-c           write(29,850) n,RMM(M22+n-1)
-c           write(29,400) (X(l,M+n),l=1,M)
-c         enddo
-c         rewind(29)
-c       endif
-c------------------------------------------------------------
-c
-c       if (SHFT) then
-c     if (niter.ge.2) then
-c Level Shifting
-c          do i=1,M
-c            do j=1,M
-c              X(i,M2a+j)=X(i,M2+j) 
-c            enddo
-c          enddo
-c        endif
-c     endif
-
 c      call g2g_timer_stop('coeff') 
 c<<<<<========================================
 c<<<<<========================================
@@ -1128,22 +1058,27 @@ c        E0=E
 c        DAMP0=DAMP
 c      endif
 
-       E=E1+E2+En
-       E=E+Es
+       E=E1+E2+En+Ex+Es
 
-       write(*,300) niter,DAMP,E
-       write(*,"(A,X,F23.16,X,F23.16,X,F23.16,X,F23.16,X,F23.16)")
-     >         'En,E1,E2,Ex,Etotal',En,E1,E2,Ex,E1+E2+En+Ex
-
-       call g2g_timer_stop('Total iter')
+        if(verbose) then
+          write(*,*) 'iter',niter,'QM Energy=',E
+          write(*,"(A,X,F23.16,X,F23.16,X,F23.16,X,F23.16)")
+     >         'En,E1,E2,Ex',En,E1,E2,Ex
+          write(*,"(A,F10.7,A,F10.7,A)") 'good= ',good,' (told= ',told,
+     >          ')'
+        endif
+c
+        call g2g_timer_stop('Total iter')
  999  continue
-c 995   continue
+c-------------------------------------------------------------------
+c
+c-------------------------------------------------------------------
 
       if (niter.ge.NMAX) then
         write(6,*) 'NO CONVERGENCE AT ',NMAX,' ITERATIONS'
         noconverge=noconverge + 1
         converge=0
-c       goto 995
+        call write_struct() !escribe la estructura que no convigio
       else
         write(6,*) 'CONVERGED AT',niter,'ITERATIONS'
         noconverge = 0
@@ -1157,12 +1092,12 @@ c       goto 995
 
 #ifdef G2G
 #ifdef ULTIMA_CPU
-       call exchnum(NORM,natom,r,Iz,Nuc,M,ncont,nshell,c,a,RMM,
-     >              M18,NCO,Exc,nopt)
+c       call exchnum(NORM,natom,r,Iz,Nuc,M,ncont,nshell,c,a,RMM,
+c     >              M18,NCO,Exc,nopt)
 #else
-       call g2g_new_grid(igrid)
+c       call g2g_new_grid(igrid)
 
-       call g2g_solve_groups(1, Exc, 0)
+c       call g2g_solve_groups(1, Exc, 0)
 
 c       write(*,*) 'g2g-Exc',Exc
 #endif
@@ -1173,56 +1108,44 @@ c       call g2g_solve_groups(1, Exc, 0)
 #else
 #endif       
 #endif
-        E=E1+E2+En+Es+Ens+Exc
+c        E=E1+E2+En+Ens+Exc
 
-c         E=E+Exc-Ex
-c         write(*,*)
-c         write(*,450) E
-c       else
-c         E=E-Ex
-c       endif
+c          write(*,*)
+c          write(*,600)
+c          write(*,610)
+c          write(*,620) E1,E2,En,Exc
+
 c calculation of energy weighted density matrix
 c
-c test -----------
-c     write(*,*) 'Eig alpha'
-c     do i=1,NCOa+10
-c      write(*,*) i,RMM(M13+i-1)
-c     enddo
-c
-c     write(*,*) 'Eig beta'
-c     do i=1,NCOb+10
-c      write(*,*) i,RMM(M22+i-1)
-c     enddo
-c
-      kk=M15-1
+      kk=0
       do j=1,M
         do i=j,M
           kk=kk+1
-          RMM(kk)=0.D0
+          RMM(M15+kk-1)=0.D0
 c
           do k=1,NCOa
             k0=M18+M*(k-1)-1
             ki=k0+i
             kj=k0+j
-            RMM(kk)=RMM(kk)-RMM(M13+k-1)*RMM(ki)*RMM(kj)
+            RMM(M15+kk-1)=RMM(M15+kk-1)-RMM(M13+k-1)*RMM(ki)*RMM(kj)
           enddo
 c
           do k=1,NCOb
             k0=M18b+M*(k-1)-1
             ki=k0+i
             kj=k0+j
-            RMM(kk)=RMM(kk)-RMM(M22+k-1)*RMM(ki)*RMM(kj)
+            RMM(M15+kk-1)=RMM(M15+kk-1)-RMM(M22+k-1)*RMM(ki)*RMM(kj)
           enddo
 c
           if (i.ne.j) then
-            RMM(kk)=2.0D0*RMM(kk)
+            RMM(M15+kk-1)=2.0D0*RMM(M15+kk-1)
           endif
 c
         enddo
       enddo
-
 c
 c-----------------------------------------------------------------
+c
 c PROPERTIES CALCULATION
 c calculates dipole moment
 c
@@ -1239,113 +1162,108 @@ c      endif
 c
 c calculates Mulliken poputations
 c       if (ipop.eq.1) then
-c        call int1(En)
+      call int1(En)
 c
+c--------------------------------------------------------------
+      do n=1,natom
+        q(n)=Iz(n)
+      enddo
 c
-c        do n=1,natom
-c          q(n)=Iz(n)
-c        enddo
+      do i=1,M
+        do j=1,i-1
+          kk=i+(M2-j)*(j-1)/2
+          t0=RMM(kk)*RMM(M5+kk-1)/2.D0
+          q(Nuc(i))=q(Nuc(i))-t0
+        enddo
 c
-c        do i=1,M
+        kk=i+(M2-i)*(i-1)/2
+        t0=RMM(kk)*RMM(M5+kk-1)
+        q(Nuc(i))=q(Nuc(i))-t0
 c
-c          do j=1,i-1
-c            kk=i+(M2-j)*(j-1)/2
-c            t0=RMM(kk)*RMM(+kk-1)/2.D0
-c            q(Nuc(i))=q(Nuc(i))-t0
-c          enddo
+        do j=i+1,M
+          kk=j+(M2-i)*(i-1)/2
+          t0=RMM(kk)*RMM(M5+kk-1)/2.D0
+          q(Nuc(i))=q(Nuc(i))-t0
+        enddo
+      enddo
 c
-c          kk=i+(M2-i)*(i-1)/2
-c          t0=RMM(kk)*RMM(M5+kk-1)
-c          q(Nuc(i))=q(Nuc(i))-t0
-c
-c          do j=i+1,M
-c            kk=j+(M2-i)*(i-1)/2
-c            t0=RMM(kk)*RMM(M5+kk-1)/2.D0
-c            q(Nuc(i))=q(Nuc(i))-t0
-c          enddo
-c        enddo
-c
-c        write(*,*) 'MULLIKEN POPULATION ANALYSIS'
-c        write(*,770)
+      write(85,*) 'MULLIKEN POPULATION ANALYSIS'
+      write(85,770)
 
-c        do n=1,natom
-c         write(*,760) n,Iz(n),q(n)
-c        enddo
-c
-c        write(*,*)
-c
+      do n=1,natom
+        write(85,760) n,Iz(n),q(n)
+      enddo
+
 c UNPAIRED SPIN POPULATION
 c M7 spin alpha density matrix, M11 spin beta density matrix
-c        kk=M7-1
-c        kk1=M11-1
-c        do j=1,M
-c          do i=j,M
-c            kk=kk+1
-c            kk1=kk1+1
-c            RMM(kk)=0.0D0
-c            RMM(kk1)=0.0D0
+      kk=M7-1
+      kk1=M11-1
+      do j=1,M
+        do i=j,M
+          kk=kk+1
+          kk1=kk1+1
+          RMM(kk)=0.0D0
+          RMM(kk1)=0.0D0
 c
-c            do k=1,NCOa
-c              k0=M18+M*(k-1)-1
-c              ki=k0+i
-c              kj=k0+j
-c              RMM(kk)=RMM(kk) + RMM(ki)*RMM(kj)
-c            enddo
+          do k=1,NCOa
+            k0=M18+M*(k-1)-1
+            ki=k0+i
+            kj=k0+j
+            RMM(kk)=RMM(kk) + RMM(ki)*RMM(kj)
+          enddo
 c
-c            do k=1,NCOb
-c              k0=M18b+M*(k-1)-1
-c              ki=k0+i
-c              kj=k0+j
-c              RMM(kk1)=RMM(kk1)  + RMM(ki)*RMM(kj)
-c            enddo
+          do k=1,NCOb
+            k0=M18b+M*(k-1)-1
+            ki=k0+i
+            kj=k0+j
+            RMM(kk1)=RMM(kk1)  + RMM(ki)*RMM(kj)
+          enddo
 c
-c            if (i.ne.j) then
-c              RMM(kk)=2.0D0*RMM(kk)
-c              RMM(kk1)=2.0D0*RMM(kk1)
-c            endif
+           if (i.ne.j) then
+             RMM(kk)=2.0D0*RMM(kk)
+             RMM(kk1)=2.0D0*RMM(kk1)
+           endif
 c
-c          enddo
-c        enddo
-       
-c        do n=1,natom
-c          q(n)=0.0D0
-c        enddo
+         enddo
+       enddo
 c
-c        do i=1,M
+       do n=1,natom
+         q(n)=0.0D0
+       enddo
 c
-c          do j=1,i-1
-c            kk=i+(M2-j)*(j-1)/2
-c            kka=kk+M7-1
-c            kkb=kk+M11-1
+       do i=1,M
+         do j=1,i-1
+           kk=i+(M2-j)*(j-1)/2
+           kka=kk+M7-1
+           kkb=kk+M11-1
 c         
-c            t0=(RMM(kka)-RMM(kkb))*RMM(M5+kk-1)/2.D0
-c            q(Nuc(i))=q(Nuc(i))-t0
-c          enddo
+           t0=(RMM(kka)-RMM(kkb))*RMM(M5+kk-1)/2.D0
+           q(Nuc(i))=q(Nuc(i))-t0
+         enddo
 c
-c          kk=i+(M2-i)*(i-1)/2
-c          kka=kk+M7-1
-c          kkb=kk+M11-1
-c          t0=(RMM(kka)-RMM(kkb))*RMM(M5+kk-1)
-c          q(Nuc(i))=q(Nuc(i))-t0
+         kk=i+(M2-i)*(i-1)/2
+         kka=kk+M7-1
+         kkb=kk+M11-1
+         t0=(RMM(kka)-RMM(kkb))*RMM(M5+kk-1)
+         q(Nuc(i))=q(Nuc(i))-t0
 c
-c          do j=i+1,M
-c            kk=j+(M2-i)*(i-1)/2
-c            kka=kk+M7-1
-c            kkb=kk+M11-1
+         do j=i+1,M
+           kk=j+(M2-i)*(i-1)/2
+           kka=kk+M7-1
+           kkb=kk+M11-1
 c
-c            t0=(RMM(kka)-RMM(kkb))*RMM(M5+kk-1)/2.D0
-c            q(Nuc(i))=q(Nuc(i))-t0
-c          enddo
-c        enddo
+           t0=(RMM(kka)-RMM(kkb))*RMM(M5+kk-1)/2.D0
+           q(Nuc(i))=q(Nuc(i))-t0
+         enddo
+       enddo
 c
-c        write(*,*) 'UNPAIRED SPIN MULLIKEN POPULATION ANALYSIS'
-c        write(*,770)
+       write(85,*)
+       write(85,*) 'UNPAIRED SPIN MULLIKEN POPULATION ANALYSIS'
+       write(85,770)
 c
-c        do n=1,natom
-c          write(*,760) n,Iz(n),q(n)
-c        enddo
-c
-c      endif
+       do n=1,natom
+         write(85,760) n,Iz(n),q(n)
+       enddo
 c
 c ELECTRICAL POTENTIAL AND POINT CHARGES EVALUATION
 c
@@ -1357,31 +1275,80 @@ c         enddo
 c         call charge(NORM,natom,r,Nuc,Iz,M,Md,ncont,nshell,
 c     >            c,a,RMM,map,Q1)
 c        endif
-c-----------------------------------------------------
-c      do l=1,M
-c        do n=1,NCOa
-c          kk=M18+(l-1)+M*(n-1)
-c          X(index(l),M+n)=RMM(kk)
-c        enddo
-c      enddo
 c
-c      do l=1,M
-c        write(2,400) (X(l,M+n),n=1,NCOa)
-c      enddo
+c--------------------------------------------------------------
+c outputs final  MO ---------------------
+
+      rewind 88
+      do l=1,M
+        do n=1,NCOa
+          kk=M18+(l-1)+M*(n-1)
+          X(indexii(l),M+n)=RMM(kk)
+        enddo
+      enddo
+c
+      do l=1,M
+        write(88,400) (X(l,M+n),n=1,NCOa)
+      enddo
 c
 c-------------------------------------------------
-c       do l=1,M
-c         do n=1,NCOb
-c           kk=M18b+(l-1)+M*(n-1)
-c           X(index(l),M+n)=RMM(kk)
+c
+       do l=1,M
+         do n=1,NCOb
+           kk=M18b+(l-1)+M*(n-1)
+           X(indexii(l),M+n)=RMM(kk)
+         enddo
+       enddo
+
+      do l=1,M
+        write(88,400) (X(l,M+n),n=1,NCOb)
+      enddo
+c-------------------------------------------------
+c
+
+
+c-------------------------------------------------
+c writes down MO coefficients and orbital energies
+
+c xxxxxxx aca poner que escriba ------------------------------
+c        if ((good.le.5.0D0*told.and.nopt.eq.0).or.niter.eq.nmax) then
+c          do l=1,M
+c            do n=1,M
+c              X(indexii(l),M+n)=X(l,M2+n)
+c            enddo
+c          enddo
+
+c          write(29,*) 'ORBITAL COEFFICIENTS AND ENERGIES, SPIN ALPHA'
+c this option in order to look orbitals
+c      do n=1,NCO+5
+c this other if one is interested in fargment  populations
+c          do n=1,M
+c            write(29,850) n,RMM(M13+n-1)
+c            write(29,400) (X(l,M+n),l=1,M)
+c          enddo
+c        endif
+c--------------------------------------------------------------
+
+c xxxxxxx  aca poner que escriba -------------------------------
+c       if ((good.le.5.0D0*told.and.nopt.eq.0).or.niter.eq.nmax) then
+c         do l=1,M
+c           do n=1,M
+c             X(indexii(l),M+n)=X(l,M2+n)
+c           enddo
 c         enddo
-c       enddo
 c
-c      do l=1,M
-c        write(2,400) (X(l,M+n),n=1,NCOb)
-c      enddo
+c         write(29,*)
+c         write(29,*) 'ORBITAL COEFFICIENTS AND ENERGIES, SPIN BETA'
+c this option is for looking orbitals
+c      do n=1,NCO+5
+c this other for fragment populations
+c         do n=1,M
+c           write(29,850) n,RMM(M22+n-1)
+c           write(29,400) (X(l,M+n),l=1,M)
+c         enddo
+c         rewind(29)
 c-------------------------------------------------
-c
+c      endif
       if(DIIS) then
         deallocate (Y,Ytrans,Xtrans,rho1_a,rho_a,fock_a,fock_am,
      >           rho1_b,rho_b,fock_b,fock_bm,
@@ -1394,23 +1361,20 @@ c
       deallocate(cool,cools)
 
  500  format('SCF TIME ',I6,' sec')
- 450  format ('SCF ENERGY = ',F14.7)
+ 450  format ('SCF ENERGY = ',F19.12)
  400  format(4(E14.7E2,2x))
+ 300  format(I3,E14.6,2x,F14.7)
  600  format('  ENERGY CONTRIBUTIONS IN A.U.')
- 610  format(2x,'ONE ELECTRON',9x,'COULOMB',11x,'NUCLEAR')
+ 610  format(2x,'ONE ELECTRON',9x,'COULOMB',11x,'NUCLEAR',10x,'EX/CORR')
  615  format(2x,'SOLVENT')
- 620  format(F14.7,4x,F14.7,4x,F14.7)
+ 620  format(F14.7,4x,F14.7,4x,F14.7,4x,F14.7)
  625  format(F14.7)
  760  format(I3,9x,I3,6x,F10.4)
  770  format('ATOM #',4x,'ATOM TYPE',4x,'POPULATION')
- 300  format(I3,E14.6,2x,F14.7)
  850  format('MOLECULAR ORBITAL #',2x,I3,3x,'ORBITAL ENERGY ',F14.7)
  900  format(3(F10.4,2x),2x,F10.4)
-c---- DEBUGGINGS
-c      write(*,*) 'Exc, integrated and calculated',Exc,Ex
-c      write(*,*) 'Coulomb energy',E2-Ex
 c
       call g2g_timer_stop('SCF')
-       return
-       end
-C  -------------------------                                            
+      return
+      end
+C  -------------------------

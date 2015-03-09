@@ -203,7 +203,7 @@ class Partition {
     void regenerate(void);
 
     void solve(Timers& timers, bool compute_rmm,bool lda,bool compute_forces, bool compute_energy,
-               double* fort_energy_ptr, double* fort_forces_ptr, bool OPEN);
+               double* fort_energy_ptr, double* fort_forces_ptr, bool OPEN, bool verbose);
     void compute_functions(bool forces, bool gga);
     void rebalance(std::vector<double> &, std::vector<double> &);
 

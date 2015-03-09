@@ -63,8 +63,9 @@ extern "C" void g2g_parameter_init_(const unsigned int& norm, const unsigned int
                                     const unsigned int& M, unsigned int* ncont, const unsigned int* nshell, double* c, double* a,
                                     double* RMM, const unsigned int& M18, const unsigned int& M5, const unsigned int& M3, double* rhoalpha, double* rhobeta,
                                     const unsigned int& nco, bool& OPEN, const unsigned int& nunp, const unsigned int& nopt, const unsigned int& Iexch,
-                                    double* e, double* e2, double* e3, double* wang, double* wang2, double* wang3)
+                                    double* e, double* e2, double* e3, double* wang, double* wang2, double* wang3, bool& verbose)
 {
+  fortran_vars.verbose = verbose;
   printf("<======= GPU Code Initialization ========>\n");
   fortran_vars.atoms = natom;
   fortran_vars.max_atoms = max_atoms;
@@ -246,7 +247,7 @@ template<bool compute_rmm, bool lda, bool compute_forces> void g2g_iteration(boo
   Timer timer; Timers timers;
 
   timer.start();
-  partition.solve(timers, compute_rmm, lda, compute_forces, compute_energy, fort_energy_ptr, fort_forces_ptr, fortran_vars.OPEN);
+  partition.solve(timers, compute_rmm, lda, compute_forces, compute_energy, fort_energy_ptr, fort_forces_ptr, fortran_vars.OPEN, fortran_vars.verbose);
   timer.stop();
 
   cout << "iteracion total: " << timer << endl;
@@ -284,7 +285,7 @@ extern "C" void g2g_solve_groups_(const uint& computation_type, double* fort_ene
       if (compute_forces) g2g_iteration<true, false, true>(compute_energy, fort_energy_ptr, fort_forces_ptr);
       else {
         g2g_iteration<true, false, false>(compute_energy, fort_energy_ptr, fort_forces_ptr);
-        cout << "XC energy: " << *fort_energy_ptr << endl;
+//        cout << "XC energy: " << *fort_energy_ptr << endl;
       }
     }
   }
@@ -298,7 +299,7 @@ extern "C" void g2g_solve_groups_(const uint& computation_type, double* fort_ene
       else g2g_iteration<false, false, false>(compute_energy, fort_energy_ptr, fort_forces_ptr);
     }
   }
-  if (compute_energy) cout << "XC energy: " << *fort_energy_ptr << endl;
+//  if (compute_energy) cout << "XC energy: " << *fort_energy_ptr << endl;
 }
 //================================================================================================================
 /* general options */

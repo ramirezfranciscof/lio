@@ -14,7 +14,8 @@ c---------------------------------------------------------------------
      > idip,writexyz,intsoldouble,DIIS,ndiis,dgtrig,
      > Iexch,integ,dens,igrid,igrid2,timedep, tdstep, ntdstep,
      > propagator,NBCH,
-     > field,a0,epsilon,exter,Fx,Fy,Fz, tdrestart, writedens,writeforces
+     > field,a0,epsilon,exter,Fx,Fy,Fz, tdrestart, writedens,verbose,
+     >   writeforces
 
       integer :: ifind, ierr
 
@@ -108,7 +109,7 @@ c        write(*,*) natom,nsol
      >           ngDyn+ngDyn*norbit+Ngrid
 c      write(*,*)ng2,ngDyn,ngdDyn,norbit,Ngrid
 
-      allocate(X(ngDyn,ng3),XX(ngdDyn,ngdDyn))
+      allocate(X(ngDyn,ng3),X2(ngDyn,ng3),XX(ngdDyn,ngdDyn))
       allocate(RMM(ng2),RMM1(ng2),RMM2(ng2), RMM3(ng2))
 
       allocate (c(ngnu,nl),a(ngnu,nl),Nuc(ngnu),ncont(ngnu)

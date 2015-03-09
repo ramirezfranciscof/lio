@@ -37,13 +37,14 @@
  FZ      =  5.000000074505806E-002,
  TDRESTART       = F,
  WRITEDENS       = T,
+ VERBOSE = T,
  WRITEFORCES     = F
  /
 <====== Initializing G2G ======>
-GPU Device used: Tesla K20c
+GPU Device used: GeForce GTX 780
 Kernels: gpu
  JOB STARTED NOW
-Thu Sep 25 17:28:09 ART 2014
+Tue Dec  2 15:12:30 ART 2014
 basis set corresponding to Z   6 was not used
 basis set corresponding to Z   7 was not used
 basis set corresponding to Z  16 was not used
@@ -64,68 +65,48 @@ max_function_exponent 10
 min_points_per_cube 1
 sphere_radius 0.5
 energy_all_iterations true
+ ======>>>> SALIENDO DE DRIVE <<<<========
+
+ (*) Initializing lio variables...
+TIMER [lio_init]: 31us.
  ======>>>> INGRESO A SCFop <<<<==========
-TIMER [int3mem]: 178670us.
-TIMER [principio int3lu]: 2421us.
-TIMER [int3lu]: 8518us.
-Ei: 0 Ec: 0 Ec1: 0 Ec2: 0
-iteration: 267629us.
-rmm: 53411us. density: 132552us. pot: 0us. forces: 0us. resto: 0us. functions: 50813us.
+ntatom,nsol,natom:       19       0      19
+ M=         140
+TIMER [int3mem]: 96957us.
+ empiezo el loop          100
+TIMER [principio int3lu]: 2233us.
+TIMER [int3lu]: 7953us.
+Ei: -106.6752458 Ec: -3.073547372 Ec1: -6.05323609 Ec2: 2.979688718
+iteration: 223687us.
+rmm: 26530us. density: 127572us. pot: 0us. forces: 0us. resto: 0us. functions: 41251us.
 
-XC energy: 0
-XC energy: 0
-TIMER [dspev]: 3990us.
-TIMER [diis]: 128us.
-  1  0.100000E+02   -1610.6066481
-En,E1,E2,Ex,Etotal    697.3674537137541165  -3717.8603515625000000   1409.8862497653628907      0.0000000000000000  -1610.6066480833828791
-TIMER [Total iter]: 319390us.
-TIMER [principio int3lu]: 2502us.
-TIMER [int3lu]: 8429us.
-Ei: -93.50730961 Ec: -2.918572378 Ec1: -5.49008816 Ec2: 2.571515783
-iteration: 271181us.
-rmm: 53342us. density: 137904us. pot: 0us. forces: 0us. resto: 0us. functions: 50072us.
+TIMER [dspev]: 2920us.
+TIMER [diis]: 104us.
+ iter           1 QM Energy=  -1720.35182767593     
+En,E1,E2,Ex    697.3674537137541165  -3717.8566894531250000   1409.8862012714118919   -109.7487932079685322
+good=  0.0000014 (told=  0.0000010)
+TIMER [Total iter]: 263252us.
+TIMER [principio int3lu]: 2188us.
+TIMER [int3lu]: 7961us.
+Ei: -106.6752523 Ec: -3.0735472 Ec1: -6.053236229 Ec2: 2.97968903
+iteration: 213356us.
+rmm: 25115us. density: 121118us. pot: 0us. forces: 0us. resto: 0us. functions: 40873us.
 
-XC energy: -96.42588198
-XC energy: -96.42588198
-TIMER [dspev]: 3853us.
-TIMER [diis]: 223us.
-  2  0.100000E+02   -1594.7245517
-En,E1,E2,Ex,Etotal    697.3674537137541165  -3472.6511230468750000   1180.5591176506179636    -96.4258819757050816  -1691.1504336582079304
-TIMER [Total iter]: 313739us.
-TIMER [principio int3lu]: 2180us.
-TIMER [int3lu]: 8426us.
-Ei: -97.18579785 Ec: -2.975650735 Ec1: -5.657134696 Ec2: 2.68148396
-iteration: 269820us.
-rmm: 53384us. density: 137025us. pot: 0us. forces: 0us. resto: 0us. functions: 49702us.
+TIMER [dspev]: 2859us.
+TIMER [diis]: 188us.
+ iter           2 QM Energy=  -1720.35221708315     
+En,E1,E2,Ex    697.3674537137541165  -3717.8569335937500000   1409.8860622951151527   -109.7487994982720068
+good=  0.0000002 (told=  0.0000010)
+TIMER [Total iter]: 249820us.
+ CONVERGED AT           2 ITERATIONS
+Ei: -106.6752536 Ec: -3.073547298 Ec1: -6.053236266 Ec2: 2.979688969
+iteration: 185676us.
+rmm: 39us. density: 119118us. pot: 0us. forces: 0us. resto: 0us. functions: 41002us.
 
-XC energy: -100.1614486
-XC energy: -100.1614486
-TIMER [diis]: 469us.
-TIMER [dspev]: 3728us.
-TIMER [diis]: 354us.
-  3  0.100000E+02   -1607.8756426
-En,E1,E2,Ex,Etotal    697.3674537137541165  -3573.1206054687500000   1267.8775091675865951   -100.1614485704544393  -1708.0370911578638697
-TIMER [Total iter]: 301730us.
-TIMER [principio int3lu]: 2155us.
-TIMER [int3lu]: 8423us.
-Ei: -93.50730961 Ec: -2.918572378 Ec1: -5.49008816 Ec2: 2.571515783
-iteration: 279442us.
-rmm: 53912us. density: 140604us. pot: 0us. forces: 0us. resto: 0us. functions: 52845us.
-
-XC energy: -96.42588198
-XC energy: -96.42588198
-TIMER [diis]: 612us.
-TIMER [dspev]: 4035us.
-TIMER [diis]: 633us.
-  4  0.100000E+02   -1594.7245517
-En,E1,E2,Ex,Etotal    697.3674537137541165  -3472.6511230468750000   1180.5591176506136435    -96.4258819757050816  -1691.1504336582124779
-TIMER [Total iter]: 313872us.
- CONVERGED AT           4 ITERATIONS
-Ei: -93.50730961 Ec: -2.918572378 Ec1: -5.49008816 Ec2: 2.571515783
-iteration: 219782us.
-rmm: 46us. density: 136524us. pot: 0us. forces: 0us. resto: 0us. functions: 52205us.
-
-XC energy: -96.42588198
-TIMER [SCF]: 2s. 12181us.
- SCF ENRGY=  -1691.15043365821     
+ 
+  ENERGY CONTRIBUTIONS IN A.U.
+  ONE ELECTRON         COULOMB           NUCLEAR          EX/CORR
+ -3717.8569336      1409.8860623       697.3674537      -109.7488009
+TIMER [SCF]: 916899us.
+ SCF ENRGY=  -1720.35221852229     
 <====== Deinitializing G2G ======>

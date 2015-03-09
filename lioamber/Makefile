@@ -29,7 +29,6 @@ makefiles += make_flags.mk
 makefiles += make_links.mk
 
 #
-
 ######################################################################
 
 # This indicates the main target.
