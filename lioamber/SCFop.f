@@ -10,7 +10,8 @@ c Nano and Will 2014 (nanolebrero@gmail.com , wagudelos@gmail.com)
 c---------------------------------------------------
       subroutine SCFOP(E,dipxyz)
       use garcha_mod
-      REAL*8:: En,E2,E,Es,Ex,Exc
+      implicit real*8 (a-h,o-z)
+      REAL*8:: En,E2,E,Es,Ex,Exc,E1
 
       dimension q(natom),work(1000)
       real*8, dimension (:,:), ALLOCATABLE ::xnano,znano
@@ -383,6 +384,13 @@ c
 
 c End of Starting guess (No MO , AO known)-------------------------------
 c
+c        do k=1,MM
+c         read(666,*) kkk, RMM(k)
+c        enddo
+c        do k=1,MM
+c         write(400,*) RMM(k)
+c        enddo
+
       call int2()
 c
 **
@@ -434,7 +442,13 @@ c----------------------------------------------------------------
 c E1 includes solvent 1 electron contributions
         do k=1,MM
           E1=E1+RMM(k)*RMM(M11+k-1)
+c        write(555,*) RMM(k),RMM(M11+k-1)
         enddo
+c        do k=1,MM
+c         write(401,*) RMM(k)
+c        enddo
+          write(*,"(A,X,F23.16,X,F23.16,X,F23.16,X,F23.16)")
+     >         'En,E1,E2,Ex',En,E1,E2,Ex
 c
 c      DAMP=gold
         if (niter.eq.1) then
@@ -1043,11 +1057,10 @@ c        E0=E
 c        DAMP0=DAMP
 c      endif
 
-       E=E1+E2+En
-       E=E+Es
+       E=E1+E2+En+Ex+Es
 
         if(verbose) then
-          write(*,*) 'iter',niter,'QM Energy=',E+Ex
+          write(*,*) 'iter',niter,'QM Energy=',E
           write(*,"(A,X,F23.16,X,F23.16,X,F23.16,X,F23.16)")
      >         'En,E1,E2,Ex',En,E1,E2,Ex
           write(*,"(A,F10.7,A,F10.7,A)") 'good= ',good,' (told= ',told,
@@ -1078,12 +1091,12 @@ c-------------------------------------------------------------------
 
 #ifdef G2G
 #ifdef ULTIMA_CPU
-       call exchnum(NORM,natom,r,Iz,Nuc,M,ncont,nshell,c,a,RMM,
-     >              M18,NCO,Exc,nopt)
+c       call exchnum(NORM,natom,r,Iz,Nuc,M,ncont,nshell,c,a,RMM,
+c     >              M18,NCO,Exc,nopt)
 #else
-       call g2g_new_grid(igrid)
+c       call g2g_new_grid(igrid)
 
-       call g2g_solve_groups(1, Exc, 0)
+c       call g2g_solve_groups(1, Exc, 0)
 
 c       write(*,*) 'g2g-Exc',Exc
 #endif
@@ -1094,12 +1107,12 @@ c       call g2g_solve_groups(1, Exc, 0)
 #else
 #endif       
 #endif
-        E=E1+E2+En+Ens+Exc
+c        E=E1+E2+En+Ens+Exc
 
-          write(*,*)
-          write(*,600)
-          write(*,610)
-          write(*,620) E1,E2,En,Exc
+c          write(*,*)
+c          write(*,600)
+c          write(*,610)
+c          write(*,620) E1,E2,En,Exc
 
 c calculation of energy weighted density matrix
 c
