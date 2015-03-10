@@ -21,7 +21,6 @@ ifeq ($(magma),1)
         LIBS     += -L$(MAGMAROOT)/lib -lmagma
 endif
 
-<<<<<<< HEAD
 ######################################################################
 liosolo: main.f
 	$(FC) $< -o $@ $(FLAGS) $(LIBS)
