@@ -1,25 +1,23 @@
 # -*- mode: make -*-
 
-CUDAHOME=/opt/cuda
+CXXFLAGS+= -fPIC -Wall -g -std=c++0x -I. -I$(CUDAHOME)/include
 
 ifeq ($(non_optimize), 1)
   OPTIMIZE:=-O2
 else
-  OPTIMIZE:=-O3
+  OPTIMIZE:=-Ofast
 endif
 
 ifeq ($(gcc),1)
   CXX      := g++
-  CXXFLAGS := $(CXXFLAGS) -fPIC -Wall -Wno-long-long -ansi -Wno-unused -I$(CUDAHOME)/include
+  CXXFLAGS := $(CXXFLAGS) -Wno-long-long -ansi -Wno-unused-variable -Wno-unused-parameter
 else
   CXX      := icc
-  CXXFLAGS := $(CXXFLAGS) -fPIC  -vec-report1 -g -I. -I$(CUDAHOME)/include
+  CXXFLAGS := $(CXXFLAGS) -qopt-report=5
 endif
 
 # Debug/release configuration
-ifeq ($(dbg),1)
-	COMMONFLAGS := -g -D_DEBUG
-else
+ifneq ($(dbg),1)
 	COMMONFLAGS := -DNDEBUG
 	ifeq ($(gcc),1)
     	CXXFLAGS  += $(OPTIMIZE) -fno-strict-aliasing

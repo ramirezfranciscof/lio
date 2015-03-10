@@ -10,13 +10,9 @@ c Nano and Will 2014 (nanolebrero@gmail.com , wagudelos@gmail.com)
 c---------------------------------------------------
       subroutine SCFOP(E,dipxyz)
       use garcha_mod
-<<<<<<< HEAD
       implicit real*8 (a-h,o-z)
       REAL*8:: En,E2,E,Es,Ex,Exc,E1
-=======
       use mathsubs
-      REAL*8:: En,E2,E,Es,Ex,Exc
->>>>>>> 7d06646cb1333889dc332b2c15ba48ac06d0dcde
 
       dimension q(natom),work(1000)
       real*8, dimension (:,:), ALLOCATABLE ::xnano,znano
