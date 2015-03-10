@@ -10,9 +10,10 @@ REQUIREMENTS
 ------------
 
 * Intel MKL (Math Kernel Library).
-* Intel C++ and Fortran Compiler (can be obtained a non-commercial license).
+* Intel C++ and Fortran Compiler (can be obtained with a non-commercial license).
 * NVIDIA CUDA (for compiling GPU version).
 * GNU Make.
+* Python 2.7 (for test scripts)
 
 COMPILATION
 ------------
@@ -60,6 +61,16 @@ runs only the tests for GPU. For more options run
 
 ```
   ./run_tests.py --help
+```
+
+CONTRIBUTING
+------------
+
+Before contributing, make sure you have set up the git hooks for the project. That
+can be done either by running a clean compile with make, or by executing
+
+```
+  make hooks
 ```
 
 INSTALLATION

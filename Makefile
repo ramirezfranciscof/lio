@@ -1,3 +1,5 @@
+.PHONY: all clean hooks
+
 all:
 	cd g2g; make;
 	cd lioamber; make;
