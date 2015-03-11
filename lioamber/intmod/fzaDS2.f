@@ -181,7 +181,7 @@
             orbint(1)=orbint(1)+cta*IMTX(1,1,2)*IMTX(2,1,1)*IMTX(3,1,2) ! <s|xpz>
 
             orbint(2)=orbint(2)+cta*IMTX(1,1,2)*IMTX(2,1,2)*IMTX(3,1,1) ! <s|ypx>
-            orbint(2)=orbint(2)+cta*IMTX(1,1,1)*IMTX(2,1,2)*IMTX(3,1,1) ! <s|ypy>
+            orbint(2)=orbint(2)+cta*IMTX(1,1,1)*IMTX(2,1,3)*IMTX(3,1,1) ! <s|ypy>
      >                         -cij*IMTX(1,1,1)*IMTX(2,1,1)*IMTX(3,1,1) !
             orbint(2)=orbint(2)+cta*IMTX(1,1,1)*IMTX(2,1,2)*IMTX(3,1,2) ! <s|ypz>
 
@@ -219,38 +219,38 @@
             orbint(1)=orbint(1)+cta*IMTX(1,1,3)*IMTX(2,1,1)*IMTX(3,2,1) ! <pz|xpx>
      >                         -cij*IMTX(1,1,1)*IMTX(2,1,1)*IMTX(3,2,1) !
 
-            orbint(2)=orbint(2)+cta*IMTX(1,2,2)*IMTX(2,1,2)*IMTX(3,1,1) ! <px|ypx>
-            orbint(2)=orbint(2)+cta*IMTX(1,1,2)*IMTX(2,2,2)*IMTX(3,1,1) ! <py|ypx>
-            orbint(2)=orbint(2)+cta*IMTX(1,1,2)*IMTX(2,1,2)*IMTX(3,2,1) ! <pz|ypx>
-
-            orbint(3)=orbint(3)+cta*IMTX(1,2,2)*IMTX(2,1,1)*IMTX(3,1,2) ! <px|zpx>
-            orbint(3)=orbint(3)+cta*IMTX(1,1,2)*IMTX(2,2,1)*IMTX(3,1,2) ! <py|zpx>
-            orbint(3)=orbint(3)+cta*IMTX(1,1,2)*IMTX(2,1,1)*IMTX(3,2,2) ! <pz|zpx>
-
-
             orbint(1)=orbint(1)+cta*IMTX(1,2,2)*IMTX(2,1,2)*IMTX(3,1,1) ! <px|xpy>
             orbint(1)=orbint(1)+cta*IMTX(1,1,2)*IMTX(2,2,2)*IMTX(3,1,1) ! <py|xpy> 
-            orbint(1)=orbint(1)+cta*IMTX(1,1,2)*IMTX(2,1,2)*IMTX(3,2,1) ! <pz|xpy> 
-
-            orbint(2)=orbint(2)+cta*IMTX(1,2,1)*IMTX(2,1,2)*IMTX(3,1,1) ! <px|ypy>
-     >                         -cij*IMTX(1,2,1)*IMTX(2,1,1)*IMTX(3,1,1) !
-            orbint(2)=orbint(2)+cta*IMTX(1,1,1)*IMTX(2,2,2)*IMTX(3,1,1) ! <py|ypy>
-     >                         -cij*IMTX(1,1,1)*IMTX(2,2,1)*IMTX(3,1,1) !
-            orbint(2)=orbint(2)+cta*IMTX(1,1,1)*IMTX(2,1,2)*IMTX(3,2,1) ! <pz|ypy>
-     >                         -cij*IMTX(1,1,1)*IMTX(2,1,1)*IMTX(3,2,1) !
-
-            orbint(3)=orbint(3)+cta*IMTX(1,2,1)*IMTX(2,1,2)*IMTX(3,1,2) ! <px|zpy>
-            orbint(3)=orbint(3)+cta*IMTX(1,1,1)*IMTX(2,2,2)*IMTX(3,1,2) ! <py|zpy>
-            orbint(3)=orbint(3)+cta*IMTX(1,1,1)*IMTX(2,1,2)*IMTX(3,2,2) ! <pz|zpy>
-
+            orbint(1)=orbint(1)+cta*IMTX(1,1,2)*IMTX(2,1,2)*IMTX(3,2,1) ! <pz|xpy>
 
             orbint(1)=orbint(1)+cta*IMTX(1,2,2)*IMTX(2,1,1)*IMTX(3,1,2) ! <px|xpz>
             orbint(1)=orbint(1)+cta*IMTX(1,1,2)*IMTX(2,2,1)*IMTX(3,1,2) ! <py|xpz>
             orbint(1)=orbint(1)+cta*IMTX(1,1,2)*IMTX(2,1,1)*IMTX(3,2,2) ! <pz|xpz>
 
+
+            orbint(2)=orbint(2)+cta*IMTX(1,2,2)*IMTX(2,1,2)*IMTX(3,1,1) ! <px|ypx>
+            orbint(2)=orbint(2)+cta*IMTX(1,1,2)*IMTX(2,2,2)*IMTX(3,1,1) ! <py|ypx>
+            orbint(2)=orbint(2)+cta*IMTX(1,1,2)*IMTX(2,1,2)*IMTX(3,2,1) ! <pz|ypx>
+
+            orbint(2)=orbint(2)+cta*IMTX(1,2,1)*IMTX(2,1,3)*IMTX(3,1,1) ! <px|ypy>
+     >                         -cij*IMTX(1,2,1)*IMTX(2,1,1)*IMTX(3,1,1) !
+            orbint(2)=orbint(2)+cta*IMTX(1,1,1)*IMTX(2,2,3)*IMTX(3,1,1) ! <py|ypy>
+     >                         -cij*IMTX(1,1,1)*IMTX(2,2,1)*IMTX(3,1,1) !
+            orbint(2)=orbint(2)+cta*IMTX(1,1,1)*IMTX(2,1,3)*IMTX(3,2,1) ! <pz|ypy>
+     >                         -cij*IMTX(1,1,1)*IMTX(2,1,1)*IMTX(3,2,1) !
+
             orbint(2)=orbint(2)+cta*IMTX(1,2,1)*IMTX(2,1,2)*IMTX(3,1,2) ! <px|ypz>
             orbint(2)=orbint(2)+cta*IMTX(1,1,1)*IMTX(2,2,2)*IMTX(3,1,2) ! <py|ypz>
             orbint(2)=orbint(2)+cta*IMTX(1,1,1)*IMTX(2,1,2)*IMTX(3,2,2) ! <pz|ypz>
+
+
+            orbint(3)=orbint(3)+cta*IMTX(1,2,2)*IMTX(2,1,1)*IMTX(3,1,2) ! <px|zpx>
+            orbint(3)=orbint(3)+cta*IMTX(1,1,2)*IMTX(2,2,1)*IMTX(3,1,2) ! <py|zpx>
+            orbint(3)=orbint(3)+cta*IMTX(1,1,2)*IMTX(2,1,1)*IMTX(3,2,2) ! <pz|zpx>
+
+            orbint(3)=orbint(3)+cta*IMTX(1,2,1)*IMTX(2,1,2)*IMTX(3,1,2) ! <px|zpy>
+            orbint(3)=orbint(3)+cta*IMTX(1,1,1)*IMTX(2,2,2)*IMTX(3,1,2) ! <py|zpy>
+            orbint(3)=orbint(3)+cta*IMTX(1,1,1)*IMTX(2,1,2)*IMTX(3,2,2) ! <pz|zpy>
 
             orbint(3)=orbint(3)+cta*IMTX(1,2,1)*IMTX(2,1,1)*IMTX(3,1,3) ! <px|zpz>
      >                         -cij*IMTX(1,2,1)*IMTX(2,1,1)*IMTX(3,1,1) !
@@ -315,17 +315,17 @@
             orbint(1)=orbint(1)+cta*IMTX(1,1,2)*IMTX(2,2,2)*IMTX(3,2,1) ! <dyz|xpy> 
             orbint(1)=orbint(1)+cta*IMTX(1,2,2)*IMTX(2,1,2)*IMTX(3,2,1) ! <dzx|xpy> 
 
-            orbint(2)=orbint(2)+cta*IMTX(1,3,1)*IMTX(2,1,2)*IMTX(3,1,1) ! <dxx|ypy>
+            orbint(2)=orbint(2)+cta*IMTX(1,3,1)*IMTX(2,1,3)*IMTX(3,1,1) ! <dxx|ypy>
      >                         -cij*IMTX(1,3,1)*IMTX(2,1,1)*IMTX(3,1,1) !
-            orbint(2)=orbint(2)+cta*IMTX(1,1,1)*IMTX(2,3,2)*IMTX(3,1,1) ! <dyy|ypy>
+            orbint(2)=orbint(2)+cta*IMTX(1,1,1)*IMTX(2,3,3)*IMTX(3,1,1) ! <dyy|ypy>
      >                         -cij*IMTX(1,1,1)*IMTX(2,3,1)*IMTX(3,1,1) !
-            orbint(2)=orbint(2)+cta*IMTX(1,1,1)*IMTX(2,1,2)*IMTX(3,3,1) ! <dzz|ypy>
+            orbint(2)=orbint(2)+cta*IMTX(1,1,1)*IMTX(2,1,3)*IMTX(3,3,1) ! <dzz|ypy>
      >                         -cij*IMTX(1,1,1)*IMTX(2,1,1)*IMTX(3,3,1) !
-            orbint(2)=orbint(2)+cta*IMTX(1,2,1)*IMTX(2,2,2)*IMTX(3,1,1) ! <dxy|ypy>
+            orbint(2)=orbint(2)+cta*IMTX(1,2,1)*IMTX(2,2,3)*IMTX(3,1,1) ! <dxy|ypy>
      >                         -cij*IMTX(1,2,1)*IMTX(2,2,1)*IMTX(3,1,1) !
-            orbint(2)=orbint(2)+cta*IMTX(1,1,1)*IMTX(2,2,2)*IMTX(3,2,1) ! <dyz|ypy>
+            orbint(2)=orbint(2)+cta*IMTX(1,1,1)*IMTX(2,2,3)*IMTX(3,2,1) ! <dyz|ypy>
      >                         -cij*IMTX(1,1,1)*IMTX(2,2,1)*IMTX(3,2,1) !
-            orbint(2)=orbint(2)+cta*IMTX(1,2,1)*IMTX(2,1,2)*IMTX(3,2,1) ! <dzx|ypy>
+            orbint(2)=orbint(2)+cta*IMTX(1,2,1)*IMTX(2,1,3)*IMTX(3,2,1) ! <dzx|ypy>
      >                         -cij*IMTX(1,2,1)*IMTX(2,1,1)*IMTX(3,2,1) !
 
             orbint(3)=orbint(3)+cta*IMTX(1,3,1)*IMTX(2,1,2)*IMTX(3,1,2) ! <dxx|zpy>
