@@ -24,6 +24,7 @@ namespace G2G {
             T* data;
             unsigned int width;
             unsigned int height;
+            bool permanent;
                 // unsigned int components;
 
             unsigned int bytes(void) const;
@@ -48,6 +49,8 @@ namespace G2G {
 
 			HostMatrix<T>& operator=(const CudaMatrix<T>& c);
 			HostMatrix<T>& operator=(const HostMatrix<T>& c);
+
+            void set_permanent();
 
 			inline const T& operator()(unsigned int i = 0, unsigned int j = 0) const {
 				assert(i < this->width);

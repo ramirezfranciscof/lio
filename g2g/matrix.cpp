@@ -6,6 +6,7 @@
 #include "matrix.h"
 #include "mkl.h"
 #include "scalar_vector_types.h"
+#include "memory.h"
 using namespace std;
 
 namespace G2G {
@@ -14,7 +15,7 @@ namespace G2G {
  * Matrix
  ***************************/
 
-template<class T> Matrix<T>::Matrix(void) : data(NULL), width(0), height(0) /*, components(0)*/ {}
+template<class T> Matrix<T>::Matrix(void) : data(NULL), width(0), height(0), permanent(false) /*, components(0)*/ {}
 
 template<class T> Matrix<T>::~Matrix(void) { }
 
@@ -44,10 +45,14 @@ template<class T> void HostMatrix<T>::alloc_data(void) {
     #else
     assert(false);
     #endif
-	}
-	else this->data = (T *) mkl_malloc(this->bytes(), 64);
+    } else {
+	    this->data = (T *) get_memory(this->bytes(), this->permanent);
+    }
 
 	assert(this->data);
+}
+template<class T> void HostMatrix<T>::set_permanent() {
+    this->permanent = true;
 }
 
 template<class T> void HostMatrix<T>::dealloc_data(void) {
@@ -58,7 +63,6 @@ template<class T> void HostMatrix<T>::dealloc_data(void) {
     assert(false);
     #endif
   }
-	else mkl_free(this->data);
 }
 
 template<class T> void HostMatrix<T>::copy_to_tmp(T * dst) const {
@@ -129,6 +133,7 @@ template<class T> HostMatrix<T>& HostMatrix<T>::fill(T value) {
 }
 
 template<class T> HostMatrix<T>& HostMatrix<T>::operator=(const HostMatrix<T>& c) {
+    this->permanent = c.permanent;
 	assert(!this->pinned);
 
 	if (!c.data) {
@@ -149,11 +154,11 @@ template<class T> HostMatrix<T>& HostMatrix<T>::operator=(const HostMatrix<T>& c
 
 		copy_submatrix(c);
 	}
-
 	return *this;
 }
 
 template <class T> HostMatrix<T>& HostMatrix<T>::operator=(const CudaMatrix<T>& c) {
+    this->permanent = c.permanent;
 	if (!c.data) {
 		if (this->data) { dealloc_data(); this->width = this->height = 0; this->data = NULL; }
 	}

@@ -99,11 +99,15 @@ extern "C" void g2g_parameter_init_(const unsigned int& norm, const unsigned int
   assert(0 < Iexch && Iexch <= 9);
 
 	fortran_vars.atom_positions_pointer = FortranMatrix<double>(r, fortran_vars.atoms, 3, max_atoms);
+	fortran_vars.atom_types.set_permanent();
 	fortran_vars.atom_types.resize(fortran_vars.atoms);
 	for (uint i = 0; i < fortran_vars.atoms; i++) { fortran_vars.atom_types(i) = Iz[i] - 1; }
 
+    fortran_vars.shells1.set_permanent();
 	fortran_vars.shells1.resize(fortran_vars.atoms);
+    fortran_vars.shells2.set_permanent();
 	fortran_vars.shells2.resize(fortran_vars.atoms);
+    fortran_vars.rm.set_permanent();
 	fortran_vars.rm.resize(fortran_vars.atoms);
 
 	/* ignore the 0th element on these */
@@ -155,8 +159,10 @@ extern "C" void g2g_parameter_init_(const unsigned int& norm, const unsigned int
 	fortran_vars.wang2 = FortranMatrix<double>(wang2, MEDIUM_GRID_SIZE, 1, MEDIUM_GRID_SIZE);
 	fortran_vars.wang3 = FortranMatrix<double>(wang3, BIG_GRID_SIZE, 1, BIG_GRID_SIZE);
 
-	fortran_vars.atom_atom_dists = HostMatrix<double>(fortran_vars.atoms, fortran_vars.atoms);
-	fortran_vars.nearest_neighbor_dists = HostMatrix<double>(fortran_vars.atoms);
+    fortran_vars.atom_atom_dists.set_permanent();
+    fortran_vars.atom_atom_dists.resize(fortran_vars.atoms, fortran_vars.atoms);
+    fortran_vars.nearest_neighbor_dists.set_permanent();
+    fortran_vars.nearest_neighbor_dists.resize(fortran_vars.atoms);
 
 #if !CPU_KERNELS
   G2G::gpu_set_variables();
@@ -205,6 +211,7 @@ extern "C" void g2g_reload_atom_positions_(const unsigned int& grid_type) {
 //	cout  << "<======= GPU Reload Atom Positions (" << grid_type << ")========>" << endl;
 
 	HostMatrixFloat3 atom_positions(fortran_vars.atoms);	// gpu version (float3)
+	fortran_vars.atom_positions.set_permanent();
 	fortran_vars.atom_positions.resize(fortran_vars.atoms);	// cpu version (double3)
 	for (uint i = 0; i < fortran_vars.atoms; i++) {
 		double3 pos = make_double3(fortran_vars.atom_positions_pointer(i, 0), fortran_vars.atom_positions_pointer(i, 1), fortran_vars.atom_positions_pointer(i, 2));

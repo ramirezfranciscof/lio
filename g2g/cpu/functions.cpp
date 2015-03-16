@@ -28,6 +28,21 @@ void PointGroup<scalar_type>::compute_functions(Timers & t, bool forces, bool gg
   } else {
     this->inGlobal = false;
   }
+  if (this->inGlobal) {
+      function_values.set_permanent();
+      function_values_transposed.set_permanent();
+
+      gX.set_permanent();
+      gY.set_permanent();
+      gZ.set_permanent();
+
+      hPX.set_permanent();
+      hPY.set_permanent();
+      hPZ.set_permanent();
+      hIX.set_permanent();
+      hIY.set_permanent();
+      hIZ.set_permanent();
+  }
   t.load_functions.pause();
   /* Load group functions */
   uint group_m = total_functions();

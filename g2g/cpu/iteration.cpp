@@ -110,7 +110,7 @@ template<class scalar_type> void PointGroup<scalar_type>::solve_closed(Timers& t
         scalar_type ww2xc = 0, ww2yc = 0, ww2zc = 0;
 
         const scalar_type * rm = rmm_input.row(i);
-        #pragma vector aligned always 
+        #pragma vector always 
         for(int j = 0; j <= i; j++) {
           const scalar_type rmj = rm[j];
           w += fv[j] * rmj;
@@ -170,6 +170,7 @@ template<class scalar_type> void PointGroup<scalar_type>::solve_closed(Timers& t
   if (compute_forces) {
     vector<vec_type3> forces;
     vector< std::vector<vec_type3> > forces_mat;
+
     forces.resize(total_nucleii(), vec_type3(0.f,0.f,0.f)); 
     forces_mat.resize(points.size(), vector<vec_type3>(total_nucleii(), vec_type3(0.f,0.f,0.f)));
 

@@ -448,10 +448,13 @@ void Partition::regenerate(void)
     next.resize(outer_threads);
 
     fort_forces_ms.resize(outer_threads);
+
     rmm_outputs.resize(outer_threads);
 
     for(int i = 0; i < outer_threads; i++) {
+      fort_forces_ms[i].set_permanent();
       fort_forces_ms[i].resize(fortran_vars.max_atoms, 3);
+      rmm_outputs[i].set_permanent();
       rmm_outputs[i].resize(fortran_vars.rmm_output.width, fortran_vars.rmm_output.height);
     }
     

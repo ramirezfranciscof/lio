@@ -11,6 +11,7 @@
 #include "matrix.h"
 #include "partition.h"
 #include "timer.h"
+#include "memory.h"
 #include "mkl.h"
 using namespace std;
 
@@ -150,11 +151,13 @@ template<class scalar_type>
 void PointGroup<scalar_type>::compute_nucleii_maps(void)
 {
   if (total_functions_simple() != 0) {
+    func2global_nuc.set_permanent();
     func2global_nuc.resize(total_functions_simple());
     for (uint i = 0; i < total_functions_simple(); i++) {
       func2global_nuc(i) = fortran_vars.nucleii(local2global_func[i]) - 1;
     }
 
+    func2local_nuc.set_permanent();
     func2local_nuc.resize(total_functions());
     uint ii = 0;
     for (uint i = 0; i < total_functions_simple(); i++) {
@@ -325,6 +328,9 @@ void Partition::solve(Timers& timers, bool compute_rmm,bool lda,bool compute_for
   double cubes_energy_c = 0, spheres_energy_c = 0;
   double cubes_energy_c1 = 0, spheres_energy_c1 = 0;
   double cubes_energy_c2 = 0, spheres_energy_c2 = 0;
+
+  memory_diagnostic();
+  reset_memory();
 
   Timer smallgroups, biggroups;
   int i;
