@@ -7,6 +7,7 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
        use garcha_mod, only:M,a,c,r,nshell,natom,ncont,nl,nuc
        use intmod
+       use testmod
        implicit none
        real*8,intent(in)      :: Sinv(M,M)
        real*8,intent(in)      :: Fmtx(M,M)
@@ -18,7 +19,7 @@
        complex*16,allocatable :: AuxMat(:,:), Mdir(:,:),Mtrp(:,:)
        complex*16,allocatable :: Bmat(:,:)
        integer,allocatable    :: nucof(:)
-       integer                :: kk,ii,jj
+       integer                :: kk,ii,jj,unitid
 
 !--------------------------------------------------------------------!
        allocate(nr(3,natom),nv(3,natom),as(nl,M),cs(nl,M),nucof(M))
@@ -27,8 +28,19 @@
 
        call g2g_timer_start('intold_')
        ffold=0.0d0
-       call intSG(ffold)
+       call testinit()
+       call calcDSM(ffold)
+!       call intSG(ffold)
        call g2g_timer_stop('intold_')
+       unitid=300
+       do kk=1,natom
+        do ii=1,M
+        do jj=1,M
+          write(unitid+kk,*) ii,jj,DSX(ii,jj,kk),DSY(ii,jj,kk),
+     >             DSZ(ii,jj,kk)
+        enddo
+        enddo
+       enddo
 
 !      Crear Mdir y Mtrp
        Mdir=matmul(Fmtx,Pmtx)
@@ -61,6 +73,16 @@
        call fzaDS2(natom,M,nshell(0),nshell(1),ncont,nl,
      >             AuxMat,nr,nv,as,cs,nucof,Bmat,ffnew)
        call g2g_timer_stop('intnew_')
+       unitid=400
+       do kk=1,natom
+        do ii=1,M
+        do jj=1,M
+          write(unitid+kk,*) ii,jj,DSX(ii,jj,kk),DSY(ii,jj,kk),
+     >            DSZ(ii,jj,kk)
+        enddo
+        enddo
+       enddo
+
 
 
        do ii=1,natom

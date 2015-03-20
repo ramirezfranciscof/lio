@@ -8,6 +8,7 @@
 !
 !
 !--------------------------------------------------------------------!
+       use testmod
        implicit none
        integer,intent(in)     :: Natoms  ! Number of atoms
        integer,intent(in)     :: Nbasis  ! Number of basis
@@ -34,6 +35,9 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
        force=CMPLX(0.0d0,0.0d0)
        Bmat=CMPLX(0.0d0,0.0d0)
+       DSX(:,:,:)=0.0d0
+       DSY(:,:,:)=0.0d0
+       DSZ(:,:,:)=0.0d0
 
 ! Derivatives of s
 !--------------------------------------------------------------------!
@@ -62,6 +66,9 @@
             orbint(3)=orbint(3)+cta*IMTX(1,1,1)*IMTX(2,1,1)*IMTX(3,1,2) ! <s|zs>
 
           enddo
+          DSX(ii,jj,nkj)=DSX(ii,jj,nkj)+orbint(1)
+          DSY(ii,jj,nkj)=DSY(ii,jj,nkj)+orbint(2)
+          DSZ(ii,jj,nkj)=DSZ(ii,jj,nkj)+orbint(3)
           do kk=1,3
            force(kk,nkj)=force(kk,nkj)+AuxMat(ii,jj)*orbint(kk)
            Bmat(ii,jj)=Bmat(ii,jj)+nucvel(kk,nkj)*orbint(kk)
@@ -97,6 +104,9 @@
             orbint(3)=orbint(3)+cta*IMTX(1,1,1)*IMTX(2,1,1)*IMTX(3,2,2) ! <pz|zs>
 
           enddo
+          DSX(ii,jj,nkj)=DSX(ii,jj,nkj)+orbint(1)
+          DSY(ii,jj,nkj)=DSY(ii,jj,nkj)+orbint(2)
+          DSZ(ii,jj,nkj)=DSZ(ii,jj,nkj)+orbint(3)
           do kk=1,3
            force(kk,nkj)=force(kk,nkj)+AuxMat(ii,jj)*orbint(kk)
            Bmat(ii,jj)=Bmat(ii,jj)+nucvel(kk,nkj)*orbint(kk)
@@ -139,6 +149,9 @@
             orbint(3)=orbint(3)+cta*IMTX(1,2,1)*IMTX(2,1,1)*IMTX(3,2,2) ! <dzx|zs>
 
           enddo
+          DSX(ii,jj,nkj)=DSX(ii,jj,nkj)+orbint(1)
+          DSY(ii,jj,nkj)=DSY(ii,jj,nkj)+orbint(2)
+          DSZ(ii,jj,nkj)=DSZ(ii,jj,nkj)+orbint(3)
           do kk=1,3
            force(kk,nkj)=force(kk,nkj)+AuxMat(ii,jj)*orbint(kk)
            Bmat(ii,jj)=Bmat(ii,jj)+nucvel(kk,nkj)*orbint(kk)
@@ -191,6 +204,9 @@
      >                         -cij*IMTX(1,1,1)*IMTX(2,1,1)*IMTX(3,1,1) !
 
           enddo
+          DSX(ii,jj,nkj)=DSX(ii,jj,nkj)+orbint(1)
+          DSY(ii,jj,nkj)=DSY(ii,jj,nkj)+orbint(2)
+          DSZ(ii,jj,nkj)=DSZ(ii,jj,nkj)+orbint(3)
           do kk=1,3
            force(kk,nkj)=force(kk,nkj)+AuxMat(ii,jj)*orbint(kk)
            Bmat(ii,jj)=Bmat(ii,jj)+nucvel(kk,nkj)*orbint(kk)
@@ -260,6 +276,9 @@
      >                         -cij*IMTX(1,1,1)*IMTX(2,1,1)*IMTX(3,2,1) !
 
           enddo
+          DSX(ii,jj,nkj)=DSX(ii,jj,nkj)+orbint(1)
+          DSY(ii,jj,nkj)=DSY(ii,jj,nkj)+orbint(2)
+          DSZ(ii,jj,nkj)=DSZ(ii,jj,nkj)+orbint(3)
           do kk=1,3
            force(kk,nkj)=force(kk,nkj)+AuxMat(ii,jj)*orbint(kk)
            Bmat(ii,jj)=Bmat(ii,jj)+nucvel(kk,nkj)*orbint(kk)
@@ -364,6 +383,9 @@
      >                         -cij*IMTX(1,2,1)*IMTX(2,1,1)*IMTX(3,2,1) !
 
           enddo
+          DSX(ii,jj,nkj)=DSX(ii,jj,nkj)+orbint(1)
+          DSY(ii,jj,nkj)=DSY(ii,jj,nkj)+orbint(2)
+          DSZ(ii,jj,nkj)=DSZ(ii,jj,nkj)+orbint(3)
           do kk=1,3
            force(kk,nkj)=force(kk,nkj)+AuxMat(ii,jj)*orbint(kk)
            Bmat(ii,jj)=Bmat(ii,jj)+nucvel(kk,nkj)*orbint(kk)
@@ -429,6 +451,9 @@
      >                         -cij*IMTX(1,1,2)*IMTX(2,1,1)*IMTX(3,1,1) !
 
           enddo
+          DSX(ii,jj,nkj)=DSX(ii,jj,nkj)+orbint(1)
+          DSY(ii,jj,nkj)=DSY(ii,jj,nkj)+orbint(2)
+          DSZ(ii,jj,nkj)=DSZ(ii,jj,nkj)+orbint(3)
           do kk=1,3
            force(kk,nkj)=force(kk,nkj)+AuxMat(ii,jj)*orbint(kk)
            Bmat(ii,jj)=Bmat(ii,jj)+nucvel(kk,nkj)*orbint(kk)
@@ -552,6 +577,9 @@
      >                         -cij*IMTX(1,1,2)*IMTX(2,1,1)*IMTX(3,2,1) !
 
           enddo
+          DSX(ii,jj,nkj)=DSX(ii,jj,nkj)+orbint(1)
+          DSY(ii,jj,nkj)=DSY(ii,jj,nkj)+orbint(2)
+          DSZ(ii,jj,nkj)=DSZ(ii,jj,nkj)+orbint(3)
           do kk=1,3
            force(kk,nkj)=force(kk,nkj)+AuxMat(ii,jj)*orbint(kk)
            Bmat(ii,jj)=Bmat(ii,jj)+nucvel(kk,nkj)*orbint(kk)
@@ -756,6 +784,9 @@
      >                         -cij*IMTX(1,2,2)*IMTX(2,1,1)*IMTX(3,2,1) !
 
           enddo
+          DSX(ii,jj,nkj)=DSX(ii,jj,nkj)+orbint(1)
+          DSY(ii,jj,nkj)=DSY(ii,jj,nkj)+orbint(2)
+          DSZ(ii,jj,nkj)=DSZ(ii,jj,nkj)+orbint(3)
           do kk=1,3
            force(kk,nkj)=force(kk,nkj)+AuxMat(ii,jj)*orbint(kk)
            Bmat(ii,jj)=Bmat(ii,jj)+nucvel(kk,nkj)*orbint(kk)
