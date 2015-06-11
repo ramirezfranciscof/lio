@@ -5,6 +5,7 @@
 #include "../matrix.h"
 #include "../init.h"
 #include "../cuda_includes.h"
+#include "../partition.h"
 #include "aint_common.h"
 #include "aint_init.h"
 
@@ -100,13 +101,18 @@ extern "C" void aint_parameter_init_(const unsigned int& Md, unsigned int* ncont
 extern "C" void aint_deinit_( void )
 {
 #if GPU_KERNELS
-	int previous_device; cudaGetDevice(&previous_device);
-	if(cudaSetDevice(os_integral.my_device) != cudaSuccess) std::cout << "Error: can't set the device " << os_integral.my_device << std::endl;
+	//int previous_device; cudaGetDevice(&previous_device);
+	//if(cudaSetDevice(os_integral.my_device) != cudaSuccess) std::cout << "Error: can't set the device " << os_integral.my_device << std::endl;
 
-	os_integral.deinit();
-	coulomb_integral.clear();
+        #pragma omp parallel for num_threads(G2G::cpu_threads+G2G::gpu_threads) schedule(static)
+        for(int i = 0; i < G2G::cpu_threads+G2G::gpu_threads; i++) {
+          if (i-G2G::cpu_threads == os_integral.my_device) {
+	    os_integral.deinit();
+	    coulomb_integral.clear();
+          }
+        }
 
-        cudaSetDevice(previous_device);
+        //cudaSetDevice(previous_device);
 #endif
 }
 //==============================================================================================================
@@ -114,14 +120,19 @@ extern "C" void aint_new_step_( void )
 {
         int stat = 0;
 #if GPU_KERNELS
-	int previous_device; cudaGetDevice(&previous_device);
-	if(cudaSetDevice(os_integral.my_device) != cudaSuccess) std::cout << "Error: can't set the device " << os_integral.my_device << std::endl;
+	//int previous_device; cudaGetDevice(&previous_device);
+	//if(cudaSetDevice(os_integral.my_device) != cudaSuccess) std::cout << "Error: can't set the device " << os_integral.my_device << std::endl;
+        #pragma omp parallel for num_threads(G2G::cpu_threads+G2G::gpu_threads) schedule(static)
+        for(int i = 0; i < G2G::cpu_threads+G2G::gpu_threads; i++) {
+          if (i-G2G::cpu_threads == os_integral.my_device) {
 
-	os_integral.new_cutoff();
-	if (!os_integral.load_input()) stat = 1;
-	if (!os_integral.alloc_output()) stat = 2;
+	    os_integral.new_cutoff();
+	    if (!os_integral.load_input()) stat = 1;
+	    if (!os_integral.alloc_output()) stat = 2;
 
-        cudaSetDevice(previous_device);
+        //cudaSetDevice(previous_device);
+          }
+        }
 #endif
 
         if (stat != 0) {
@@ -159,20 +170,25 @@ extern "C" void aint_qmmm_init_( const unsigned int& nclatom, double* r_all, dou
 extern "C" void aint_coulomb_init_( void )
 {
 #if GPU_KERNELS
-	int previous_device; cudaGetDevice(&previous_device);
-	if(cudaSetDevice(os_integral.my_device) != cudaSuccess) std::cout << "Error: can't set the device " << os_integral.my_device << std::endl;
-
+	//int previous_device; cudaGetDevice(&previous_device);
+	//if(cudaSetDevice(os_integral.my_device) != cudaSuccess) std::cout << "Error: can't set the device " << os_integral.my_device << std::endl;
         int stat = 0;
-        coulomb_integral.clear();
-        if (!coulomb_integral.load_aux_basis()) stat = 1;
-	if (!coulomb_integral.load_input()) stat = 2;
-	if (!coulomb_integral.alloc_output()) stat = 3;
+        #pragma omp parallel for num_threads(G2G::cpu_threads+G2G::gpu_threads) schedule(static)
+        for(int i = 0; i < G2G::cpu_threads+G2G::gpu_threads; i++) {
+          if (i-G2G::cpu_threads == os_integral.my_device) {
+
+            coulomb_integral.clear();
+            if (!coulomb_integral.load_aux_basis()) stat = 1;
+	    if (!coulomb_integral.load_input()) stat = 2;
+	    if (!coulomb_integral.alloc_output()) stat = 3;
+          } 
+        }
         if (stat != 0) {
           cout << "Could not initialize COULOMB module; probably due to not enough GPU memory" << endl;
           exit(-1);
         }
 
-        cudaSetDevice(previous_device);
+        //cudaSetDevice(previous_device);
 #endif
 }
 //===============================================================================================================
@@ -181,10 +197,13 @@ extern "C" void aint_coulomb_init_( void )
 extern "C" void aint_qmmm_forces_(double* qm_forces, double* mm_forces)
 {
 #if GPU_KERNELS
-  int previous_device; cudaGetDevice(&previous_device);
-  if(cudaSetDevice(os_integral.my_device) != cudaSuccess) std::cout << "Error: can't set the device " << os_integral.my_device << std::endl;
+  //int previous_device; cudaGetDevice(&previous_device);
+  //if(cudaSetDevice(os_integral.my_device) != cudaSuccess) std::cout << "Error: can't set the device " << os_integral.my_device << std::endl;
 
   int stat = 0;
+  #pragma omp parallel for num_threads(G2G::cpu_threads+G2G::gpu_threads) schedule(static)
+  for(int i = 0; i < G2G::cpu_threads+G2G::gpu_threads; i++) {
+    if (i-G2G::cpu_threads == os_integral.my_device) {
   if (integral_vars.clatoms > 0) {
     if (!qmmm_integral.load_clatoms()) stat = 1;
     if (!qmmm_integral.alloc_output()) stat = 2;
@@ -210,18 +229,23 @@ extern "C" void aint_qmmm_forces_(double* qm_forces, double* mm_forces)
   }
 
   qmmm_integral.clear();
+    }
+  }
 
-  cudaSetDevice(previous_device);
+  //cudaSetDevice(previous_device);
 #endif
 }
 extern "C" void aint_qmmm_fock_(double& Es, double& Ens)
 {
   Ens = 0.0; Es = 0.0;
 #if GPU_KERNELS
-  int previous_device; cudaGetDevice(&previous_device);
-  if(cudaSetDevice(os_integral.my_device) != cudaSuccess) std::cout << "Error: can't set the device " << os_integral.my_device << std::endl;
+  //int previous_device; cudaGetDevice(&previous_device);
+  //if(cudaSetDevice(os_integral.my_device) != cudaSuccess) std::cout << "Error: can't set the device " << os_integral.my_device << std::endl;
 
   int stat = 0;
+  #pragma omp parallel for num_threads(G2G::cpu_threads+G2G::gpu_threads) schedule(static)
+  for(int i = 0; i < G2G::cpu_threads+G2G::gpu_threads; i++) {
+    if (i-G2G::cpu_threads == os_integral.my_device) {
   if (integral_vars.clatoms > 0) {
     if (!qmmm_integral.load_clatoms()) stat = 1;
   }
@@ -246,8 +270,10 @@ extern "C" void aint_qmmm_fock_(double& Es, double& Ens)
   }
 
   qmmm_integral.clear();
+    }
+  }
 
-  cudaSetDevice(previous_device);
+  //cudaSetDevice(previous_device);
 #endif
 }
 //===============================================================================================================
@@ -256,27 +282,37 @@ extern "C" void aint_qmmm_fock_(double& Es, double& Ens)
 extern "C" void aint_coulomb_forces_(double* qm_forces)
 {
 #if GPU_KERNELS
-  int previous_device; cudaGetDevice(&previous_device);
-  if(cudaSetDevice(os_integral.my_device) != cudaSuccess) std::cout << "Error: can't set the device " << os_integral.my_device << std::endl;
+  //int previous_device; cudaGetDevice(&previous_device);
+  //if(cudaSetDevice(os_integral.my_device) != cudaSuccess) std::cout << "Error: can't set the device " << os_integral.my_device << std::endl;
+  #pragma omp parallel for num_threads(G2G::cpu_threads+G2G::gpu_threads) schedule(static)
+  for(int i = 0; i < G2G::cpu_threads+G2G::gpu_threads; i++) {
+    if (i-G2G::cpu_threads == os_integral.my_device) {
   if (AINT_GPU_LEVEL >= 5) {
     coulomb_integral.calc_gradient(qm_forces,false);
   } else {
     coulomb_integral.calc_gradient(qm_forces,true);
   }
-  cudaSetDevice(previous_device);
+    }
+  }
+  //cudaSetDevice(previous_device);
 #endif
 }
 extern "C" void aint_coulomb_fock_(double& Es)
 {
   Es = 0.0;
 #if GPU_KERNELS
-  int previous_device; cudaGetDevice(&previous_device);
-  if(cudaSetDevice(os_integral.my_device) != cudaSuccess) std::cout << "Error: can't set the device " << os_integral.my_device << std::endl;
+  //int previous_device; cudaGetDevice(&previous_device);
+  //if(cudaSetDevice(os_integral.my_device) != cudaSuccess) std::cout << "Error: can't set the device " << os_integral.my_device << std::endl;
 
+  #pragma omp parallel for num_threads(G2G::cpu_threads+G2G::gpu_threads) schedule(static)
+  for(int i = 0; i < G2G::cpu_threads+G2G::gpu_threads; i++) {
+    if (i-G2G::cpu_threads == os_integral.my_device) {
   coulomb_integral.fit_aux_density( );
   coulomb_integral.calc_fock(Es);
+    }
+  }
 
-  cudaSetDevice(previous_device);
+  //cudaSetDevice(previous_device);
 #endif
 }
 //===============================================================================================================

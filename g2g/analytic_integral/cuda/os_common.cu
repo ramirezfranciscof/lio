@@ -9,6 +9,7 @@
 #include "../../timer.h"
 #include "../../scalar_vector_types.h"
 #include "../../global_memory_pool.h"
+#include "../../partition.h"
 
 #include "../os_integral.h"
 #include "../aint_init.h"
@@ -60,8 +61,11 @@ void OSIntegral<scalar_type>::load_params(void)
 
     cout << "Using device " << devnum << " for analytic integral calculations" << endl;
     this->my_device = devnum;
-    int previous_device; cudaGetDevice(&previous_device);
-    if(cudaSetDevice(devnum) != cudaSuccess) std::cout << "Error: can't set the device " << devnum << std::endl;
+    //int previous_device; cudaGetDevice(&previous_device);
+    #pragma omp parallel for num_threads(G2G::cpu_threads+G2G::gpu_threads) schedule(static)
+    for(int i = 0; i < G2G::cpu_threads+G2G::gpu_threads; i++) {
+    if (i-G2G::cpu_threads == devnum) {
+    //if(cudaSetDevice(devnum) != cudaSuccess) std::cout << "Error: can't set the device " << devnum << std::endl;
 
     cudaMemcpyToSymbol(gpu_m, &G2G::fortran_vars.m, sizeof(G2G::fortran_vars.m), 0, cudaMemcpyHostToDevice);
     cudaMemcpyToSymbol(gpu_atom_types, G2G::fortran_vars.atom_types.data, G2G::fortran_vars.atom_types.bytes(), 0, cudaMemcpyHostToDevice);
@@ -91,8 +95,10 @@ void OSIntegral<scalar_type>::load_params(void)
     cudaMemcpyToArray(gammaArray,0,0,h_str.data,sizeof(scalar_type)*880*22,cudaMemcpyHostToDevice);
     cudaMemcpyToSymbol(gpu_fac,h_fac.data,h_fac.bytes(),0,cudaMemcpyHostToDevice);
 
-    cudaSetDevice(previous_device);
+    //cudaSetDevice(previous_device);
     cudaAssertNoError("OSIntegral::load_params");
+    }
+    }
 
 }
 

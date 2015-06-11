@@ -192,7 +192,7 @@ template<class T> void HostMatrix<T>::copy_submatrix(const CudaMatrix<T>& c, uns
 
   #if GPU_KERNELS
 	cudaMemcpy(this->data, c.data, _bytes, cudaMemcpyDeviceToHost);
-  cudaAssertNoError("HostMatrix::copy_submatrix");
+  //cudaAssertNoError("HostMatrix::copy_submatrix");
   #else
   assert(false);
   #endif
@@ -201,7 +201,7 @@ template<class T> void HostMatrix<T>::copy_submatrix(const CudaMatrix<T>& c, uns
 template<class T> void HostMatrix<T>::to_constant(const char* symbol) {
   #if GPU_KERNELS
 	cudaMemcpyToSymbol(symbol, this->data, this->bytes(), 0, cudaMemcpyHostToDevice);
-  cudaAssertNoError("to_constant");
+  //cudaAssertNoError("to_constant");
   #endif
 }
 
@@ -227,7 +227,7 @@ template<class T> void HostMatrix<T>::copy_transpose(const CudaMatrix<T>& cuda_m
 template<class T> void to_constant(const char* constant, const T& value) {
   #if GPU_KERNELS
 	cudaMemcpyToSymbol(constant, &value, sizeof(T), 0, cudaMemcpyHostToDevice);
-  cudaAssertNoError("to_constant(value)");
+  //cudaAssertNoError("to_constant(value)");
   #endif
 }
 
@@ -253,7 +253,7 @@ template<class T> CudaMatrix<T>& CudaMatrix<T>::resize(unsigned int _width, unsi
     if (this->data) cudaFree(this->data);
     this->width = _width; this->height = _height;
     cudaMalloc((void**)&this->data, this->bytes());
-    cudaAssertNoError("CudaMatrix::resize");
+    //cudaAssertNoError("CudaMatrix::resize");
   }
   #endif
 	return *this;
@@ -263,7 +263,7 @@ template<class T> CudaMatrix<T>& CudaMatrix<T>::zero(void) {
   #if GPU_KERNELS
 	assert(this->data);
 	cudaMemset(this->data, 0, this->bytes());
-  cudaAssertNoError("CudaMatrix::zero");
+  //cudaAssertNoError("CudaMatrix::zero");
   #endif
 	return *this;
 }
@@ -299,7 +299,7 @@ template<class T> void CudaMatrix<T>::copy_submatrix(const HostMatrix<T>& c, uns
 
   #if GPU_KERNELS
 	cudaMemcpy(this->data, c.data, _bytes, cudaMemcpyHostToDevice);
-  cudaAssertNoError("CudaMatrix::copy_submatrix");
+  //cudaAssertNoError("CudaMatrix::copy_submatrix");
   #endif
 }
 
@@ -309,7 +309,7 @@ template<class T> void CudaMatrix<T>::copy_submatrix(const CudaMatrix<T>& c, uns
 
   #if GPU_KERNELS
 	cudaMemcpy(c.data, this->data, _bytes, cudaMemcpyDeviceToDevice);
-  cudaAssertNoError("CudaMatrix::copy_submatrix");
+  //cudaAssertNoError("CudaMatrix::copy_submatrix");
   #endif
 }
 
@@ -319,7 +319,7 @@ template<class T> void CudaMatrix<T>::copy_submatrix(const std::vector<T>& v, un
 
   #if GPU_KERNELS
 	cudaMemcpy(this->data, (T*)&v[0], _bytes, cudaMemcpyHostToDevice);
-  cudaAssertNoError("CudaMatrix::copy_submatrix");
+  //cudaAssertNoError("CudaMatrix::copy_submatrix");
   #endif
 }
 
@@ -340,7 +340,7 @@ template<class T> CudaMatrix<T>& CudaMatrix<T>::operator=(const HostMatrix<T>& c
 			this->width = c.width; this->height = c.height;
 			cudaMalloc((void**)&this->data, this->bytes());
 		}
-		cudaAssertNoError("CudaMatrix::operator=");
+		//cudaAssertNoError("CudaMatrix::operator=");
 		copy_submatrix(c);
 	}
   #endif
@@ -364,7 +364,7 @@ template<class T> CudaMatrix<T>& CudaMatrix<T>::operator=(const std::vector<T>& 
 			this->width = v.size(); this->height = 1;
 			cudaMalloc((void**)&this->data, this->bytes());
 		}
-    cudaAssertNoError("CudaMatrix::operator=");
+    //cudaAssertNoError("CudaMatrix::operator=");
 		copy_submatrix(v);
 	}
   #endif
@@ -391,7 +391,7 @@ template<class T> CudaMatrix<T>& CudaMatrix<T>::operator=(const CudaMatrix<T>& c
     }
 		cudaMemcpy(this->data, c.data, this->bytes(), cudaMemcpyDeviceToDevice);
 	}
-  cudaAssertNoError("CudaMatrix::operator=");
+  //cudaAssertNoError("CudaMatrix::operator=");
 	#endif
 	return *this;
 }

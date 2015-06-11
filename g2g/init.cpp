@@ -37,7 +37,7 @@ extern "C" void g2g_init_(void)
 {
   cout << "<====== Initializing G2G ======>"<<endl;
   #if GPU_KERNELS
-  cuInit(0);
+//  cuInit(0);
   int devcount = cudaGetGPUCount();
   int devnum = -1;
   cudaDeviceProp devprop;
@@ -55,6 +55,14 @@ extern "C" void g2g_init_(void)
   if(gpu_threads == 0 && cpu_threads == 0)
     throw runtime_error("Error: Either a gpu or a cpu thread is needed to run G2G");
   cout << "Using " << G2G::cpu_threads << " CPU Threads and " << G2G::gpu_threads << " GPU Threads" << endl;
+
+  #pragma omp parallel for num_threads(cpu_threads+gpu_threads) schedule(static)
+  for(int i = 0; i < cpu_threads+gpu_threads; i++) {
+    if (i >= cpu_threads) {
+      cudaSetDevice(i-cpu_threads);
+      cudaAssertNoError("g2g_init");
+    }
+  }
 
 //  cout.precision(10);
 }

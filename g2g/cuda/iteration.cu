@@ -42,28 +42,37 @@ using std::vector;
 using std::endl;
 
 void gpu_set_variables(void) {
-  int previous_device; cudaGetDevice(&previous_device);
-  int gpu_devices = cudaGetGPUCount();
-  for(int i = 0; i < gpu_devices; i++) {
-    if(cudaSetDevice(i) != cudaSuccess)
-      std::cout << "Error: can't set the device " << i << std::endl;
+  //int previous_device; cudaGetDevice(&previous_device);
+  //int gpu_devices = cudaGetGPUCount();
+  #pragma omp parallel for num_threads(cpu_threads+gpu_threads) schedule(static)
+  for(int i = 0; i < cpu_threads+gpu_threads/*gpu_devices*/; i++) {
+    if (i >= cpu_threads) {
+    //if(cudaSetDevice(i-cpu_threads) != cudaSuccess)
+    //  std::cout << "Error: can't set the device " << i-cpu_threads << std::endl;
     cudaMemcpyToSymbol(gpu_normalization_factor, &fortran_vars.normalization_factor, sizeof(fortran_vars.normalization_factor), 0, cudaMemcpyHostToDevice);
     cudaMemcpyToSymbol(gpu_atoms, &fortran_vars.atoms, sizeof(fortran_vars.atoms), 0, cudaMemcpyHostToDevice);
     cudaMemcpyToSymbol(gpu_Iexch, &fortran_vars.iexch, sizeof(fortran_vars.iexch), 0, cudaMemcpyHostToDevice);
+    cudaAssertNoError("set_gpu_variables");
+    }
   }
-  cudaSetDevice(previous_device);
-  cudaAssertNoError("set_gpu_variables");
+  //cudaSetDevice(previous_device);
+  //cudaAssertNoError("set_gpu_variables");
 }
 
 template<class T> void gpu_set_atom_positions(const HostMatrix<T>& m) {
-  int previous_device; cudaGetDevice(&previous_device);
-  int gpu_devices = cudaGetGPUCount();
-  for(int i = 0; i < gpu_devices; i++) {
-    if(cudaSetDevice(i) != cudaSuccess)
-      std::cout << "Error: can't set the device " << i << std::endl;
+  //int previous_device; cudaGetDevice(&previous_device);
+  //int gpu_devices = cudaGetGPUCount();
+  #pragma omp parallel for num_threads(cpu_threads+gpu_threads) schedule(static)
+  for(int i = 0; i < cpu_threads+gpu_threads/*gpu_devices*/; i++) {
+    if (i >= cpu_threads) {
+    //if(cudaSetDevice(i-cpu_threads) != cudaSuccess)
+    //  std::cout << "Error: can't set the device " << i-cpu_threads << std::endl;
     cudaMemcpyToSymbol(gpu_atom_positions, m.data, m.bytes(), 0, cudaMemcpyHostToDevice);
+    cudaAssertNoError("set_atom_positions");
+    }
   }
-  cudaSetDevice(previous_device);
+  //cudaSetDevice(previous_device);
+  //cudaAssertNoError("set_atom_positions");
 }
 
 #if FULL_DOUBLE
@@ -762,6 +771,9 @@ void PointGroupGPU<scalar_type>::compute_functions(bool forces, bool gga)
 template<class scalar_type>
 void PointGroupGPU<scalar_type>::compute_weights(void)
 {
+  #pragma omp parallel for num_threads(cpu_threads+gpu_threads) schedule(static)
+  for(int k = 0; k < cpu_threads+gpu_threads; k++) {
+  if (k == cpu_threads) {
   CudaMatrix<vec_type4> point_positions_gpu;
   CudaMatrix<vec_type4> atom_position_rm_gpu;
   {
@@ -795,6 +807,8 @@ void PointGroupGPU<scalar_type>::compute_weights(void)
   for (vector<Point>::iterator p =this->points.begin(); p != this->points.end(); ++p, ++i) {
     p->weight *= weights_cpu(i);
     }
+  }
+  }
 }
 
 template class PointGroup<double>;

@@ -1,10 +1,13 @@
 #include <cstdio>
 #include <time.h>
 #include <sys/time.h>
+#include <omp.h>
 #include <map>
 #include <set>
 #include <string>
 #include "timer.h"
+#include "matrix.h"
+#include "partition.h"
 
 // Only include it to sync timings in cuda threads.
 #include "cuda_includes.h"
@@ -108,7 +111,7 @@ bool Timer::operator<(const Timer& other) const {
 void Timer::sync(void) {
 #ifdef TIMINGS
   #if GPU_KERNELS
-	cudaThreadSynchronize();
+	cudaDeviceSynchronize();
   #endif
 #endif
 }
@@ -158,7 +161,12 @@ extern "C" void g2g_timer_start_(const char* timer_name, unsigned int length_arg
   string tname(timer_name,length_arg);
   tname.append("\0");
   if (fortran_timers.find(tname) == fortran_timers.end()) fortran_timers[tname] = Timer();
-  Timer::sync();
+  #pragma omp parallel for num_threads(G2G::cpu_threads+G2G::gpu_threads) schedule(static)
+  for(int i = 0; i < G2G::cpu_threads+G2G::gpu_threads; i++) {
+    if (i >= G2G::cpu_threads) {
+      Timer::sync();
+    }
+  }
   fortran_timers[tname].start();
 #endif
 #endif
@@ -169,7 +177,12 @@ extern "C" void g2g_timer_stop_(const char* timer_name, unsigned int length_arg)
 #ifndef TIMER_SUMMARY
   string tname(timer_name, length_arg);
   tname.append("\0");
-  Timer::sync();
+  #pragma omp parallel for num_threads(G2G::cpu_threads+G2G::gpu_threads) schedule(static)
+  for(int i = 0; i < G2G::cpu_threads+G2G::gpu_threads; i++) {
+    if (i >= G2G::cpu_threads) {
+    Timer::sync();
+    }
+  }
   if (fortran_timers.find(tname) == fortran_timers.end()) cout << "no existe timer! (" << tname << ")" << endl;
   fortran_timers[tname].stop();
   cout << "TIMER [" << tname << "]: " << fortran_timers[tname] << endl;
@@ -182,7 +195,12 @@ extern "C" void g2g_timer_pause_(const char* timer_name, unsigned int length_arg
 #ifndef TIMER_SUMMARY
   string tname(timer_name, length_arg);
   tname.append("\0");
-  Timer::sync();
+  #pragma omp parallel for num_threads(G2G::cpu_threads+G2G::gpu_threads) schedule(static)
+  for(int i = 0; i < G2G::cpu_threads+G2G::gpu_threads; i++) {
+    if (i >= G2G::cpu_threads) {
+      Timer::sync();
+    }
+  }
   if (fortran_timers.find(tname) == fortran_timers.end()) cout << "no existe timer! (" << tname << ")" << endl;
   fortran_timers[tname].pause();
   cout << "TIMER [" << tname << "]: " << fortran_timers[tname] << "(so far)" << endl;
@@ -201,7 +219,12 @@ extern "C" void g2g_timer_sum_start_(const char* timer_name, unsigned int length
   if (timer_children.find(tname) == timer_children.end()) timer_children[tname] = set<string>();
   if (current_timer.length() == 0) {
     if (top_timers.find(tname) == top_timers.end()) top_timers[tname] = new Timer();
-    Timer::sync();
+    #pragma omp parallel for num_threads(G2G::cpu_threads+G2G::gpu_threads) schedule(static)
+    for(int i = 0; i < G2G::cpu_threads+G2G::gpu_threads; i++) {
+      if (i >= G2G::cpu_threads) {
+        Timer::sync();
+      }
+    }
     top_timers[tname]->start();
     if (all_timers.find(tname) == all_timers.end()) all_timers[tname] = top_timers[tname];
     current_timer = tname;
@@ -211,7 +234,12 @@ extern "C" void g2g_timer_sum_start_(const char* timer_name, unsigned int length
        all_timers[tname] = new Timer();
        timer_parents[tname] = current_timer;
     }
-    Timer::sync();
+    #pragma omp parallel for num_threads(G2G::cpu_threads+G2G::gpu_threads) schedule(static)
+    for(int i = 0; i < G2G::cpu_threads+G2G::gpu_threads; i++) {
+      if (i >= G2G::cpu_threads) {
+        Timer::sync();
+      }
+    }
     all_timers[tname]->start();
     current_timer = tname;
   }
@@ -222,7 +250,12 @@ extern "C" void g2g_timer_sum_stop_(const char* timer_name, unsigned int length_
 #ifdef TIMER_SUMMARY
   string tname(timer_name, length_arg);
   tname.append("\0");
-  Timer::sync();
+  #pragma omp parallel for num_threads(G2G::cpu_threads+G2G::gpu_threads) schedule(static)
+  for(int i = 0; i < G2G::cpu_threads+G2G::gpu_threads; i++) {
+    if (i >= G2G::cpu_threads) {
+      Timer::sync();
+    }
+  }
   if (current_timer.compare(tname) != 0) { cout << "Error: not the current timer: (" << tname << "," << current_timer << ")" << endl; }
   else {
     all_timers[current_timer]->stop();
@@ -236,7 +269,12 @@ extern "C" void g2g_timer_sum_pause_(const char* timer_name, unsigned int length
 #ifdef TIMER_SUMMARY
   string tname(timer_name, length_arg);
   tname.append("\0");
-  Timer::sync();
+  #pragma omp parallel for num_threads(G2G::cpu_threads+G2G::gpu_threads) schedule(static)
+  for(int i = 0; i < G2G::cpu_threads+G2G::gpu_threads; i++) {
+    if (i >= G2G::cpu_threads) {
+      Timer::sync();
+    }
+  }
   if (current_timer.compare(tname) != 0) { cout << "Error: not the current timer: (" << tname << ")" << endl; }
   else {
     all_timers[current_timer]->pause();

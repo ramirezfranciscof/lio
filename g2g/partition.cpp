@@ -407,7 +407,7 @@ void Partition::solve(Timers& timers, bool compute_rmm,bool lda,bool compute_for
 #if GPU_KERNELS
     if(i>=cpu_threads) {
       gpu_thread = true;
-      cudaSetDevice(i-cpu_threads);
+      //cudaSetDevice(i-cpu_threads);
     }
 #endif
     double local_energy = 0;
@@ -435,6 +435,7 @@ void Partition::solve(Timers& timers, bool compute_rmm,bool lda,bool compute_for
 #if GPU_KERNEL
       if(gpu_thread) {
         cudaDeviceSynchronize();
+        cudaAssertNoError("3");
       }
 #endif
 
@@ -448,6 +449,7 @@ void Partition::solve(Timers& timers, bool compute_rmm,bool lda,bool compute_for
     next[i] = t.getTotal();
 
     energy += local_energy;
+
   }
 
   Timer enditer; enditer.start();
