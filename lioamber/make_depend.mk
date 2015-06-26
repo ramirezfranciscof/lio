@@ -69,7 +69,7 @@ objlist := testforce.o
 $(objlist:%.o=$(obj_path)/%.o) : $(obj_path)/intmod.mod
 
 # testmod
-objlist := calcDSM.o testmod.o testforce.o
+objlist := intmod.o calcDSM.o testmod.o testforce.o
 $(objlist:%.o=$(obj_path)/%.o) : $(obj_path)/testmod.mod
 
 ######################################################################
