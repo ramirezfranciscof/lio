@@ -3,6 +3,9 @@ c MAIN SUBROUTINE ----------------------------------------------------
 C DFT calculation with gaussian basis sets
 c---------------------------------------------------------------------
       use garcha_mod
+#ifdef CUBLAS
+      use cublasmath
+#endif
       implicit real*8 (a-h,o-z)
 
       character(len=20)::argument,inpfile,inpbasis,inpcoords
@@ -14,12 +17,30 @@ c---------------------------------------------------------------------
      > idip,writexyz,intsoldouble,DIIS,ndiis,dgtrig,
      > Iexch,integ,dens,igrid,igrid2,timedep, tdstep, ntdstep,
      > propagator,NBCH,
-     > field,a0,epsilon,exter,Fx,Fy,Fz, tdrestart, writedens,writeforces
+     > field,a0,epsilon,exter,Fx,Fy,Fz, tdrestart, writedens,
+     > writeforces,basis_set,fitting_set,int_basis,
+     > cubegen_only,cube_res,
+     > cube_dens,cube_dens_file,
+     > cube_orb,cube_sel,cube_orb_file,cube_elec,cube_elec_file
 
       integer :: ifind, ierr
 
      !defaults
       basis='input'  ! name of the base file
+      basis_set='DZVP'
+      fitting_set='DZVP Coulomb Fitting'
+      int_basis=.false.
+      cubegen_only=.false.
+      cube_res=40
+      cube_dens=.false.
+      cube_dens_file='dens.cube'
+      cube_orb=.false.
+      cube_sel=0
+      cube_orb_file="orb.cube"
+      cube_elec=.false.
+      cube_elec_file="field.cube"
+      restart_freq=1
+      energy_freq=1
       output='output'
       fcoord='qm.xyz'
       fmulliken='mulliken'
@@ -68,6 +89,13 @@ c---------------------------------------------------------------------
             call get_command_argument(i+1,inpfile)
           case("-b")
             call get_command_argument(i+1,basis)
+          case("-bs")
+            call get_command_argument(i+1,basis_set)
+          case("-fs")
+            call get_command_argument(i+1,fitting_set)
+          case("-ib")
+            int_basis=.true.
+            !call get_command_argument(i+1,int_basis)
           case("-c")
             call get_command_argument(i+1,inpcoords)
           case("-v")
@@ -75,6 +103,8 @@ c---------------------------------------------------------------------
           case default
         end select
       enddo
+
+      call g2g_timer_sum_start("Total")
 
       inquire(file=inpfile,exist=filexist)
 
@@ -109,7 +139,7 @@ c        write(*,*) natom,nsol
 c      write(*,*)ng2,ngDyn,ngdDyn,norbit,Ngrid
 
       allocate(X(ngDyn,ng3),XX(ngdDyn,ngdDyn))
-      allocate(RMM(ng2),RMM1(ng2),RMM2(ng2), RMM3(ng2))
+      allocate(RMM(ng2))
 
       allocate (c(ngnu,nl),a(ngnu,nl),Nuc(ngnu),ncont(ngnu)
      >  ,cx(ngdnu,nl),ax(ngdnu,nl),Nucx(ngdnu),ncontx(ngdnu)
@@ -117,8 +147,9 @@ c      write(*,*)ng2,ngDyn,ngdDyn,norbit,Ngrid
      > ,indexii(ngnu),indexiid(ngdnu))
 
       allocate (r(ntatom,3),v(ntatom,3),rqm(natom,3),Em(ntatom)
-     >,Rm(ntatom),pc(ntatom),Iz(natom),nnat(ntatom),af(natom*ngd0),
+     >,Rm(ntatom),pc(ntatom),Iz(natom),af(natom*ngd0),
      >  B(natom*ngd0,3))
+      allocate (nnat(100))
       allocate(d(natom,natom))
 
       do i=1,natom
@@ -157,28 +188,29 @@ c--------------------------------------------------------
        else
          call SCF(escf,dipxyz)
        endif
-c-------------------------------------------------------- 
+c--------------------------------------------------------
 
-       write(*,*) 'SCF ENRGY=',escf 
+       write(*,*) 'SCF ENRGY=',escf
 
-      if(writeforces) then        
+      if(writeforces) then
        open(unit=123,file='fuerzas')
        allocate (dxyzqm(3,natom))
        dxyzqm=0.0
 
-       if(nsol.gt.0) then 
+       if(nsol.gt.0) then
           allocate (dxyzcl(3,natom+nsol))
           dxyzcl=0.
        endif
 
        call dft_get_qm_forces(dxyzqm)
-       call dft_get_mm_forces(dxyzcl,dxyzqm)
+       if (nsol.gt.0) then
+         call dft_get_mm_forces(dxyzcl,dxyzqm)
+       endif
 c       call g2g_solve_groups(3, Exc, dxyzqm)
 c       write(*,*) dxyzqm
 
        do k=1,natom
-!         write(123,'("fuerza",I,D,D,D)')
-         write(123,100) 
+       write(123,100)
      >     k,dxyzqm(k,1),dxyzqm(k,2),dxyzqm(k,3)
        enddo
          if(nsol.gt.0) then
@@ -191,7 +223,7 @@ c       write(*,*) dxyzqm
          endif
        deallocate (dxyzqm)
        if(nsol.gt.0) deallocate(dxyzcl)
-       endif 
+       endif
        call lio_finalize()
 100    format (I5,2x,f10.6,2x,f10.6,2x,f10.6)
        end program

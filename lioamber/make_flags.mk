@@ -35,6 +35,22 @@ ifeq ($(magma),1)
   DEFINE += -Dmagma
 endif
 
+FORTRAN_WRAPPER=
+ifeq ($(cublas),1)
+        CUBLAS_OBJ=$(CUBLAS_SRC:cublas/%.f=obj/garcha_g2g_obj/%.o)
+        CFLAGS += -DCUBLAS
+        CFLAGS2 += -DCUBLAS
+        CFLAGS3 += -DCUBLAS
+        FFLAGS += -DCUBLAS
+        FORTRAN_WRAPPER = obj/fortran.o
+endif
+ifeq ($(td_simple),1)
+        CFLAGS += -DTD_SIMPLE
+        CFLAGS2 += -DTD_SIMPLE
+        CFLAGS3 += -DTD_SIMPLE
+        FFLAGS += -DTD_SIMPLE
+endif
+
 #
 ######################################################################
 # TARGET-SPECIFIC FLAGS (OPTIMIZATION) : This following section
@@ -58,14 +74,17 @@ objlist += intsolG.o intsolGs.o intsol.o
 $(objlist:%.o=$(obj_path)/%.o) : optim:=$(optim1)
 #$(objlist:%.o=$(obj_path)/%.o) : private optim+=$(optim1)
 
-objlist := matmuldiag.o int3lu.o
+objlist := matmuldiag.o int3lu.o fock_commuts.o
 objlist := SCF.o TD.o ehrenfest.o magnus.o predictor.o
 objlist += FixMessRho.o get_unit.o mulliken.o PackedStorage.f
 objlist += init_amber.o init.o lio_init.o liomain.o lio_finalize.o
 objlist += dft_get_mm_forces.o dft_get_qm_forces.o
 objlist += alg.o drive.o func.o grid.o dipmem.o jarz.o
-objlist += int1.o int2.o int2G.o int3mem.o int3mems.o intSG.o
-objlist += garcha_mod.o mathsubs.o
+objlist += int1.o int2.o int2G.o int3mem.o intSG.o
+objlist += garcha_mod.o mathsubs.o cubegen.o
+ifeq ($(cublas),1)
+objlist += cublasmath.o 
+endif
 $(objlist:%.o=$(obj_path)/%.o) : optim:=$(optim3)
 #UNNECESSARY IF PREVIOUS ASSIGNMENT USED PRIVATE KEYWORD
 
@@ -79,7 +98,7 @@ $(objlist:%.o=$(obj_path)/%.o) : optim:=$(optim3)
 myflags :=
 
 ifeq ($(ifort),1)
-  objlist := matmuldiag.o int3lu.o
+  objlist := matmuldiag.o int3lu.o fock_commuts.o
   objlist += mathsubs.o
   $(objlist:%.o=$(obj_path)/%.o) : myflags:=-parallel
   #$(objlist:%.o=$(obj_path)/%.o) : private myflags+=-parallel
@@ -89,11 +108,17 @@ ifeq ($(ifort),1)
   objlist += init_amber.o init.o lio_init.o liomain.o lio_finalize.o
   objlist += dft_get_mm_forces.o dft_get_qm_forces.o
   objlist += alg.o drive.o func.o grid.o dipmem.o jarz.o
-  objlist += int1.o int2.o int2G.o int3mem.o int3mems.o intSG.o
-  objlist += garcha_mod.o
+  objlist += int1.o int2.o int2G.o int3mem.o  intSG.o
+  objlist += garcha_mod.o cubegen.o 
   $(objlist:%.o=$(obj_path)/%.o) : myflags:=-mp1 -ip
   #$(objlist:%.o=$(obj_path)/%.o) : private myflags+=$(optim3) -mp1 -ip
 endif
+
+ifeq ($(cublas),1)
+  objlist += cublasmath.o 
+#  $(objlist:%.o=$(obj_path)/%.o) 
+endif
+
 #
 ######################################################################
 # (*) IMPORTANT: due to the incompatibility of most common
