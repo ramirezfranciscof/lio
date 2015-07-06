@@ -21,7 +21,7 @@ c  A narrow gaussian type electric field can be introduced during the time
 c  evolution in order to excite all electronic frequencies with the same intensity.
 c  Once this perturbation is turned on (Field=t, exter=t) each component of the
 c  external electric field has to be specified in the input file (Fx,Fy,Fz).
-c  In each step of the propagation the cartesian components of the sistem's dipole
+c  In each step of the propagation the cartesian components of the sistems dipole
 c  are stored in files x.dip, y.dip, z.dip.
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 c       USE latom
@@ -71,6 +71,7 @@ c       USE latom
       integer*8 devPtrX, devPtrY,devPtrXc
       external CUBLAS_INIT, CUBLAS_SET_MATRIX
       external CUBLAS_SHUTDOWN, CUBLAS_ALLOC,CUBLAS_GET_MATRIX
+      external CUBLAS_FREE
       integer CUBLAS_ALLOC, CUBLAS_SET_MATRIX,CUBLAS_GET_MATRIX
 #endif
 !!   GROUP OF CHARGES
@@ -93,7 +94,7 @@ c       USE latom
        write(*,*) 'USING CUBLAS'
        stat=CUBLAS_INIT()
        if (stat.NE.0) then
-           write(*,*) "initialization failed -predictor"
+           write(*,*) "initialization failed -TD"
            call CUBLAS_SHUTDOWN
            stop
        endif
@@ -285,9 +286,9 @@ c Initializations/Defaults
             enddo
 !------------------------------------------------------------------!
 c
-c -Create integration grid for XC here
-c -Assign points to groups (spheres/cubes)
-c -Assign significant functions to groups
+c Create integration grid for XC here
+c Assign points to groups (spheres/cubes)
+c Assign significant functions to groups
 c -Calculate point weights
 c
       call g2g_timer_sum_start('Exchange-correlation grid setup')
@@ -298,7 +299,6 @@ c
       if (igpu.gt.1) call aint_new_step()
 
       if (predcoef.and.npas.gt.3) then
-        write(*,*) 'no debería estar aca!'
 
 c        if (.not.OPEN) then
 c          if(verbose) write(*,*) 'prediciendo densidad'
@@ -473,10 +473,10 @@ c Small elements of t_i put into single-precision cools here
          call g2g_timer_stop('int3mem')
          call g2g_timer_sum_stop('Coulomb precalc')
       endif
-****
 #ifdef CUBLAS
             call CUBLAS_FREE(devPtrY)
 #endif
+
             call g2g_timer_stop('inicio')
 !##############################################################################!
 ! HERE STARTS THE TIME EVOLUTION
@@ -673,8 +673,15 @@ c using commutator
 !           rhonew=rhonew+(dt_lpfrg*Im*(matmul(rho,fock)))
 c--------------------------------------c
 ! using commutator:
+            call g2g_timer_start('commutator')
+#ifdef CUBLAS
+              rhonew=commutator_cublas(fock,rho)
+              rhonew=rhold-dt_lpfrg*(Im*rhonew)
+#else
               rhonew=commutator(fock,rho)
               rhonew=rhold-dt_lpfrg*(Im*rhonew)
+#endif
+            call  g2g_timer_stop('commutator')
 c Density update (rhold-->rho, rho-->rhonew)
               do i=1,M
                  do j=1,M
@@ -695,8 +702,16 @@ c Density update (rhold-->rho, rho-->rhonew)
                 call g2g_timer_stop('cupredictor')
                 call g2g_timer_start('cumagnus')
                 call cumagnusfac(fock,rho,rhonew,M,NBCH,dt_magnus,
-     >factorial) 
+     >factorial)
                 call g2g_timer_stop('cumagnus')
+!                rhold=rhonew
+!                call g2g_timer_start('MAGNUS_MODIFIED')
+!                call magnus_cublas(fock,rho,rhonew,M,NBCH,dt_magnus,
+!     >factorial) 
+!                call g2g_timer_stop('MAGNUS_MODIFIED')
+!                rhold=rhonew-rhold
+!                write(22222222,*) rhold
+!                stop 'hemos escrito rhold'
 #else
                 call g2g_timer_start('predictor')
                 call predictor(F1a,F1b,fock,rho,factorial,
@@ -715,7 +730,7 @@ c Density update (rhold-->rho, rho-->rhonew)
 !####################################################################!
 c Here we transform the density to the atomic orbital basis and take the real part of it. The imaginary part of the density 
 c can be descarted since for a basis set of purely real functions the fock matrix is real and symetric and depends only on 
-c the real part of the complex density matrix. (This won't be true in the case of hybrid functionals)
+c the real part of the complex density matrix. (This wont be true in the case of hybrid functionals)
 c with matmul:
 #ifdef CUBLAS
              call g2g_timer_start('complex_rho_on_to_ao-cu')
@@ -772,16 +787,30 @@ c The real part of the density matrix in the atomic orbital basis is copied in R
                 open(unit=134,file='x.dip')
                 open(unit=135,file='y.dip')
                 open(unit=136,file='z.dip')
+                open(unit=13600,file='abs.dip')
         write(134,*) '#Time (fs) vs DIPOLE MOMENT, X COMPONENT (DEBYES)'
         write(135,*) '#Time (fs) vs DIPOLE MOMENT, Y COMPONENT (DEBYES)'
         write(136,*) '#Time (fs) vs DIPOLE MOMENT, Z COMPONENT (DEBYES)'
+        write(13600,*) '#Time (fs) vs DIPOLE MOMENT (DEBYES)'
               endif
-              call g2g_timer_start('DIPOLE') 
-              call dip(ux,uy,uz)
-              call g2g_timer_stop('DIPOLE')
-              write(134,901) t,ux
-              write(135,901) t,uy
-              write(136,901) t,uz
+              if ((propagator.eq.2).and.(istep.lt.lpfrg_steps)
+     >      .and. (.not.tdrestart)) then
+                  if(mod ((istep-1),10) == 0) then
+                     call g2g_timer_start('DIPOLE')
+                     call dip(ux,uy,uz)
+                     call g2g_timer_stop('DIPOLE')
+                     write(134,901) t,ux
+                     write(135,901) t,uy
+                     write(136,901) t,uz
+                  endif
+              else
+                  call g2g_timer_start('DIPOLE')
+                  call dip(ux,uy,uz)
+                  call g2g_timer_stop('DIPOLE')
+                  write(134,901) t,ux
+                  write(135,901) t,uy
+                  write(136,901) t,uz
+              endif
 c u in Debyes
 !# END OF DIPOLE MOMENT CALCULATION
 c------------------------------------------------------------------------------------
@@ -790,7 +819,7 @@ c-------------------------------------------------------------------------------
 !       endif
 c
 c      write(*,*) 'Coulomb E',E2-Ex,Ex
-               call g2g_timer_stop('iteration')
+               call g2g_timer_stop('TD step')
                write(*,*)
  999           continue
 !
@@ -907,6 +936,12 @@ c      do n=1,NCO+3
 !       close(29)
 !--------------------------------------!
       endif
+#ifdef CUBLAS
+            call CUBLAS_FREE(devPtrX)
+            call CUBLAS_FREE(devPtrXc)
+            call CUBLAS_FREE(devPtrY)
+            call CUBLAS_SHUTDOWN()
+#endif
 c
 c
 c---- DEBUGGINGS

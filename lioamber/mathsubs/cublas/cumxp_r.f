@@ -1,6 +1,6 @@
             subroutine cumxp_r(A,devPtrX,C,M)
 !===============================================================================!
-!!!!!!!!  Hace C=Bt*(A*B) para matrices cuadradas
+!!!!!!!!  Hace C=x*A para matrices cuadradas
 !===============================================================================!
       implicit none
       integer sizeof_real
@@ -17,14 +17,8 @@
       integer CUBLAS_ALLOC, CUBLAS_SET_MATRIX, CUBLAS_GET_MATRIX
       integer CUBLAS_INIT
       REAL*8 , intent(in) :: A(M,M)
-      REAL*8, intent(out) :: C(M,M)
+      REAL*8 , intent(out) :: C(M,M)
 !---------------------------------------------------------------------!
-      stat=CUBLAS_INIT()
-      if (stat.NE.0) then
-        write(*,*) "initialization failed -cumxtp"
-        call CUBLAS_SHUTDOWN
-        stop
-      endif
       alpha=1.0D0
       beta=0.0D0
 !--------------------------------------------------------------------!
@@ -42,7 +36,6 @@
 !--------------------------------------------------------------------!
       call CUBLAS_FREE ( devPtrScratch1 )
       call CUBLAS_FREE ( devPtrScratch2 )
-      call CUBLAS_SHUTDOWN
       return
       end subroutine
 
