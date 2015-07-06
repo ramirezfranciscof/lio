@@ -76,7 +76,7 @@
          DSY(ii,jj,nkj)=DSY(ii,jj,nkj)+orbint(2)
          DSZ(ii,jj,nkj)=DSZ(ii,jj,nkj)+orbint(3)
        enddo
-       enddo  
+       enddo
 
 
 ! Integrals of <  p | s' >

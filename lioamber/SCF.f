@@ -21,7 +21,7 @@ c
        real*8, dimension (:), ALLOCATABLE :: rmm5,rmm15,rmm13,
      >   bcoef, suma
       real*8, dimension (:,:), allocatable :: fock,fockm,rho,!,FP_PF,
-     >   FP_PFm,EMAT,Y,Ytrans,Xtrans,rho1,EMAT2
+     >   FP_PFm,EMAT,Y,Ytrans,Xtrans,rho1,EMAT2,Xcpy
 c
        integer ndiist
 c       dimension d(natom,natom)
@@ -516,7 +516,6 @@ c Size criteria based on size of pre-factor in Gaussian Product Theorem
 c (applied to MO basis indices)
          call int3mem() 
 c Small elements of t_i put into single-precision cools here
-c         call int3mems()
          call g2g_timer_stop('int3mem')
          call g2g_timer_sum_stop('Coulomb precalc')
       endif
@@ -1270,14 +1269,13 @@ c
 
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 ! TESTIN THE FORCE
-       deallocate (kkind,kkinds)
-       deallocate(cool,cools)
+!       deallocate (kkind,kkinds)
+!!       deallocate(cool,cools)
 
        print*,'-------------------------------------IGNORE FROM HERE'
        call intsol(E1s,Ens,.true.)
        call int2()
        call int3mem()
-       call int3mems()
        call int3lu(E2)
        call g2g_solve_groups(0,Ex,0)
        print*,'----------------------------------------------TO HERE'
@@ -1289,6 +1287,7 @@ c
        enddo
        enddo
        call testforce(Sinv,Fmtx,Pmtx)
+       print*,'----------------------------------------------DONE'
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 
 

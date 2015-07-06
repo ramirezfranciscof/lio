@@ -20,7 +20,6 @@ include intmod/intmod.mk
 ifeq ($(cublas),1)
 include mathsubs/cublas/cublasmath.mk
 endif
->>>>>>> 6d293411c2f2c674bcfb66220eecd091ebb6a045
 
 #
 ######################################################################

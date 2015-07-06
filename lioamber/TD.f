@@ -470,7 +470,6 @@ c Size criteria based on size of pre-factor in Gaussian Product Theorem
 c (applied to MO basis indices)
          call int3mem()
 c Small elements of t_i put into single-precision cools here
-c         call int3mems()
          call g2g_timer_stop('int3mem')
          call g2g_timer_sum_stop('Coulomb precalc')
       endif
