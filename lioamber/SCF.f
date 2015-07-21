@@ -461,12 +461,31 @@ c-------------------------------------------------------
 c
 c REACTION FIELD CASE --------------------------------------------
 c
+        IF(SCFIELD) THEN
+            call dip(ux,uy,uz)
+            write(*,*) 'ux,uy,uz =', ux,uy,uz
+!            write(*,*) 'fx,fy,fz =',fx,fy,fz
+!            fxx=fx
+!            fyy=fy
+!            fzz=fz
+            g=1.0D0
+            factor=2.54D0
+            call intfld(g,Fx,Fy,Fz)
+!           E1=-1.0D0*g*(Fxx*ux+Fyy*uy+Fzz*uz)/fac 
+!           E1=E1-0.50D0*(1.0D0-1.0D0/epsilon)*Qc2/a0
+            E1=-1.00D0*g*(Fx*ux+Fy*uy+Fz*uz)/factor -
+     >      0.50D0*(1.0D0-1.0D0/epsilon)*Qc2/a0
+            do k=1,MM
+               E1=E1+RMM(k)*RMM(M11+k-1)
+            enddo
+        ELSE
         call g2g_timer_start('actualiza rmm')
 c----------------------------------------------------------------
 c E1 includes solvent 1 electron contributions
         do k=1,MM
           E1=E1+RMM(k)*RMM(M11+k-1)
         enddo
+        ENDIF
 c
 c
 c now, we know S matrix, and F matrix, and E for a given P

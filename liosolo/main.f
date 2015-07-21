@@ -14,7 +14,8 @@ c---------------------------------------------------------------------
      > idip,writexyz,intsoldouble,DIIS,ndiis,dgtrig,
      > Iexch,integ,dens,igrid,igrid2,timedep, tdstep, ntdstep,
      > propagator,NBCH,
-     > field,a0,epsilon,exter,Fx,Fy,Fz, tdrestart, writedens,writeforces
+     > field,a0,epsilon,exter,Fx,Fy,Fz, tdrestart,writedens,writeforces,
+     > scfield 
 
       integer :: ifind, ierr
 
@@ -59,6 +60,7 @@ c---------------------------------------------------------------------
       tdrestart=.false.
       writedens=.true.
       writeforces=.false.
+      scfield=.false.
       narg=command_argument_count()
 
       do i=1, narg

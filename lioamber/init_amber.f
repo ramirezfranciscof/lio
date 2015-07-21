@@ -5,7 +5,8 @@
      > , writexyz_i, intsoldouble_i, DIIS_i, ndiis_i, dgtrig_i, Iexch_i
      > , integ_i, DENS_i , IGRID_i, IGRID2_i , timedep_i , tdstep_i 
      > , ntdstep_i, field_i, exter_i, a0_i, epsilon_i, Fx_i
-     > , Fy_i, Fz_i, NBCH_i, propagator_i, writedens_i, tdrestart_i)
+     > , Fy_i, Fz_i, NBCH_i, propagator_i, writedens_i, tdrestart_i,
+     > scfield_i)
 
       use garcha_mod
 c      use qmmm_module, only : qmmm_struct,qmmm_nml
@@ -69,6 +70,7 @@ c      include 'param'
        integer :: propagator_i
        logical :: writedens_i
        logical :: tdrestart_i
+       logical :: scfield_i
 
 
        basis= basis_i
@@ -112,6 +114,7 @@ c      include 'param'
        propagator=propagator_i
        writedens=writedens_i
        tdrestart=tdrestart_i
+       scfield=scfield_i
 
 
 c      parameter (norbit=800,Ngrid=0)
@@ -181,6 +184,7 @@ c      write(*,*) 'ng2 en init',ng2,ngDyn,ngdDyn,norbit,Ngrid
        write(6,*)     '  propagator ', propagator
        write(6,*)     '  writedens ', writedens
        write(6,*)     '  tdrestart ', tdrestart
+       write(6,*)     '  scfield ', scfield
         write(6,*) '-----end Lio options-------'
        endif
 
