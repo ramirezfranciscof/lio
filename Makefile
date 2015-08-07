@@ -1,5 +1,7 @@
 .PHONY: all clean hooks
 
+
+
 ifeq ($(cublas),1)
 all:
 	cd g2g; make;
