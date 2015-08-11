@@ -255,10 +255,9 @@ c Diagonalization of S matrix, after this is not needed anymore
 c S = YY^T ; X = (Y^-1)^T
 c => (X^T)SX = 1
 c
-      docholesky=.true.!.false.
+      docholesky=.true.
       call g2g_timer_start('cholesky')
       call g2g_timer_sum_start('Overlap decomposition')
-
       IF (docholesky) THEN
 #ifdef magma
         ! ESTO SIGUE USANDO Smat EN RMM(M5)
@@ -403,22 +402,16 @@ c Calculate F' in RMM(M5)
         call g2g_timer_sum_start('initial guess')
         primera=.false.
         do i=1,M
-! X is upper triangular
-          do j=1,i-1
+          do j=1,M
             X(i,M+j)=0.D0
             do k=1,j
               X(i,M+j)=X(i,M+j)+X(k,i)*RMM(M11+j+(M2-k)*(k-1)/2-1)
             enddo
-            do k=j+1,i
+            do k=j+1,M
               X(i,M+j)=X(i,M+j)+X(k,i)*RMM(M11+k+(M2-j)*(j-1)/2-1)
             enddo
           enddo
-          do j=i,M
-            X(i,M+j)=0.D0
-            do k=1,i
-              X(i,M+j)=X(i,M+j)+X(k,i)*RMM(M11+j+(M2-k)*(k-1)/2-1)
-            enddo
-          enddo
+
         enddo
 
         kk=0
@@ -468,8 +461,7 @@ c Recover C from (X^-1)*C
         do i=1,M
           do j=1,M
             X(i,M2+j)=0.D0
-! X is upper triangular
-            do k=i,M
+            do k=1,M
               X(i,M2+j)=X(i,M2+j)+X(i,k)*X(k,M+j)
             enddo
           enddo
@@ -1016,7 +1008,8 @@ c---------------------
        LWORK=work(1)
       LIWORK=IWORK(1)
 
-      if(allocated(WORK2)) deallocate (WORK2,IWORK2)
+      if(allocated(WORK2)) deallocate (WORK2)
+      if(allocated(IWORK2)) deallocate (IWORK2)
 
        allocate (WORK2(LWORK),IWORK2(LIWORK))
 
@@ -1061,20 +1054,31 @@ c-----------------------------------------------------------
        enddo
 #else
 c new coefficients
-       do i=1,M
-         do k=1,M
-           xnano(i,k)=X(k,i)
-         enddo
-       enddo
-       do i=1,M
-        do j=1,M
-            X(i,M2+j)=0.D0
-            ! xnano is lower triangular
-            do k=i,M
-              X(i,M2+j)=X(i,M2+j)+xnano(k,i)*fock(k,j)
-            enddo
+        do i=1,M
+           do j=1,M
+              xnano(i,j)=x(i,j)
+           enddo
+        enddo
+        xnano=matmul(xnano,fock)
+        do i=1,M
+          do j=1,M
+             X(i,M2+j)=xnano(i,j)
           enddo
-      enddo
+       enddo
+!       do i=1,M
+!         do k=1,M
+!           xnano(i,k)=X(k,i)
+!         enddo
+!       enddo
+!       do i=1,M
+!        do j=1,M
+!            X(i,M2+j)=0.D0
+!            ! xnano is lower triangular
+!            do k=i,M
+!              X(i,M2+j)=X(i,M2+j)+xnano(k,i)*fock(k,j)
+!            enddo
+!          enddo
+!      enddo
 #endif
       call g2g_timer_stop('coeff')
       call g2g_timer_start('otras cosas')
