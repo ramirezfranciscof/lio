@@ -5,6 +5,7 @@ src_paths += liomods
 src_paths += maskrmm
 src_paths += mathsubs
 src_paths += intmod
+src_paths += general_module
 ifeq ($(cublas),1)
 src_paths += mathsubs/cublas/
 endif
@@ -17,6 +18,7 @@ include liomods/liomods.mk
 include maskrmm/maskrmm.mk
 include mathsubs/mathsubs.mk
 include intmod/intmod.mk
+include general_module/general_module.mk
 ifeq ($(cublas),1)
 include mathsubs/cublas/cublasmath.mk
 endif
@@ -43,6 +45,8 @@ objects += sysdata.o
 objects += mathsubs.o
 objects += maskrmm.o
 objects += density.o
+objects += fterm_biaspot.o lowdinpop.o general_module.o
+objects += choldcmp.o
 ifeq ($(cublas),1)
 objects += cublasmath.o 
 endif
@@ -82,6 +86,10 @@ $(objlist:%.o=$(obj_path)/%.o) : $(obj_path)/intmod.mod
 # testmod
 objlist := intmod.o calcDSM.o testmod.o testforce.o
 $(objlist:%.o=$(obj_path)/%.o) : $(obj_path)/testmod.mod
+
+# general_module
+objlist := SCF.o
+$(objlist:%.o=$(obj_path)/%.o) : $(obj_path)/general_module.mod
 
 ifeq ($(cublas),1)
 #cublasmath
