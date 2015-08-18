@@ -344,8 +344,11 @@ c
          call sdcmp_cholesky(Smat,Dvec,Vmat,Ymat,Xtrp,Ytrp,Xmat)
 
          allocate (Y(M,M),Ytrans(M,M),Xtrans(M,M))
-         allocate (Xcpy(M,M))
-         X=Xmat
+         do iii=1,M
+         do jjj=1,M
+           X(iii,jjj)=Xmat(iii,jjj)
+         enddo
+         enddo
          Y=Ymat
          Xtrans=Xtrp
          Ytrans=Ytrp
@@ -379,7 +382,11 @@ c
          endif
 
          allocate (Y(M,M),Ytrans(M,M),Xtrans(M,M))
-         X=Xmat
+         do iii=1,M
+         do jjj=1,M
+           X(iii,jjj)=Xmat(iii,jjj)
+         enddo
+         enddo
          Y=Ymat
          Xtrans=Xtrp
          Ytrans=Ytrp
@@ -1358,7 +1365,7 @@ c
        call g2g_solve_groups(0,Ex,0)
        print*,'----------------------------------------------TO HERE'
        call spunpack('L',M,RMM(M5),Fmtx)
-       Sinv=matmul(Xcpy,Xtrans)
+       Sinv=matmul(Xmat,Xtrans)
        do iii=1,M
        do jjj=1,M
          Pmtx(iii,jjj)=CMPLX(RealRho(iii,jjj),0.0d0)
