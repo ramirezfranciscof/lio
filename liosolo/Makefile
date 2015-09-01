@@ -1,7 +1,6 @@
 LIBS=
-FLAGS = -fopenmp
-
-ifeq ($(ifort),1)
+FLAGS = -fopenmp 
+ifeq ($(intel),1)
 FLAGS += -fpp
 else
 FLAGS += -cpp
@@ -12,7 +11,7 @@ ifeq ($(xeon_phi),1)
   LIBS= -Qoption,link,-rpath=/opt/intel/composer_xe_2013_sp1.3.174/mkl/lib/mic -Qoption,link,-rpath=/opt/intel/composer_xe_2013_sp1.3.174/compiler/lib/mic/
 endif
 ######################################################################
-ifeq ($(ifort),1)
+ifeq ($(intel),1)
   FC   = ifort
   LIBS+= -module ../lioamber/obj -I../lioamber/obj 
 else
@@ -28,12 +27,12 @@ ifeq ($(magma),1)
         LIBS     += -L$(MAGMAROOT)/lib -lmagma
 endif
 
-FORTRAN_WRAPER=
+#FORTRAN_WRAPER=
 ifeq ($(cublas),1)
-LIBS +=-L../g2g -lg2g -lstdc++ -L $(CUDA_HOME)/lib64/ -lcudart -lcublas 
-FORTRAN_WRAPER=../lioamber/obj/fortran.o
+#LIBS += -lstdc++ -L$(CUDA_HOME)/lib64/ -lcudart -lcublas
+#FORTRAN_WRAPER=../lioamber/obj/fortran.o
 endif
-FLAGS +=$(FORTRAN_WRAPER)
+#FLAGS +=$(FORTRAN_WRAPER)
 
 
 ######################################################################
