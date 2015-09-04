@@ -84,11 +84,11 @@ tmplist := testforce.o
 $(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/intmod.mod
 
 
-# maskrmm: Description pending
+# rmmtools: Description pending
 ######################################################################
-objects   += maskrmm.o
-src_paths += maskrmm
-include maskrmm/maskrmm.mk
+#objects   += rmmtools.o
+#src_paths += rmmtools
+#include rmmtools/rmmtools.mk
 
 
 # mathsubs: Description pending
