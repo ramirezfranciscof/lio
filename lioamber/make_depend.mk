@@ -64,6 +64,15 @@ tmplist += SCF.o SCF_in.o SCFop.o TD.o cubegen.o
 $(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/garcha_mod.mod
 
 
+# testmod: Description pending
+######################################################################
+objects   += testmod.o
+src_paths += testmod
+
+tmplist := testforce.o intmod.o
+$(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/testmod.mod
+
+
 # intmod: Description pending
 ######################################################################
 objects   += intmod.o
