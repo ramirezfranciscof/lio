@@ -14,8 +14,8 @@
 !
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-  interface rhofix
-    module procedure rhofix_mat
-    module procedure rhofix_vec
-  end interface
+       interface rhofix
+         module procedure rhofix_mat
+         module procedure rhofix_vec
+       end interface
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
