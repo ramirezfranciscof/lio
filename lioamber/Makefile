@@ -88,7 +88,7 @@ $(obj_path)/%.mod : %.f $(makefiles) |  $(obj_path)
 	@touch $@
 
 $(obj_path)cublasmath.o: $(obj_path)garcha_mod.mod $(obj_path)fortran.o
-	$(FC) -module ../../obj  -fpp -Dpack -fPIC -DG2G -g -c -O3 /mathsubs/cublas/$(*F).f -o $@
+	$(FC) -module ./obj  -fpp -Dpack -fPIC -DG2G -g -c -O3 mathsubs/cublas/$(*F).f -o $@
 
 else
 liblio-g2g.so : $(objects:%.o=$(obj_path)/%.o)

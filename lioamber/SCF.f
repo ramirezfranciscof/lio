@@ -175,6 +175,13 @@ c
       Qc=Qc-Nel
       Qc2=Qc**2
 
+      do i=1,natom
+      rqm(i,1)=r(i,1)
+      rqm(i,2)=r(i,2)
+      rqm(i,3)=r(i,3)
+       enddo
+
+
 
 ! FFR: Variable Allocation
 !--------------------------------------------------------------------!

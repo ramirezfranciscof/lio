@@ -183,6 +183,8 @@ c--------------------------------------------------------
        if (.not.allocated(Smat))    allocate(Smat(M,M))
        if (.not.allocated(RealRho)) allocate(RealRho(M,M))
 c--------------------------------------------------------
+       call geom()
+       stop
        if(OPEN) then
          call SCFOP(escf,dipxyz)
        else

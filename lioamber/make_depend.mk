@@ -49,6 +49,7 @@ ifeq ($(cublas),1)
 objects += cublasmath.o 
 endif
 objects += elec.o
+objects += geom.o dfp2.o lsearch.o
 
 #
 ######################################################################
@@ -67,6 +68,7 @@ objlist += int1.o int2.o int3lu.o int3mem.o intfld.o intsol.o
 objlist += int1G.o int2G.o int3G.o intSG.o intsolG.o intsolGs.o
 objlist += jarz.o lio_finalize.o predictor.o
 objlist += SCF.o SCF_in.o SCFop.o TD.o cubegen.o
+objects += geom.o dfp2.o lsearch.o
 $(objlist:%.o=$(obj_path)/%.o) : $(obj_path)/garcha_mod.mod
 
 # mathsubs

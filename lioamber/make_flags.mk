@@ -9,7 +9,7 @@ ifeq ($(ifort),1)
 else
   FC     = gfortran
   FFLAGS+= -I$(obj_path) -J$(obj_path)
-  FFLAGS+= -cpp
+  FFLAGS+= -cpp  -fcheck=all
 endif
 FFLAGS += -Dpack -fPIC -DG2G -g
 FFLAGS += $(optim) $(myflags) $(DEFINE) $(PROFILE)
@@ -85,6 +85,7 @@ objlist += garcha_mod.o mathsubs.o cubegen.o density.o
 ifeq ($(cublas),1)
 objlist += cublasmath.o 
 endif
+objects += geom.o dfp2.o lsearch.o
 $(objlist:%.o=$(obj_path)/%.o) : optim:=$(optim3)
 #UNNECESSARY IF PREVIOUS ASSIGNMENT USED PRIVATE KEYWORD
 
@@ -110,6 +111,7 @@ ifeq ($(ifort),1)
   objlist += alg.o drive.o func.o grid.o dipmem.o jarz.o
   objlist += int1.o int2.o int2G.o int3mem.o  intSG.o
   objlist += garcha_mod.o cubegen.o density.o
+  objects += geom.o dfp2.o lsearch.o
   $(objlist:%.o=$(obj_path)/%.o) : myflags:=-mp1 -ip
   #$(objlist:%.o=$(obj_path)/%.o) : private myflags+=$(optim3) -mp1 -ip
 endif
