@@ -11,13 +11,14 @@
        implicit none
        real*8,intent(in)      :: Sinv(M,M)
        real*8,intent(in)      :: Fmtx(M,M)
-       complex*16,intent(in)  :: Pmtx(M,M)
+       real*8,intent(in)      :: Pmtx(M,M)
+!       complex*16,intent(in)  :: Pmtx(M,M)
 
        real*8,allocatable     :: nr(:,:),nv(:,:),as(:,:),cs(:,:)
-       real*8,allocatable     :: ffold(:,:)
+       real*8,allocatable     :: ffold(:,:),Mato(:,:)
        complex*16,allocatable :: ffnew(:,:)
        complex*16,allocatable :: AuxMat(:,:), Mdir(:,:),Mtrp(:,:)
-       complex*16,allocatable :: Bmat(:,:),Mato(:,:)
+       complex*16,allocatable :: Bmat(:,:)
        integer,allocatable    :: nucof(:)
        integer                :: kk,ii,jj,unitid,nk,nn
        integer                :: MM,MMd,indx
@@ -52,7 +53,7 @@
 !      Crear Mdir y Mtrp
        Mdir=matmul(Fmtx,Pmtx)
        Mdir=matmul(Sinv,Mdir)
-       Mato=Mdir
+       Mato=(-1)*DBLE(Mdir)
        Mtrp=matmul(Pmtx,Fmtx)
        Mtrp=matmul(Mtrp,Sinv)
        Mtrp=transpose(Mtrp)
@@ -146,8 +147,8 @@
        MM=M*(M+1)/2
        MMd=Md*(Md+1)/2
        indx=1+M+2*MMd+4*MM
-!       call sprepack('L',M,RMM(indx),Mato)
-!       call messrho(M,RMM(indx))
+       call sprepack('L',M,RMM(indx),Mato)
+       call messrho(M,RMM(indx))
        ffold(:,:)=0.0
        call intSG(ffold)
 !       call calcDSM(ffold)

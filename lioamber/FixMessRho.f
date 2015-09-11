@@ -39,10 +39,10 @@
        real*8,intent(inout) :: Vector((M*(M+1))/2)
        integer              :: ii,jj,kk
 !
-       do ii=1,M
-       do jj=1,ii
+       do ii=2,M
+       do jj=1,ii-1
          kk=ii+(2*M-jj)*(jj-1)/2
-         if (ii.ne.jj) Vector(kk)=Vector(kk)*(2.0d0)
+         Vector(kk)=Vector(kk)*(2.0d0)
        enddo
        enddo
 

@@ -687,6 +687,7 @@ c-------------------------------------------------------------------------------
 ! FFR: Van Voorhis Term for DIIS
 !--------------------------------------------------------------------!
          if (dovv.eqv..true.) fock=fock+fockbias
+         Fmtx=fock ! TODO: Solo importa quedarse con la ultima
 
 c-----------------------------------------------------------------------------------------
 c Expand density matrix into full square form (before, density matrix was set up for triangular sums
@@ -846,6 +847,7 @@ c
 ! FFR: Van Voorhis Term for not DIIS
 !--------------------------------------------------------------------!
          if (dovv.eqv..true.) fock=fock+fockbias
+         Fmtx=fock ! TODO: Solo importa quedarse con la ultima
 
 
 #ifdef CUBLAS
@@ -1364,14 +1366,15 @@ c
        call int3lu(E2)
        call g2g_solve_groups(0,Ex,0)
        print*,'----------------------------------------------TO HERE'
-       call spunpack('L',M,RMM(M5),Fmtx)
+!       call spunpack('L',M,RMM(M5),Fmtx) TODO: sacar si fock esta bien
        Sinv=matmul(Xmat,Xtrans)
        do iii=1,M
        do jjj=1,M
          Pmtx(iii,jjj)=CMPLX(RealRho(iii,jjj),0.0d0)
        enddo
        enddo
-       call testforce(Sinv,Fmtx,Pmtx)
+!       call testforce(Sinv,Fmtx,Pmtx)
+       call testforce(Sinv,Fmtx,RealRho)
        print*,'----------------------------------------------DONE'
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 
