@@ -30,18 +30,19 @@
        allocate(Mato(M,M))
 
 
-       call g2g_timer_start('intold_')
        ffold=0.0d0
        call testinit()
        DSX(:,:,:)=0.0d0
        DSY(:,:,:)=0.0d0
        DSZ(:,:,:)=0.0d0
-!       call calcDSM(ffold)
-       call intSG(ffold)
-       call g2g_timer_stop('intold_')
+       call calcDSM(ffold)
+!       call intSG(ffold)
        do kk=1,natom
+        write(unit=666,fmt=*) kk
         do ii=1,M
         do jj=1,M
+          write(unit=666,fmt=*) ii,jj,DSX(ii,jj,kk),DSY(ii,jj,kk),
+     >                          DSZ(ii,jj,kk)
           DSXc(ii,jj,kk)=DSX(ii,jj,kk)
           DSYc(ii,jj,kk)=DSY(ii,jj,kk)
           DSZc(ii,jj,kk)=DSZ(ii,jj,kk)
@@ -77,14 +78,12 @@
        enddo
 
 !      Calcula las fuerzas
-       call g2g_timer_start('intnew_')
        DSX(:,:,:)=0.0d0
        DSY(:,:,:)=0.0d0
        DSZ(:,:,:)=0.0d0
        ffnew=CMPLX(0.0d0,0.0d0)
        call fzaDS2(natom,M,nshell(0),nshell(1),ncont,nl,
      >             AuxMat,nr,nv,as,cs,nucof,Bmat,ffnew)
-       call g2g_timer_stop('intnew_')
        do kk=1,natom
         do ii=1,M
         do jj=1,M
@@ -138,20 +137,6 @@
 
 
 
-       print*,'     natom         dir'
-       do ii=1,natom
-       do kk=1,3
-         print*,ii,kk,ffold(ii,kk),ffnew(kk,ii)
-       enddo
-       enddo
-       MM=M*(M+1)/2
-       MMd=Md*(Md+1)/2
-       indx=1+M+2*MMd+4*MM
-       call sprepack('L',M,RMM(indx),Mato)
-       call messrho(M,RMM(indx))
-       ffold(:,:)=0.0
-       call intSG(ffold)
-!       call calcDSM(ffold)
        print*,'     natom         dir'
        do ii=1,natom
        do kk=1,3

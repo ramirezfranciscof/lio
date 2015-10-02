@@ -127,11 +127,11 @@ c
       ss=pi32*exp(-alf*dd)/(zij*sqrt(zij))
 c
       k=i+((M2-j)*(j-1))/2
-c 
+ 
 c l2: different p in the p shell GRADIENT PART ----------
 c
       te=RMM(M15+k-1)*ccoef
-      te=ccoef !IFOFF
+!      te=ccoef !IFOFF
       ty=te*2.D0
       t5=ty*a(j,nj)
       t4=ty*a(i,ni)
@@ -144,8 +144,8 @@ c
         spi=pis+ tx*ss
 c
         ff(Nuc(i),l2)=ff(Nuc(i),l2)+t4*pis
-!        scratch=t4*pis/RMM(M15+k-1)            !IFON
-        scratch=t4*pis                         !IFOFF
+        scratch=t4*pis/RMM(M15+k-1)            !IFON
+!        scratch=t4*pis                         !IFOFF
         CALL assignDSM(i,j,Nuc(i),l2,scratch)  !ALWAYS
 
         ff(Nuc(j),l2)=ff(Nuc(j),l2)+t5*spi
@@ -192,7 +192,7 @@ c
         k=ii+((M2-j)*(j-1))/2
 c
         te=RMM(M15+k-1)*ccoef
-        te=ccoef     !IFOFF
+!        te=ccoef     !IFOFF
         ty=te*2.D0
         t5=ty*a(j,nj)
         t4=ty*a(i,ni)
@@ -207,8 +207,8 @@ c
 c
        if (l1.eq.l2) then
         ff(Nuc(i),l2)=ff(Nuc(i),l2)-te*ss
-!        scratch=-ccoef*ss                       !IFON
-        scratch=-te*ss                          !IFOFF
+        scratch=-ccoef*ss                       !IFON
+!        scratch=-te*ss                          !IFOFF
         CALL assignDSM(ii,j,Nuc(i),l2,scratch)  !ALWAYS
 
         ds=ds+t10
@@ -217,13 +217,13 @@ c
 c
 c
         ff(Nuc(i),l2)=ff(Nuc(i),l2)+t4*ds
-!        scratch=t4*ds/RMM(M15+k-1)              !IFON
-        scratch=t4*ds                           !IFOFF
+        scratch=t4*ds/RMM(M15+k-1)              !IFON
+!        scratch=t4*ds                           !IFOFF
         CALL assignDSM(ii,j,Nuc(i),l2,scratch)  !ALWAYS
 
         ff(Nuc(j),l2)=ff(Nuc(j),l2)+t5*pp
-!        scratch=t5*pp/RMM(M15+k-1)              !IFON
-        scratch=t5*pp                           !IFOFF
+        scratch=t5*pp/RMM(M15+k-1)              !IFON
+!        scratch=t5*pp                           !IFOFF
         CALL assignDSM(ii,j,Nuc(j),l2,scratch)  !ALWAYS
 
 c
@@ -283,7 +283,7 @@ c
       k=ii+((M2-jj)*(jj-1))/2
 c
         te=RMM(M15+k-1)*ccoef
-        te=ccoef !IFOFF
+!        te=ccoef !IFOFF
         ty=te*2.D0
         t5=ty*a(j,nj)
         t4=ty*a(i,ni)
@@ -299,29 +299,29 @@ c
        if (l1.eq.l3) then
         dp=dp+t13
         ff(Nuc(i),l3)=ff(Nuc(i),l3)-te*spj
-!        scratch=-ccoef*spj                       !IFON
-        scratch=-te*spj                          !IFOFF
+        scratch=-ccoef*spj                       !IFON
+!        scratch=-te*spj                          !IFOFF
         CALL assignDSM(ii,jj,Nuc(i),l3,scratch)  !ALWAYS
        endif
 c
        if (l2.eq.l3) then
         dp=dp+t11
         ff(Nuc(j),l3)=ff(Nuc(j),l3)-te*pis
-!        scratch=-ccoef*pis                       !IFON
-        scratch=-te*pis                          !IFOFF
+        scratch=-ccoef*pis                       !IFON
+!        scratch=-te*pis                          !IFOFF
         CALL assignDSM(ii,jj,Nuc(j),l3,scratch)  !ALWAYS
        endif
 c
        pd=dp+tx*pp
 c
         ff(Nuc(i),l3)=ff(Nuc(i),l3)+t4*dp
-!        scratch=t4*dp/RMM(M15+k-1)               !IFON
-        scratch=t4*dp                            !IFOFF
+        scratch=t4*dp/RMM(M15+k-1)               !IFON
+!        scratch=t4*dp                            !IFOFF
         CALL assignDSM(ii,jj,Nuc(i),l3,scratch)  !ALWAYS
 
         ff(Nuc(j),l3)=ff(Nuc(j),l3)+t5*pd
-!        scratch=t5*pd/RMM(M15+k-1)               !IFON
-        scratch=t5*pd                            !IFOFF
+        scratch=t5*pd/RMM(M15+k-1)               !IFON
+!        scratch=t5*pd                            !IFOFF
         CALL assignDSM(ii,jj,Nuc(j),l3,scratch)  !ALWAYS
 
 
@@ -376,7 +376,7 @@ c
        cc=ccoef/f1
 c
         te=RMM(M15+k-1)*cc
-        te=cc    !IFOFF
+!        te=cc    !IFOFF
         ty=te*2.D0
         t5=ty*a(j,nj)
         t4=ty*a(i,ni)
@@ -391,16 +391,16 @@ c
 c
        if (l1.eq.l3) then
         ff(Nuc(i),l3)=ff(Nuc(i),l3)-te*pjs
-!        scratch=-cc*pjs                         !IFON
-        scratch=-te*pjs                         !IFOFF
+        scratch=-cc*pjs                         !IFON
+!        scratch=-te*pjs                         !IFOFF
         CALL assignDSM(ii,j,Nuc(i),l3,scratch)  !ALWAYS
         dp=dp+t11
        endif
 c
        if (l2.eq.l3) then
         ff(Nuc(i),l3)=ff(Nuc(i),l3)-te*pis
-!        scratch=-cc*pis                         !IFON
-        scratch=-te*pis                         !IFOFF
+        scratch=-cc*pis                         !IFON
+!        scratch=-te*pis                         !IFOFF
         CALL assignDSM(ii,j,Nuc(i),l3,scratch)  !ALWAYS
         dp=dp+t12
        endif
@@ -408,13 +408,13 @@ c
        fs=dp-tx*dijs
 c
         ff(Nuc(i),l3)=ff(Nuc(i),l3)+t4*fs
-!        scratch=t4*fs/RMM(M15+k-1)              !IFON
-        scratch=t4*fs                           !IFOFF
+        scratch=t4*fs/RMM(M15+k-1)              !IFON
+!        scratch=t4*fs                           !IFOFF
         CALL assignDSM(ii,j,Nuc(i),l3,scratch)  !ALWAYS
 
         ff(Nuc(j),l3)=ff(Nuc(j),l3)+t5*dp
-!        scratch=t5*dp/RMM(M15+k-1)              !IFON
-        scratch=t5*dp                           !IFOFF
+        scratch=t5*dp/RMM(M15+k-1)              !IFON
+!        scratch=t5*dp                           !IFOFF
         CALL assignDSM(ii,j,Nuc(j),l3,scratch)  !ALWAYS
 
 c
@@ -489,7 +489,7 @@ c
 c
         cc=ccoef/f1
         te=RMM(M15+k-1)*cc
-        te=cc    !IFOFF
+!        te=cc    !IFOFF
         ty=te*2.D0
         t5=ty*a(j,nj)
         t4=ty*a(i,ni)
@@ -507,37 +507,37 @@ c
        if (l1.eq.l4) then
         dsd=dsd+t15
         ff(Nuc(i),l4)=ff(Nuc(i),l4)-te*pjpk
-!        scratch=-cc*pjpk                         !IIFON
-        scratch=-te*pjpk                         !IFOFF
+        scratch=-cc*pjpk                         !IIFON
+!        scratch=-te*pjpk                         !IFOFF
         CALL assignDSM(ii,jj,Nuc(i),l4,scratch)  !ALWAYS
        endif
 c
        if (l2.eq.l4) then
         dsd=dsd+t14
         ff(Nuc(i),l4)=ff(Nuc(i),l4)-te*pipk
-!        scratch=-cc*pipk                         !IFON
-        scratch=-te*pipk                         !IFOFF
+        scratch=-cc*pipk                         !IFON
+!        scratch=-te*pipk                         !IFOFF
         CALL assignDSM(ii,jj,Nuc(i),l4,scratch)  !ALWAYS
        endif
 c
        if (l3.eq.l4) then
         dsd=dsd+t13
         ff(Nuc(j),l4)=ff(Nuc(j),l4)-te*dijs
-!        scratch=-cc*dijs                         !IFON
-        scratch=-te*dijs                         !IFOFF
+        scratch=-cc*dijs                         !IFON
+!        scratch=-te*dijs                         !IFOFF
         CALL assignDSM(ii,jj,Nuc(j),l4,scratch)  !ALWAYS
        endif
 c
        fsp=dsd-tx*dijpk
 c
         ff(Nuc(i),l4)=ff(Nuc(i),l4)+t4*fsp
-!        scratch=t4*fsp/RMM(M15+k-1)              !IFON
-        scratch=t4*fsp                           !IFOFF
+        scratch=t4*fsp/RMM(M15+k-1)              !IFON
+!        scratch=t4*fsp                           !IFOFF
         CALL assignDSM(ii,jj,Nuc(i),l4,scratch)  !ALWAYS
 
         ff(Nuc(j),l4)=ff(Nuc(j),l4)+t5*dsd
-!        scratch=t5*dsd/RMM(M15+k-1)              !IFON
-        scratch=t5*dsd                           !IFOFF
+        scratch=t5*dsd/RMM(M15+k-1)              !IFON
+!        scratch=t5*dsd                           !IFOFF
         CALL assignDSM(ii,jj,Nuc(j),l4,scratch)  !ALWAYS
 
 c
@@ -657,7 +657,7 @@ c
 c
        cc=ccoef/(f1*f2)
         te=RMM(M15+k-1)*cc
-        te=cc    !IFOFF
+!        te=cc    !IFOFF
         ty=te*2.D0
         t5=ty*a(j,nj)
         t4=ty*a(i,ni)
@@ -673,45 +673,45 @@ c
         if (l1.eq.l5) then
          fd=fd+t10
          ff(Nuc(i),l5)=ff(Nuc(i),l5)-te*pjdkl
-!         scratch=-cc*pjdkl                        !IFON
-         scratch=-te*pjdkl                        !IFOFF
+         scratch=-cc*pjdkl                        !IFON
+!         scratch=-te*pjdkl                        !IFOFF
          CALL assignDSM(ii,jj,Nuc(i),l5,scratch)  !ALWAYS
         endif
 c
         if (l2.eq.l5) then
          fd=fd+t11
          ff(Nuc(i),l5)=ff(Nuc(i),l5)-te*pidkl
-!         scratch=-cc*pidkl                        !IFON
-         scratch=-te*pidkl                        !IFOFF
+         scratch=-cc*pidkl                        !IFON
+!         scratch=-te*pidkl                        !IFOFF
          CALL assignDSM(ii,jj,Nuc(i),l5,scratch)  !ALWAYS
         endif
 c
         if (l3.eq.l5) then
          fd=fd+t12
          ff(Nuc(j),l5)=ff(Nuc(j),l5)-te*dijpl
-!         scratch=-cc*dijpl                        !IFON
-         scratch=-te*dijpl                        !IFOFF
+         scratch=-cc*dijpl                        !IFON
+!         scratch=-te*dijpl                        !IFOFF
          CALL assignDSM(ii,jj,Nuc(j),l5,scratch)  !ALWAYS
         endif
 c
         if (l4.eq.l5) then
          fd=fd+t13
          ff(Nuc(j),l5)=ff(Nuc(j),l5)-te*dijpk
-!         scratch=-cc*dijpk                        !IFON
-         scratch=-te*dijpk                        !IFOFF
+         scratch=-cc*dijpk                        !IFON
+!         scratch=-te*dijpk                        !IFOFF
          CALL assignDSM(ii,jj,Nuc(j),l5,scratch)  !ALWAYS
         endif
 c
         df=fd+tx*ovlap
 c
         ff(Nuc(i),l5)=ff(Nuc(i),l5)+t4*fd
-!        scratch=t4*fd/RMM(M15+k-1)               !IFON
-        scratch=t4*fd                            !IFOFF
+        scratch=t4*fd/RMM(M15+k-1)               !IFON
+!        scratch=t4*fd                            !IFOFF
         CALL assignDSM(ii,jj,Nuc(i),l5,scratch)  !ALWAYS
 
         ff(Nuc(j),l5)=ff(Nuc(j),l5)+t5*df
-!        scratch=t5*df/RMM(M15+k-1)               !IFON
-        scratch=t5*df                            !IFOFF
+        scratch=t5*df/RMM(M15+k-1)               !IFON
+!        scratch=t5*df                            !IFOFF
         CALL assignDSM(ii,jj,Nuc(j),l5,scratch)  !ALWAYS
 
 c

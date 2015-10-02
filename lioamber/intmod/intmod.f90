@@ -1,20 +1,20 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-       module intmod
+  module intmod
 !--------------------------------------------------------------------!
 !
 !
 ! INCLUDE FILES WITH HEADERS:
 !--------------------------------------------------------------------!
-       implicit none
-       contains
+  implicit none
+  contains
 !
 !
 ! INCLUDE FILES WITH PROCEDURES:
 !--------------------------------------------------------------------!
-       include 'fzaDS2.f'
-!       include 'fzaDDS.f'
-       include 'setim.f'
-       end module
+  include 'setim.f90'
+  include 'fzaDS2.f90'
+!  include 'fzaDDS.f'
+  end module
 !
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
