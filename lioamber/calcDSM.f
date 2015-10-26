@@ -775,5 +775,12 @@ c
          IF (ii.NE.jj) DSZ(jj,ii,kk)=DSZ(jj,ii,kk)+val
        ENDIF
 
+       if (kk.eq.1) then
+       if ((ii.eq.13).and.(jj.eq.1)) write(666,*) ii,jj,val
+       if ((ii.eq.13).and.(jj.eq.1)) write(666,*) 
+     & DSX(ii,jj,kk),DSY(ii,jj,kk),DSZ(ii,jj,kk)
+       if ((ii.eq.13).and.(jj.eq.1)) write(666,*)
+       endif
+
        RETURN;END SUBROUTINE
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!

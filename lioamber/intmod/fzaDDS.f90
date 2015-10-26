@@ -1,5 +1,5 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-  subroutine fzaDS2(Natoms,Nbasis,nbs,nbp,Nconts,Ncontm,AuxMat, &
+  subroutine fzaDDS(Natoms,Nbasis,nbs,nbp,Nconts,Ncontm,AuxMat, &
                nucpos,nucvel,alpha,coefs,nucof,Bmat,force)
 !--------------------------------------------------------------------!
 !
@@ -31,7 +31,7 @@
   real*8     :: cij,cta,ct2
   real*8     :: intx,inty,intz,term1,term2
   integer    :: opi(3),opj(3),pi(3),pj(3)
-  integer    :: ii,ni,nki,jj,nj,nkj,kk
+  integer    :: ii,ni,nki,jj,nj,nkj,ki,kj,kk
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
   force=DCMPLX(0.0d0,0.0d0)
   Bmat=DCMPLX(0.0d0,0.0d0)
@@ -57,15 +57,15 @@
   enddo
 
   do kk=nbs+nbp+1,Nbasis,6
-     orbpot(1,kk+0)=2  ! dxx (x)
-     orbpot(1,kk+1)=1  ! dxy (x)
-     orbpot(2,kk+1)=1  ! dxy (y)
-     orbpot(2,kk+2)=2  ! dyy (y)
-     orbpot(1,kk+3)=1  ! dxz (x)
-     orbpot(3,kk+3)=1  ! dxz (z)
-     orbpot(2,kk+4)=1  ! dyz (y)
-     orbpot(3,kk+4)=1  ! dyz (z)
-     orbpot(3,kk+5)=2  ! dzz (z)
+     orbpot(1,kk+0)=2   ! dxx (x)
+     orbpot(1,kk+1)=1   ! dxy (x)
+     orbpot(2,kk+1)=1   ! dxy (y)
+     orbpot(2,kk+2)=2   ! dyy (y)
+     orbpot(1,kk+3)=1   ! dxz (x)
+     orbpot(3,kk+3)=1   ! dxz (z)
+     orbpot(2,kk+4)=1   ! dyz (y)
+     orbpot(3,kk+4)=1   ! dyz (z)
+     orbpot(3,kk+5)=2   ! dzz (z)
 
      alpha(:,kk+1)=alpha(:,kk)
      alpha(:,kk+2)=alpha(:,kk)
@@ -73,12 +73,12 @@
      alpha(:,kk+4)=alpha(:,kk)
      alpha(:,kk+5)=alpha(:,kk)
 
-     coefs(:,kk+1)=coefs(:,kk)
-     coefs(:,kk+2)=coefs(:,kk)/SQRT(3.0)
-     coefs(:,kk+3)=coefs(:,kk)
-     coefs(:,kk+4)=coefs(:,kk)
-     coefs(:,kk+5)=coefs(:,kk)/SQRT(3.0)
-     coefs(:,kk+0)=coefs(:,kk)/SQRT(3.0)
+     coefs(:,kk+1)=coefs(:,kk)             ! dxy
+     coefs(:,kk+2)=coefs(:,kk)/SQRT(3.0)   ! dyy
+     coefs(:,kk+3)=coefs(:,kk)             ! dxz
+     coefs(:,kk+4)=coefs(:,kk)             ! dyz
+     coefs(:,kk+5)=coefs(:,kk)/SQRT(3.0)   ! dzz
+     coefs(:,kk+0)=coefs(:,kk)/SQRT(3.0)   ! dxx
   enddo
 
 
@@ -100,48 +100,57 @@
       call setim(0,1,ani,anj,posi,posj,IMTX)
 
       cij=coefs(ni,ii)*coefs(nj,jj)
-      write(555,*) ii,coefs(ni,ii),' .... ',jj,coefs(nj,jj)
-      ct2=cij*2
-      cta=ct2*anj
 
-      do kk=1,3
+      do kj=1,3
+      do ki=1,3
          pi(:)=opi(:)
          pj(:)=opj(:)
-         pj(kk)=pj(kk)+1
+
+         term1=0.0d0
+         pi(ki)=opi(ki)+1
+         pj(kj)=opj(kj)+1
          intx=IMTX(1,1+pi(1),1+pj(1))
          inty=IMTX(2,1+pi(2),1+pj(2))
          intz=IMTX(3,1+pi(3),1+pj(3))
-         term1=cta*intx*inty*intz
+         term1=cij*ani*anj*intx*inty*intz
 
          term2=0.0d0
-         if (pj(kk).ge.2) then
-           pj(kk)=pj(kk)-2
+         if (opj(kj).gt.0) then
+           pi(ki)=opi(ki)+1
+           pj(kj)=opj(kj)-1
            intx=IMTX(1,1+pi(1),1+pj(1))
            inty=IMTX(2,1+pi(2),1+pj(2))
            intz=IMTX(3,1+pi(3),1+pj(3))
-           if (pj(kk).eq.0) term2=-cij*intx*inty*intz
-           if (pj(kk).eq.1) term2=-ct2*intx*inty*intz
+           cj2=-1.0d0
+           if (pj(kj).eq.2) cj2=-2.0d0
+           term2=cij*ani*cj2*intx*inty*intz
          endif
 
-         Bmat(ii,jj)=Bmat(ii,jj)+NucVel(kk,nkj)*(term1+term2)
-         Force(kk,nkj)=Force(kk,nkj)+AuxMat(ii,jj)*(term1+term2)
+         term3=0.0d0
+         if (opi(ki).gt.0) then
+           pi(ki)=opi(ki)-1
+           pj(kj)=opj(kj)+1
+           intx=IMTX(1,1+pi(1),1+pj(1))
+           inty=IMTX(2,1+pi(2),1+pj(2))
+           intz=IMTX(3,1+pi(3),1+pj(3))
+           ci2=-1.0d0
+           if (pi(ki).eq.2) ci2=-2.0d0
+           term3=cij*ci2*anj*intx*inty*intz
+         endif
 
-         if (kk.eq.1) DSX(ii,jj,nkj)=DSX(ii,jj,nkj)+(term1+term2)
-         if (kk.eq.2) DSY(ii,jj,nkj)=DSY(ii,jj,nkj)+(term1+term2)
-         if (kk.eq.3) DSZ(ii,jj,nkj)=DSZ(ii,jj,nkj)+(term1+term2)
+         term4=0.0d0
+         if ((opi(ki).gt.0).and.(opj(kj).gt.0)) then
+           pi(ki)=opi(ki)-1
+           pj(kj)=opj(kj)-1
+           intx=IMTX(1,1+pi(1),1+pj(1))
+           inty=IMTX(2,1+pi(2),1+pj(2))
+           intz=IMTX(3,1+pi(3),1+pj(3))
+           term4=cij*ci2*cj2*intx*inty*intz
+         endif
 
-!      enddo
-      if (nki.eq.1) then
-      if (((ii.eq.1).and.(jj.eq.13)).or.((ii.eq.13).and.(jj.eq.1))) then
-        write(666,*) ii,jj
-        write(666,*) cta*intx*inty*intz,-cij*intx*inty*intz,-ct2*intx*inty*intz
-        write(666,*) term1,term2
-        write(666,*) DSX(ii,jj,nkj),DSY(ii,jj,nkj),DSZ(ii,jj,nkj)
-        write(666,*)
-        write(666,*)
-      endif
-      endif
-
+         term=term1+term2+term3+term4
+         Force(kj,nkj)=Force(kj,nkj)+AuxMat(ii,jj)*NucVel(ki,nki)*term
+      enddo
       enddo
 
     enddo

@@ -35,14 +35,13 @@
        DSX(:,:,:)=0.0d0
        DSY(:,:,:)=0.0d0
        DSZ(:,:,:)=0.0d0
+       call g2g_timer_start('oldie')
        call calcDSM(ffold)
+       call g2g_timer_stop('oldie')
 !       call intSG(ffold)
        do kk=1,natom
-        write(unit=666,fmt=*) kk
         do ii=1,M
         do jj=1,M
-          write(unit=666,fmt=*) ii,jj,DSX(ii,jj,kk),DSY(ii,jj,kk),
-     >                          DSZ(ii,jj,kk)
           DSXc(ii,jj,kk)=DSX(ii,jj,kk)
           DSYc(ii,jj,kk)=DSY(ii,jj,kk)
           DSZc(ii,jj,kk)=DSZ(ii,jj,kk)
@@ -81,9 +80,11 @@
        DSX(:,:,:)=0.0d0
        DSY(:,:,:)=0.0d0
        DSZ(:,:,:)=0.0d0
-       ffnew=CMPLX(0.0d0,0.0d0)
+       ffnew=DCMPLX(0.0d0,0.0d0)
+       call g2g_timer_start('newbie')
        call fzaDS2(natom,M,nshell(0),nshell(1),ncont,nl,
      >             AuxMat,nr,nv,as,cs,nucof,Bmat,ffnew)
+       call g2g_timer_stop('newbie')
        do kk=1,natom
         do ii=1,M
         do jj=1,M
@@ -101,24 +102,28 @@
        do kk=1,natom
         do ii=1,M
         do jj=1,M
-          write(unitid+10+kk,*) ii,jj,DSXc(ii,jj,kk),DSX(ii,jj,kk)
-          write(unitid+20+kk,*) ii,jj,DSYc(ii,jj,kk),DSY(ii,jj,kk)
-          write(unitid+30+kk,*) ii,jj,DSZc(ii,jj,kk),DSZ(ii,jj,kk)
+          write(unitid+10+kk,*) ii,jj,nuc(ii),nuc(jj),
+     &                          DSXc(ii,jj,kk),DSX(ii,jj,kk)
+          write(unitid+20+kk,*) ii,jj,nuc(ii),nuc(jj),
+     &                          DSYc(ii,jj,kk),DSY(ii,jj,kk)
+          write(unitid+30+kk,*) ii,jj,nuc(ii),nuc(jj),
+     &                          DSZc(ii,jj,kk),DSZ(ii,jj,kk)
         enddo
         enddo
        enddo
 
        do ii=1,M
        do jj=1,M
-         write(300,*) ii,jj
+         write(300,*) ii
          write(300,*) r(nuc(ii),1),r(nuc(ii),2),r(nuc(ii),3)
          do kk=1,ncont(ii)
-           write(300,*) c(ii,kk),a(ii,kk)
+           write(300,*) kk,a(ii,kk),c(ii,kk)
          enddo
-         write(300,*)
+         write(300,*) 
+         write(300,*) jj
          write(300,*) r(nuc(jj),1),r(nuc(jj),2),r(nuc(jj),3)
          do kk=1,ncont(jj)
-           write(300,*) c(jj,kk),a(jj,kk)
+           write(300,*) kk,a(jj,kk),c(ii,kk)
          enddo
          write(300,*)
          write(300,*) DSX(ii,jj,1),DSX(ii,jj,2),DSX(ii,jj,3)
