@@ -1356,8 +1356,10 @@ c
 
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 ! TESTIN THE FORCE
-!       deallocate (kkind,kkinds)
-!!       deallocate(cool,cools)
+       if (allocated(kkind))  deallocate(kkind)
+       if (allocated(kkinds)) deallocate(kkinds)
+       if (allocated(cool))   deallocate(cool)
+       if (allocated(cools))  deallocate(cools)
 
        print*,'-------------------------------------IGNORE FROM HERE'
        call intsol(E1s,Ens,.true.)
