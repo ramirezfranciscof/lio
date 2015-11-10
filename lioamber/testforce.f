@@ -6,7 +6,8 @@
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
        use garcha_mod, only:M,a,c,r,nshell,natom,ncont,nl,nuc,RMM,Md
-       use intmod
+       use ehrendyn
+       use basis_copy, only:set_basis_copy
        use testmod
        implicit none
        real*8,intent(in)      :: Sinv(M,M)
@@ -69,10 +70,14 @@
        enddo
 
 !      Transpone r y setea nv=0
+       call RANDOM_SEED()
        do ii=1,natom
        do jj=1,3
          nr(jj,ii)=r(ii,jj)
          nv(jj,ii)=0.0d0
+         call RANDOM_NUMBER(nv(jj,ii))
+         nv(jj,ii)=(nv(jj,ii)-0.5)*3
+         print*, nv(jj,ii)
        enddo
        enddo
 
@@ -148,6 +153,14 @@
          print*,ii,kk,ffold(ii,kk),ffnew(kk,ii)
        enddo
        enddo
+
+       print*,''
+       print*,''
+       call set_basis_copy
+     > (nshell(0),nshell(1),nshell(2),nucof,ncont,a,c)
+!       print*,forceDS(natom,M,nr,nv,dcmplx(Pmtx),Fmtx,Sinv)
+       print*,''
+       print*,''
 
 
 !--------------------------------------------------------------------!

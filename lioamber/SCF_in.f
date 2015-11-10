@@ -1,13 +1,20 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-      Subroutine SCF_in(E,qmcoords,clcoords,nsolin,dipxyz)
+      Subroutine SCF_in(E,qmcoords,qmvels,clcoords,nsolin,dipxyz)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
       use garcha_mod
       REAL*8 , intent(in)  :: qmcoords(3,natom)
+      REAL*8 , intent(in)  :: qmvels(3,natom)
       REAL*8 , intent(in)  :: clcoords(4,nsolin)
+      integer :: kk
       nsol=nsolin
       ntatom=nsol+natom
 
       call g2g_timer_sum_start("Total")
+      do kk=1,natom
+        write(667,123) qmvels(1:3,kk)
+      enddo
+ 123  FORMAT(3(3X,f12.8))
+
 
       deallocate (r,v,Em,Rm,pc,nnat)
 

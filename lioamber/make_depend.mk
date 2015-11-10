@@ -43,9 +43,7 @@ objects += sysdata.o
 objects += density.o
 objects += fterm_biaspot.o lowdinpop.o
 objects += elec.o
-objects += intmod.o
 objects += testforce.o calcDSM.o
-objects += testmod.o
 
 
 
@@ -63,25 +61,46 @@ tmplist += jarz.o lio_finalize.o predictor.o
 tmplist += SCF.o SCF_in.o SCFop.o TD.o cubegen.o
 $(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/garcha_mod.mod
 
+# basis_copy: Description pending
+######################################################################
+objects   += basis_copy.o
+#src_paths += liomods
+#include liomods/liomods.mk
+
+tmplist := ehrendyn.o
+$(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/basis_copy.mod
+
 
 # testmod: Description pending
 ######################################################################
 objects   += testmod.o
 src_paths += testmod
 
-tmplist := testforce.o intmod.o
+tmplist := testforce.o ehrendyn.o
 $(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/testmod.mod
 
 
-# intmod: Description pending
+# ehrendyn: Description pending
 ######################################################################
-objects   += intmod.o
-src_paths += intmod
-include intmod/intmod.mk
+objects   += ehrendyn.o
+src_paths += ehrendyn
+include ehrendyn/ehrendyn.mk
 
 
 tmplist := testforce.o
-$(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/intmod.mod
+$(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/ehrendyn.mod
+
+
+# ehrendyn: Description pending
+######################################################################
+objects   += ehrendyn.o
+src_paths += ehrendyn
+include ehrendyn/ehrendyn.mk
+
+
+tmplist := testforce.o
+$(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/ehrendyn.mod
+
 
 
 # maskrmm : Description pending
