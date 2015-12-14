@@ -5,7 +5,8 @@
 !
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-       use garcha_mod,only:natom,nsol,cubegen_only
+       use garcha_mod,only:natom,nsol,cubegen_only,qm_forces_ds,
+     >                     do_ehrenfest,first_step
        implicit none
        real*8,intent(out) :: dxyzqm(3,natom)
        real*8,allocatable :: ff1G(:,:),ffSG(:,:),ff3G(:,:)
@@ -37,6 +38,15 @@
        call g2g_timer_sum_start('Overlap gradients')
        ffSG=0.0d0
        call intSG(ffSG)
+       write(667,101) ffSG
+       write(667,*) ''
+       write(667,*) ''
+       if ((do_ehrenfest).and.(.not.first_step)) 
+     >   ffSG=-transpose(qm_forces_ds)
+       write(668,101) ffSG
+       write(668,*) ''
+       write(668,*) ''
+101    format(3(3X,E14.7))
        call g2g_timer_stop('intSG')
        call g2g_timer_sum_stop('Overlap gradients')
 
@@ -94,6 +104,8 @@ c       factor=627.509391D0/0.5291772108D0
          call g2g_timer_summary()
          call g2g_timer_clear()
        endif
+
+       if (first_step) first_step=.false.
 
 !--------------------------------------------------------------------!
        deallocate(ff1G,ffSG,ff3G)

@@ -1,5 +1,5 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-  module basis_copy
+  module basis_data
   implicit none
   integer                            :: basis_size
   integer                            :: basis_size_s
@@ -7,7 +7,7 @@
   integer                            :: basis_size_d
   integer                            :: maximum_contractions
   integer,allocatable,dimension(:)   :: orbital_contractions
-  integer,allocatable,dimension(:)   :: orbital_atom
+  integer,allocatable,dimension(:)   :: parent_atom
   integer,allocatable,dimension(:,:) :: angular_momentum
   real*8,allocatable,dimension(:,:)  :: gauss_expo
   real*8,allocatable,dimension(:,:)  :: gauss_coef
@@ -16,7 +16,7 @@
 
 
 !------------------------------------------------------------------------------!
-  subroutine set_basis_copy(ns,np,nd,orba,orbc,ge,gc)
+  subroutine basis_data_set(ns,np,nd,orba,orbc,ge,gc)
 !------------------------------------------------------------------------------!
   implicit none
   integer,intent(in)                :: ns,np,nd
@@ -34,13 +34,13 @@
   basis_size=ns+np+nd
   maximum_contractions=max(size(ge,2),size(gc,2))
 
-  if (allocated(orbital_atom))         deallocate(orbital_atom)
+  if (allocated(parent_atom))          deallocate(parent_atom)
   if (allocated(orbital_contractions)) deallocate(orbital_contractions)
   if (allocated(angular_momentum))     deallocate(angular_momentum)
   if (allocated(gauss_expo))           deallocate(gauss_expo)
   if (allocated(gauss_coef))           deallocate(gauss_coef)
 
-  allocate(orbital_atom(basis_size))
+  allocate(parent_atom(basis_size))
   allocate(orbital_contractions(basis_size))
   allocate(angular_momentum(3,basis_size))
   allocate(gauss_expo(maximum_contractions,basis_size))
@@ -48,7 +48,7 @@
 
 
   do nn=1,ns
-    orbital_atom(nn+0)         = orba(nn)
+    parent_atom(nn+0)          = orba(nn)
     orbital_contractions(nn+0) = orbc(nn)
 
     angular_momentum(:,nn) = 0
@@ -57,9 +57,9 @@
   enddo
 
   do nn=ns+1,ns+np,3
-    orbital_atom(nn+2)         = orba(nn)
-    orbital_atom(nn+1)         = orba(nn)
-    orbital_atom(nn+0)         = orba(nn)
+    parent_atom(nn+2)          = orba(nn)
+    parent_atom(nn+1)          = orba(nn)
+    parent_atom(nn+0)          = orba(nn)
     orbital_contractions(nn+2) = orbc(nn)
     orbital_contractions(nn+1) = orbc(nn)
     orbital_contractions(nn+0) = orbc(nn)
@@ -81,12 +81,12 @@
   enddo
 
   do nn=ns+np+1,ns+np+nd,6
-    orbital_atom(nn+5)         = orba(nn)
-    orbital_atom(nn+4)         = orba(nn)
-    orbital_atom(nn+3)         = orba(nn)
-    orbital_atom(nn+2)         = orba(nn)
-    orbital_atom(nn+1)         = orba(nn)
-    orbital_atom(nn+0)         = orba(nn)
+    parent_atom(nn+5)          = orba(nn)
+    parent_atom(nn+4)          = orba(nn)
+    parent_atom(nn+3)          = orba(nn)
+    parent_atom(nn+2)          = orba(nn)
+    parent_atom(nn+1)          = orba(nn)
+    parent_atom(nn+0)          = orba(nn)
     orbital_contractions(nn+5) = orbc(nn)
     orbital_contractions(nn+4) = orbc(nn)
     orbital_contractions(nn+3) = orbc(nn)

@@ -100,7 +100,6 @@
       call setim(0,1,ani,anj,posi,posj,IMTX)
 
       cij=coefs(ni,ii)*coefs(nj,jj)
-      write(555,*) ii,coefs(ni,ii),' .... ',jj,coefs(nj,jj)
       ct2=cij*2
       cta=ct2*anj
 
@@ -126,21 +125,10 @@
          Bmat(ii,jj)=Bmat(ii,jj)+NucVel(kk,nkj)*(term1+term2)
          Force(kk,nkj)=Force(kk,nkj)+AuxMat(ii,jj)*(term1+term2)
 
+
          if (kk.eq.1) DSX(ii,jj,nkj)=DSX(ii,jj,nkj)+(term1+term2)
          if (kk.eq.2) DSY(ii,jj,nkj)=DSY(ii,jj,nkj)+(term1+term2)
          if (kk.eq.3) DSZ(ii,jj,nkj)=DSZ(ii,jj,nkj)+(term1+term2)
-
-!      enddo
-      if (nki.eq.1) then
-      if (((ii.eq.1).and.(jj.eq.13)).or.((ii.eq.13).and.(jj.eq.1))) then
-        write(666,*) ii,jj
-        write(666,*) cta*intx*inty*intz,-cij*intx*inty*intz,-ct2*intx*inty*intz
-        write(666,*) term1,term2
-        write(666,*) DSX(ii,jj,nkj),DSY(ii,jj,nkj),DSZ(ii,jj,nkj)
-        write(666,*)
-        write(666,*)
-      endif
-      endif
 
       enddo
 

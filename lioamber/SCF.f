@@ -848,6 +848,7 @@ c
 !--------------------------------------------------------------------!
          if (dovv.eqv..true.) fock=fock+fockbias
          Fmtx=fock ! TODO: Solo importa quedarse con la ultima
+!         write(601,*) Fmtx
 
 
 #ifdef CUBLAS
@@ -1353,6 +1354,8 @@ c
        call fixrho(M,RealRho)
        call mulliken_calc(natom,M,RealRho,Smat,Nuc,Iz,q)
        call mulliken_write(85,natom,Iz,q)
+       RhoCero=DCMPLX(RealRho)
+       if (first_step) RhoSave=DCMPLX(RealRho)
 
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 ! TESTIN THE FORCE
@@ -1362,21 +1365,28 @@ c
        if (allocated(cools))  deallocate(cools)
 
        print*,'-------------------------------------IGNORE FROM HERE'
-       call intsol(E1s,Ens,.true.)
+       call aint_query_gpu_level(igpu)
+       if (igpu.le.1) then
+         call intsol(Energy1,Energy2,.true.)
+       else
+         call aint_qmmm_fock(Energy1,Energy2)
+       endif
        call int2()
        call int3mem()
        call int3lu(E2)
        call g2g_solve_groups(0,Ex,0)
        print*,'----------------------------------------------TO HERE'
-!       call spunpack('L',M,RMM(M5),Fmtx) TODO: sacar si fock esta bien
+       call spunpack('L',M,RMM(M5),Fmtx)   !TODO: sacar si fock esta bien
+!       write(602,*) Fmtx
        Sinv=matmul(Xmat,Xtrans)
+
        do iii=1,M
        do jjj=1,M
          Pmtx(iii,jjj)=CMPLX(RealRho(iii,jjj),0.0d0)
        enddo
        enddo
-!       call testforce(Sinv,Fmtx,Pmtx)
-       call testforce(Sinv,Fmtx,RealRho)
+       call testforce(Sinv,Fmtx,Pmtx)
+!       call testforce(Sinv,Fmtx,RealRho)
        print*,'----------------------------------------------DONE'
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 

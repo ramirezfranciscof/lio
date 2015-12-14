@@ -11,9 +11,9 @@
      > , cubegen_only_i, cuberes_i
      > , cubedens_i, cubedensfile_i
      > , cubeorb_i, cubesel_i, cubeorbfile_i
-     > , restart_freq_i, energy_freq_i)
+     > , restart_freq_i, energy_freq_i, dt_i)
 #else
-     > )
+     > , dt_i)
 #endif
 
       use garcha_mod
@@ -86,6 +86,7 @@ c      include 'param'
        integer :: propagator_i
        logical :: writedens_i
        logical :: tdrestart_i
+       real*8,intent(in) :: dt_i
 
 
        basis= basis_i
@@ -252,6 +253,16 @@ c       write(*,*) ng2,ngDyn,ngdDyn
 c--------------------------------------------------------
       call drive(ng2,ngDyn,ngdDyn)
 c        write(*,*) 'Lio init amber'
+
+! FFR
+       if (allocated(RhoSave)) deallocate(RhoSave)
+       allocate(RhoSave(M,M))
+       if (allocated(RhoCero)) deallocate(RhoCero)
+       allocate(RhoCero(M,M))
+
+       first_step=.true.
+       do_ehrenfest=.false.
+       tdstep=dt_i
 
       end
 c---------------------------------------------------------------------

@@ -102,9 +102,15 @@ c
       real*4, dimension (:), ALLOCATABLE :: cools
 c      parameter rmintsol=16.0D0
 !
+! FFR - My global variables
 !------------------------------------------------------------------------------!
+       logical                               :: do_ehrenfest,first_step
+       real*8,allocatable,dimension(:,:)     :: nucpos,nucvel
        real*8,allocatable,dimension(:,:)     :: Smat
        real*8,allocatable,dimension(:,:)     :: RealRho
+       real*8,allocatable,dimension(:,:)     :: qm_forces_ds
+       complex*16,allocatable,dimension(:,:) :: RhoSave,RhoCero
+!       real*8,allocatable,dimension(:,:)     :: FockA,FockB
 !       real*8,allocatable,dimension(:,:)     :: Gmat !DK
 !       real*8,allocatable,dimension(:,:)     :: Hmat !DK
 !       real*8,allocatable,dimension(:,:)     :: FockMat

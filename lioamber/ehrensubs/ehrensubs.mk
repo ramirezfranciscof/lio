@@ -3,7 +3,9 @@
 INCLUDES :=
 INCLUDES += fzaDS2.f90
 INCLUDES += setim.f90
-INCLUDES += forceDS.f90
+INCLUDES += calc_forceDS.f90
+INCLUDES += calc_forceDS_dss.f90
+INCLUDES += calc_forceDS_dds.f90
 
-$(obj_path)/ehrendyn.o : $(INCLUDES) ehrendyn.mk
+$(obj_path)/ehrensubs.o : $(INCLUDES) ehrensubs.mk
 ######################################################################

@@ -43,7 +43,9 @@ objects += sysdata.o
 objects += density.o
 objects += fterm_biaspot.o lowdinpop.o
 objects += elec.o
-objects += testforce.o calcDSM.o
+objects += testforce.o
+objects += calcDSM.o
+objects += ehrendyn.o Calculate_Fock.o Calculate_Overlap.o
 
 
 
@@ -61,45 +63,46 @@ tmplist += jarz.o lio_finalize.o predictor.o
 tmplist += SCF.o SCF_in.o SCFop.o TD.o cubegen.o
 $(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/garcha_mod.mod
 
-# basis_copy: Description pending
+# basis_data: Description pending
 ######################################################################
-objects   += basis_copy.o
+objects   += basis_data.o
 #src_paths += liomods
 #include liomods/liomods.mk
 
-tmplist := ehrendyn.o
-$(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/basis_copy.mod
+tmplist := ehrensubs.o
+$(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/basis_data.mod
 
 
 # testmod: Description pending
 ######################################################################
 objects   += testmod.o
-src_paths += testmod
+#src_paths += liomods
+#include liomods/liomods.mk
 
-tmplist := testforce.o ehrendyn.o
+tmplist := testforce.o ehrensubs.o
 $(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/testmod.mod
 
 
-# ehrendyn: Description pending
+# ehrensubs: Description pending
 ######################################################################
-objects   += ehrendyn.o
-src_paths += ehrendyn
-include ehrendyn/ehrendyn.mk
+objects   += ehrensubs.o
+src_paths += ehrensubs
+include ehrensubs/ehrensubs.mk
+
+
+tmplist := testforce.o ehrendyn.o
+$(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/ehrensubs.mod
+
+
+# ehrensubs: Description pending
+######################################################################
+objects   += ehrensubs.o
+src_paths += ehrensubs
+include ehrensubs/ehrensubs.mk
 
 
 tmplist := testforce.o
-$(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/ehrendyn.mod
-
-
-# ehrendyn: Description pending
-######################################################################
-objects   += ehrendyn.o
-src_paths += ehrendyn
-include ehrendyn/ehrendyn.mk
-
-
-tmplist := testforce.o
-$(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/ehrendyn.mod
+$(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/ehrensubs.mod
 
 
 
