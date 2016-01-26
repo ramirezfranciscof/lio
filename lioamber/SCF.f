@@ -8,6 +8,7 @@ c
 c Dario Estrin, 1992
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
       subroutine SCF(E,dipxyz)
+      use ehrensubs
       use garcha_mod
       use mathsubs
       use general_module
@@ -41,7 +42,7 @@ c       REAL*8 , intent(in)  :: clcoords(4,nsolin)
 
 !FFR!
 !      NewForce
-       real*8     :: Sinv(M,M),Fmtx(M,M)
+       real*8     :: Sinv(M,M),Fmtx(M,M),Bmat(M,M)
        complex*16 :: Pmtx(M,M)
 
 !      vvterm
@@ -1297,6 +1298,8 @@ c--------------------------------------------------------------
         E=E-Ex
       endif
       endif
+      write(888,*) 'SCF energy = ',E
+
 c calculation of energy weighted density matrix
 c
       call g2g_timer_sum_start('energy-weighted density')
@@ -1355,7 +1358,10 @@ c
        call mulliken_calc(natom,M,RealRho,Smat,Nuc,Iz,q)
        call mulliken_write(85,natom,Iz,q)
        RhoCero=DCMPLX(RealRho)
-       if (first_step) RhoSave=DCMPLX(RealRho)
+       if (first_step) then
+         RhoSave=DCMPLX(RealRho)
+       endif
+
 
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 ! TESTIN THE FORCE
@@ -1372,7 +1378,17 @@ c
          call aint_qmmm_fock(Energy1,Energy2)
        endif
        call int2()
-       call int3mem()
+       if (igpu.gt.2) then
+         call aint_coulomb_init()
+       endif
+       if (igpu.eq.5) MEMO = .false.
+       if (MEMO) then
+          call g2g_timer_start('int3mem')
+          call g2g_timer_sum_start('Coulomb precalc')
+          call int3mem()
+          call g2g_timer_stop('int3mem')
+          call g2g_timer_sum_stop('Coulomb precalc')
+       endif
        call int3lu(E2)
        call g2g_solve_groups(0,Ex,0)
        print*,'----------------------------------------------TO HERE'
@@ -1385,8 +1401,26 @@ c
          Pmtx(iii,jjj)=CMPLX(RealRho(iii,jjj),0.0d0)
        enddo
        enddo
-       call testforce(Sinv,Fmtx,Pmtx)
-!       call testforce(Sinv,Fmtx,RealRho)
+! NECESITO TESTFORCE PORQUE SETEA EL BASIS_DATA!
+!       call testforce(Sinv,Fmtx,Pmtx)
+
+
+       if (.not.allocated(qm_forces_ds)) then
+          allocate(qm_forces_ds(3,natom))
+          qm_forces_ds=0.0d0
+       endif
+
+       do ii=1,natom
+       do kk=1,3
+          nucvel(kk,ii)=nucvel(kk,ii)-
+     >    dt*qm_forces_ds(kk,ii)/atom_mass(ii)
+       enddo
+       enddo
+
+       call calc_forceDS(natom,M,nucpos,nucvel,Pmtx,Fmtx,Sinv,Bmat
+     >                  ,qm_forces_ds)
+
+
        print*,'----------------------------------------------DONE'
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 
@@ -1453,7 +1487,6 @@ c writes down MO coefficients and orbital energies
         call cubegen(M15,Xnano)
         call g2g_timer_sum_stop('cube gen')
       endif
-
 
 c
 c-------------------------------------------------

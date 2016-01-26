@@ -33,20 +33,28 @@
          call g2g_timer_sum_stop('Nuclear attraction gradients')
        endif
        call g2g_timer_stop('int1G')
+       do ii=1,natom
+         kk=610+ii
+         write(kk,101) ff1G(ii,:)
+       enddo
+!       write(671,*) ''
+
 
        call g2g_timer_start('intSG')
        call g2g_timer_sum_start('Overlap gradients')
        ffSG=0.0d0
        call intSG(ffSG)
-       write(667,101) ffSG
-       write(667,*) ''
-       write(667,*) ''
-       if ((do_ehrenfest).and.(.not.first_step)) 
-     >   ffSG=-transpose(qm_forces_ds)
-       write(668,101) ffSG
-       write(668,*) ''
-       write(668,*) ''
-101    format(3(3X,E14.7))
+!       write(666,101) ffSG
+!       write(666,*) ''
+!       if (do_ehrenfest) then
+!         ffSG=-transpose(qm_forces_ds)
+!       endif
+       do ii=1,natom
+         kk=620+ii
+         write(kk,101) ffSG(ii,:)
+       enddo
+!       write(672,*) ''
+101    format(3(3X,E20.13))
        call g2g_timer_stop('intSG')
        call g2g_timer_sum_stop('Overlap gradients')
 
@@ -56,6 +64,12 @@
        call int3G(ff3G,.true.)
        call g2g_timer_stop('int3G')
        call g2g_timer_sum_stop('Coulomb+Exchange-correlation')
+       do ii=1,natom
+         kk=630+ii
+         write(kk,101) ff3G(ii,:)
+       enddo
+!       write(673,*) ''
+
 
        factor=1.D0
 c       factor=627.509391D0/0.5291772108D0
@@ -63,8 +77,15 @@ c       factor=627.509391D0/0.5291772108D0
        do ii=1,3
          dxyzqm(ii,kk)=ff1G(kk,ii)+ffSG(kk,ii)+ff3G(kk,ii)
          dxyzqm(ii,kk)=dxyzqm(ii,kk)*factor
+!         dxyzqm(ii,kk)=0.0d0
        enddo
        enddo
+
+       do ii=1,natom
+         kk=660+ii
+         write(kk,101) dxyzqm(:,ii)
+       enddo
+
 
 !--------------------------------------------------------------------!
        print_forces=.false.

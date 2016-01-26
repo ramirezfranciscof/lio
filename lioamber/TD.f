@@ -796,7 +796,7 @@ c The real part of the density matrix in the atomic orbital basis is copied in R
               endif
               if ((propagator.eq.2).and.(istep.lt.lpfrg_steps)
      >      .and. (.not.tdrestart)) then
-                  if(mod ((istep-1),10) == 0) then
+                  if(mod ((istep-1),100) == 0) then
                      call g2g_timer_start('DIPOLE')
                      call dip(ux,uy,uz)
                      call g2g_timer_stop('DIPOLE')

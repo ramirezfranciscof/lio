@@ -100,7 +100,7 @@ objects   += ehrensubs.o
 src_paths += ehrensubs
 include ehrensubs/ehrensubs.mk
 
-
+tmplist := SCF_in.o
 tmplist := testforce.o
 $(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/ehrensubs.mod
 

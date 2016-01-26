@@ -17,6 +17,7 @@
 #endif
 
       use garcha_mod
+      use basis_data, only:basis_data_set
 c      use qmmm_module, only : qmmm_struct,qmmm_nml
       implicit real*8 (a-h,o-z)
 c
@@ -261,8 +262,12 @@ c        write(*,*) 'Lio init amber'
        allocate(RhoCero(M,M))
 
        first_step=.true.
-       do_ehrenfest=.false.
-       tdstep=dt_i
+       do_ehrenfest=.true.
+       call basis_data_set
+     > (nshell(0),nshell(1),nshell(2),nuc,ncont,a,c)
+
+! time units transform 1/20.455 ps to atomic units (2.418884326505 x 10e−17 s)
+       tdstep=(dt_i)/((20.455)*(2.418884326505E-5))
 
       end
 c---------------------------------------------------------------------

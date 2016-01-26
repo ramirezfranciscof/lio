@@ -36,6 +36,7 @@ c-----auxiliar quantities
        allocate(s3s(natom),s4s(natom),Iaux(natom))
        if (.not.allocated(Smat)) allocate(Smat(M,M))
 
+
 c-----distance between pairs of centers
 c
 c --- BSSE------------------------------------
@@ -137,6 +138,7 @@ c
       RMM(M5+k-1)=RMM(M5+k-1)+ccoef*ovlap
       Smat(i,j)=Smat(i,j)+ccoef*ovlap
       Smat(j,i)=Smat(j,i)+ccoef*ovlap
+
 c 
 c loop over nuclei, nuclear attraction matrix elements
 c tna: accumulates nuc. attraction over all nuclei
@@ -201,6 +203,7 @@ c
         RMM(M5+k-1)=RMM(M5+k-1)+ovlap*ccoef
         Smat(iin,j)=Smat(iin,j)+ovlap*ccoef
         Smat(j,iin)=Smat(j,iin)+ovlap*ccoef
+
 c
 c loop over nuclei, specific part
        tna=0.D0

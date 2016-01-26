@@ -21,6 +21,9 @@
   real*8,allocatable     :: Btrp(:,:)
   complex*16,allocatable :: InputMat(:,:),MatTrp(:,:),MatDir(:,:)
   complex*16,allocatable :: fterm1(:,:),fterm2(:,:),fterm3(:,:)
+
+! TEST
+  integer                :: ii,jj
 !--------------------------------------------------------------------!
   allocate(InputMat(Nbasis,Nbasis))
   allocate(MatTrp(Nbasis,Nbasis),MatDir(Nbasis,Nbasis))
@@ -32,6 +35,7 @@
   fterm2=dcmplx(0.0d0,0.0d0)
   fterm3=dcmplx(0.0d0,0.0d0)
 
+
 ! NOTA: El orden de las multiplicaciones afecta levemente el
 ! resultado obtenido
   MatTrp=matmul(DensMao,FockMao)
@@ -41,6 +45,12 @@
   InputMat=transpose(MatTrp)+MatDir
   call calc_forceDS_dss(Natoms,Nbasis,nucpos,nucvel,InputMat,Bmat,fterm1)
   Btrp=transpose(Bmat)
+  do ii=1,Natoms
+  do jj=1,3
+    write(777,*) fterm1(jj,ii)
+  enddo
+  enddo
+  write(777,*) ''
 
 
   MatTrp=matmul(DensMao,Btrp)
@@ -50,14 +60,35 @@
   MatDir=matmul(MatDir,DensMao)
   MatDir=MatDir*dcmplx(0.0d0,-1.0d0)
   InputMat=transpose(MatTrp)+MatDir
-  call calc_forceDS_dss(Natoms,Nbasis,nucpos,nucvel,InputMat,Bmat,fterm2)
+!  call calc_forceDS_dss(Natoms,Nbasis,nucpos,nucvel,InputMat,Bmat,fterm2)
+  do ii=1,Natoms
+  do jj=1,3
+    write(777,*) fterm2(jj,ii)
+  enddo
+  enddo
+  write(777,*) ''
+
 
   MatTrp=DensMao*dcmplx(0.0d0,-1.0d0)
   MatDir=DensMao*dcmplx(0.0d0, 1.0d0)
   InputMat=transpose(MatTrp)+MatDir
-  call calc_forceDS_dds(Natoms,Nbasis,nucpos,nucvel,InputMat,fterm3)
+!  call calc_forceDS_dds(Natoms,Nbasis,nucpos,nucvel,InputMat,fterm3)
+  do ii=1,Natoms
+  do jj=1,3
+    write(777,*) fterm3(jj,ii)
+  enddo
+  enddo
+  write(777,*) ''
 
+
+!  forceDS=dble(real(fterm1))
   forceDS=dble(real(fterm1+fterm2+fterm3))
+!  do ii=1,Nbasis
+!  do jj=1,Nbasis
+!    write(999,*) ii,jj,'    ',DensMao(ii,jj)
+!  enddo
+!  enddo
+!  write(999,*) 
 
   deallocate(InputMat,MatTrp,MatDir,Btrp)
   deallocate(fterm1,fterm2,fterm3)

@@ -2,6 +2,7 @@
       Subroutine SCF_in(E,qmcoords,qmvels,clcoords,nsolin,dipxyz)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
       use garcha_mod
+      use ehrensubs
       REAL*8 , intent(in)  :: qmcoords(3,natom)
       REAL*8 , intent(in)  :: qmvels(3,natom)
       REAL*8 , intent(in)  :: clcoords(4,nsolin)
@@ -45,38 +46,32 @@ c        write(18,345) 8,r(nn,1),r(nn,2),r(nn,3)
        do kk=1,3
           r(ii,kk)   = qmcoords(kk,ii)/0.529177D0
           rqm(ii,kk) = qmcoords(kk,ii)/0.529177D0
+! velocity units in angstrom per 1/20.455 pico-second must go to atomic units
           nucpos(kk,ii) = r(ii,kk)
-          nucvel(kk,ii) = qmvels(kk,ii)
-c          write(89,*) ii, kk, qmcoords(ii,kk)
-c          write(87,*) ii, kk, r(ii,kk)
+          nucvel(kk,ii) = qmvels(kk,ii)*(20.455)*(2.418884326505E-5)
+          nucvel(kk,ii) = qmvels(kk,ii)/(0.529177d0)
        enddo
        write(18,345) Iz(ii),qmcoords(:,ii)
       enddo
 
+
+
 !--------------------------------------------------------------------!
 ! I am not sure this should be here, but it is the only
 ! place to put it right now (FFR)
+       if (allocated(atom_mass)) deallocate(atom_mass)
+       allocate(atom_mass(natom))
+       call ehren_masses(natom,Iz,atom_mass)
+
        call liomain()
        if (.not.allocated(Smat))    allocate(Smat(M,M))
        if (.not.allocated(RealRho)) allocate(RealRho(M,M))
 !--------------------------------------------------------------------!
       if (do_ehrenfest) then
-
         if (first_step) then
           call SCF(E,dipxyz)
-        else
-          call SCF(E,dipxyz)
-          do ii=1,M
-          do jj=1,M
-            write(666,*) RhoSave(ii,jj),RhoCero(ii,jj)
-!     >                     ABS(RhoSave(ii,jj)+RhoCero(ii,jj)),
-!     >                     ABS(RhoSave(ii,jj)+RhoCero(ii,jj))/2
-          enddo
-          enddo
-          write(666,*) ''
-          write(666,*) ''
-          call ehrendyn(E,dipxyz)
         endif
+        call ehrendyn(E,dipxyz)
       else
         if (OPEN) then 
           call SCFOP(E,dipxyz)

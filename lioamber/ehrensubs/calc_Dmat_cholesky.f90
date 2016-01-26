@@ -21,19 +21,15 @@
 
   do jj=1,nbasis
 
-     if (jj.gt.1) then
      do ii=1,jj-1
        Dmat(ii,jj)=-Matrix(jj,ii)
      enddo
-     endif
 
      Dmat(jj,jj)=0.0d0
 
-     if (jj.lt.nbasis) then
      do ii=jj+1,nbasis
        Dmat(ii,jj)=Matrix(ii,jj)
      enddo
-     endif
 
   enddo
 
