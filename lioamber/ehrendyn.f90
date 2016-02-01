@@ -42,6 +42,7 @@
   do ii=1,natom
   do kk=1,3
     nucvel(kk,ii)=nucvel(kk,ii)+dt*qm_forces_ds(kk,ii)/atom_mass(ii)
+   ! NONO QM_FORCES_DS no, todas las contribuciones
   enddo
   enddo
 

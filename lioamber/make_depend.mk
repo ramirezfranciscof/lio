@@ -37,7 +37,7 @@ objects += int1.o int1G.o int2.o int2G.o
 objects += int3lu.o int3mem.o  int3G.o
 objects += intsol.o intsolG.o intsolGs.o
 objects += intfld.o intSG.o
-objects += FixMessRho.o get_unit.o PackedStorage.o
+objects += FixMessRho.o find_free_unit.o PackedStorage.o
 objects += liokeys.o
 objects += sysdata.o
 objects += density.o
@@ -46,6 +46,7 @@ objects += elec.o
 objects += testforce.o
 objects += calcDSM.o
 objects += ehrendyn.o Calculate_Fock.o Calculate_Overlap.o
+objects += writegeom.o
 
 
 
@@ -61,6 +62,7 @@ tmplist += int1.o int2.o int3lu.o int3mem.o intfld.o intsol.o
 tmplist += int1G.o int2G.o int3G.o intSG.o intsolG.o intsolGs.o
 tmplist += jarz.o lio_finalize.o predictor.o
 tmplist += SCF.o SCF_in.o SCFop.o TD.o cubegen.o
+tmplist += testmod.o
 $(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/garcha_mod.mod
 
 # basis_data: Description pending
@@ -90,20 +92,8 @@ src_paths += ehrensubs
 include ehrensubs/ehrensubs.mk
 
 
-tmplist := testforce.o ehrendyn.o
+tmplist := testforce.o ehrendyn.o SCF.f SCF_in.o 
 $(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/ehrensubs.mod
-
-
-# ehrensubs: Description pending
-######################################################################
-objects   += ehrensubs.o
-src_paths += ehrensubs
-include ehrensubs/ehrensubs.mk
-
-tmplist := SCF_in.o
-tmplist := testforce.o
-$(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/ehrensubs.mod
-
 
 
 # maskrmm : Description pending

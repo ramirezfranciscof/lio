@@ -33,7 +33,12 @@ endif
 
 
 ######################################################################
+all: liosolo liomd.x
+
 liosolo: main.f
+	$(FC) $< -o $@ $(FLAGS) $(LIBS)
+
+liomd.x: liomd.f90
 	$(FC) $< -o $@ $(FLAGS) $(LIBS)
 
 clean:

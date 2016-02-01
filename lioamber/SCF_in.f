@@ -56,9 +56,9 @@ c        write(18,345) 8,r(nn,1),r(nn,2),r(nn,3)
 
 
 
-!--------------------------------------------------------------------!
+!%%%%-FFR-START-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 ! I am not sure this should be here, but it is the only
-! place to put it right now (FFR)
+! place to put it right now
        if (allocated(atom_mass)) deallocate(atom_mass)
        allocate(atom_mass(natom))
        call ehren_masses(natom,Iz,atom_mass)
@@ -79,6 +79,14 @@ c        write(18,345) 8,r(nn,1),r(nn,2),r(nn,3)
           call SCF(E,dipxyz)
         endif
       endif
+! OLD CODE:
+!       if (OPEN) then
+!          call SCFOP(E,dipxyz)
+!       else
+!          call SCF(E,dipxyz)
+!       endif
+!%%%%-FFR-START-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+
 
 !
 !--------------------------------------------------------------------!

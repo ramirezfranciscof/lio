@@ -1370,7 +1370,7 @@ c
        if (allocated(cool))   deallocate(cool)
        if (allocated(cools))  deallocate(cools)
 
-       print*,'-------------------------------------IGNORE FROM HERE'
+!       print*,'-------------------------------------IGNORE FROM HERE'
        call aint_query_gpu_level(igpu)
        if (igpu.le.1) then
          call intsol(Energy1,Energy2,.true.)
@@ -1391,7 +1391,7 @@ c
        endif
        call int3lu(E2)
        call g2g_solve_groups(0,Ex,0)
-       print*,'----------------------------------------------TO HERE'
+!       print*,'----------------------------------------------TO HERE'
        call spunpack('L',M,RMM(M5),Fmtx)   !TODO: sacar si fock esta bien
 !       write(602,*) Fmtx
        Sinv=matmul(Xmat,Xtrans)
@@ -1410,6 +1410,7 @@ c
           qm_forces_ds=0.0d0
        endif
 
+
        do ii=1,natom
        do kk=1,3
           nucvel(kk,ii)=nucvel(kk,ii)-
@@ -1421,7 +1422,7 @@ c
      >                  ,qm_forces_ds)
 
 
-       print*,'----------------------------------------------DONE'
+!       print*,'----------------------------------------------DONE'
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 
 

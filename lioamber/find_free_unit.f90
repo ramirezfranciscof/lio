@@ -26,7 +26,7 @@
 
 
   if (errorid.ne.0) then
-     print*,'AN ERROR OCCURRED ON UNIT ',fileunit
+     print*,'AN ERROR OCCURRED ON UNIT ',file_unit
      print*,'(iostat= ',errorid,' )'
      stop
   endif

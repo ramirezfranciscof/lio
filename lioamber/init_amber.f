@@ -17,7 +17,9 @@
 #endif
 
       use garcha_mod
+!%%%%-FFR-START-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
       use basis_data, only:basis_data_set
+!%%%%-FFR-STOPS-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 c      use qmmm_module, only : qmmm_struct,qmmm_nml
       implicit real*8 (a-h,o-z)
 c
@@ -255,19 +257,22 @@ c--------------------------------------------------------
       call drive(ng2,ngDyn,ngdDyn)
 c        write(*,*) 'Lio init amber'
 
-! FFR
+!%%%%-FFR-START-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
        if (allocated(RhoSave)) deallocate(RhoSave)
        allocate(RhoSave(M,M))
        if (allocated(RhoCero)) deallocate(RhoCero)
        allocate(RhoCero(M,M))
 
        first_step=.true.
-       do_ehrenfest=.true.
+       do_ehrenfest=.false.
        call basis_data_set
      > (nshell(0),nshell(1),nshell(2),nuc,ncont,a,c)
 
-! time units transform 1/20.455 ps to atomic units (2.418884326505 x 10e−17 s)
+! time units transform 1/20.455 ps to atomic units
+! ( AU = 2.418884326505 x 10e−17 s )
        tdstep=(dt_i)/((20.455)*(2.418884326505E-5))
+!%%%%-FFR-STOPS-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+
 
       end
 c---------------------------------------------------------------------

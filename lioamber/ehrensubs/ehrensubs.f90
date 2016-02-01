@@ -23,7 +23,8 @@
 
   include 'ehren_cholesky.f90'
   include 'ehren_magnus.f90'
-  include 'ehren_verlet.f90'
+  include 'ehren_verlet_e.f90'
+  include 'ehren_verlet_n.f90'
   include 'ehren_masses.f90'
 
   end module

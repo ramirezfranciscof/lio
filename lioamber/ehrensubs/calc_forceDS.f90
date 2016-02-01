@@ -35,7 +35,6 @@
   fterm2=dcmplx(0.0d0,0.0d0)
   fterm3=dcmplx(0.0d0,0.0d0)
 
-
 ! NOTA: El orden de las multiplicaciones afecta levemente el
 ! resultado obtenido
   MatTrp=matmul(DensMao,FockMao)
@@ -51,7 +50,6 @@
   enddo
   enddo
   write(777,*) ''
-
 
   MatTrp=matmul(DensMao,Btrp)
   MatTrp=matmul(MatTrp,Sinv)
