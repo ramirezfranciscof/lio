@@ -201,11 +201,11 @@
 
   call ehren_masses(natom,Iz,atom_mass)
   first_step=.true.
-  do_ehrenfest=.true.
+  do_ehrenfest=.false.
   call basis_data_set(nshell(0),nshell(1),nshell(2),nuc,ncont,a,c)
 
 
-  md_steps=1000
+  md_steps=5000
   tdstep=4.13414d0!/2.0d0
   open(unit=654,file='liomd.xyz')
   do nn=1,md_steps
@@ -222,7 +222,7 @@
     call SCF(escf,dipxyz)
     call dft_get_qm_forces(dxyzqm)
     dxyzqm=-dxyzqm
-    write(*,*) 'MDSTEP',nn,escf,Kenergy,escf+Kenergy
+    write(unit=999,fmt=*) 'MDSTEP',nn,escf+Kenergy,escf,Kenergy
     call writegeom(natom,Iz,nucpos,654)
   enddo
   close(unit=654)
