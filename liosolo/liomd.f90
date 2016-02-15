@@ -4,6 +4,7 @@
   use garcha_mod
   use ehrensubs
   use basis_data
+  use liosubs
 #ifdef CUBLAS
       use cublasmath
 #endif
@@ -15,7 +16,8 @@
       integer :: ng2, ng3, ngdDyn, ngdnu, ngDyn, ngnu, nqnuc
       logical::filexist,writeforces
       REAL*8  :: dipxyz(3),escf,Kenergy
-      REAL*8,ALLOCATABLE,DIMENSION(:,:) :: oldpos,newpos
+      REAL*8,ALLOCATABLE,DIMENSION(:,:) :: oldpos,newpos,nucvel,nucpos
+      REAL*8,ALLOCATABLE,DIMENSION(:) :: atom_mass
       REAL*8, dimension (:,:), ALLOCATABLE   :: dxyzqm,dxyzcl
       namelist /lio/ natom,nsol,charge,OPEN,NMAX,Nunp,VCINP,frestartin, &
       GOLD,told,rmax,rmaxs,predcoef, &
@@ -30,6 +32,7 @@
       ,md_steps
 
       integer :: ifind, ierr
+      real*8  :: ftot(3)
 
      !defaults
       basis='input'  ! name of the base file
@@ -199,17 +202,17 @@
   enddo
   enddo
 
-  call ehren_masses(natom,Iz,atom_mass)
+  call set_masses(natom,Iz,atom_mass)
   first_step=.true.
   do_ehrenfest=.false.
   call basis_data_set(nshell(0),nshell(1),nshell(2),nuc,ncont,a,c)
 
-
   md_steps=5000
   tdstep=4.13414d0!/2.0d0
-  open(unit=654,file='liomd.xyz')
+  open(unit=501,file='liomd-trays.xyz')
+  open(unit=502,file='liomd-energy.dat')
   do nn=1,md_steps
-    call ehren_verlet_n(natom,tdstep,atom_mass,dxyzqm,oldpos,nucpos,&
+    call nuclear_verlet(natom,tdstep,atom_mass,dxyzqm,oldpos,nucpos,&
                         newpos,nucvel,Kenergy)
     oldpos=nucpos
     nucpos=newpos
@@ -222,8 +225,18 @@
     call SCF(escf,dipxyz)
     call dft_get_qm_forces(dxyzqm)
     dxyzqm=-dxyzqm
-    write(unit=999,fmt=*) 'MDSTEP',nn,escf+Kenergy,escf,Kenergy
-    call writegeom(natom,Iz,nucpos,654)
+
+    ftot=0.0d0
+    do kk=1,natom
+      ftot(1)=ftot(1)+dxyzqm(1,kk)
+      ftot(2)=ftot(2)+dxyzqm(2,kk)
+      ftot(3)=ftot(3)+dxyzqm(3,kk)
+      write(unit=989,fmt=*) dxyzqm(:,kk)
+    enddo
+    write(unit=989,fmt=*) ''
+    call writegeom(natom,Iz,nucpos,501)
+    write(unit=502,fmt=*) 'MDSTEP',nn,escf+Kenergy,escf,Kenergy
+    write(unit=999,fmt=*) ftot
   enddo
   close(unit=654)
 
