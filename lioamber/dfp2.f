@@ -82,15 +82,17 @@ c#ifdef G2G
 c			write(*,*) 'cambio de grilla para fuerza+energia (igrid)'
 c      call g2g_new_grid(igrid)
 c#endif
+       dxyz=0
        call dft_get_qm_forces(dxyz)
 
        do inan=1,natom
        f(inan,1)=-dxyz(1,inan)
        f(inan,2)=-dxyz(2,inan)
        f(inan,3)=-dxyz(3,inan)
+
        enddo
-        write(1234,*) f
-       stop
+c        write(1234,*) f
+c       stop
 c      call int1G(f)
 c
 c
@@ -253,6 +255,7 @@ c#endif
        f(inan,1)=dxyz(1,inan)
        f(inan,2)=dxyz(2,inan)
        f(inan,3)=dxyz(3,inan)
+       write(987,*) inan,f(inan,1),f(inan,2),f(inan,3) 
        enddo
 
 c      call int1G(f)

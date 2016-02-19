@@ -28,7 +28,7 @@ c
       character*20 strng
       character*17 name5
       character*12 name1
-      real*8, dimension(:,:), ALLOCATABLE ::f,f1,f2,xH,xU,xUU,dxyz
+      real*8, dimension(:,:), ALLOCATABLE ::f,f1,f2,xH,xU,xUU,dxyz,XXX
       real*8, dimension(:), ALLOCATABLE :: Pm,vib,aux,xWW,Ei,Xi,q,hess
       logical thereis
       real*8 dipxyz(3)
@@ -44,28 +44,9 @@ c       write(*,*) 'cosas',nt3,ntatom
       allocate (Pm(ntatom),vib(3*ntatom),aux(nt3*2),xWW(nt3))
       allocate (Ei(3),Xi(20),q(ntatom))
       allocate (hess(nt3+nt3*(nt3-1)/2))
-c      memory=ntatom*3+nt3*nt3+nt3*2+(nat3 + nat3*(nat3-1)/2)
-c      memory=memory*8
-c      memory=memory
-c       write(*,*) 'memory',memory,'B'
-
-c       write(*,*) 'cosas',nt3,ntatom
-
-      delta=0.01D0
-c      dimension Pm(nt),vib(3*nt),
-c        real*8,  dimension(3), Ei
-c        real*8,  dimension(20), Xi
-c
-c      dimension xH(nt3,nt3),f1(nt,3),f2(nt,3),aux(nx)
-c      dimension xWW(nt3)
-c      dimension xU(nt3,3),xUU(nt3,3)
-*
-c auxiliars
-c X scratch space in matrices
-c
-c
-c     common /HF/ nopt,OPEN,NMAX,NCO,ATRHO,VCINP,DIRECT,
-c    >             IDAMP,EXTR,SHFT,SHI,GOLD,told,write,Nunp
+      allocate (XXX(nt3,nt3))
+      delta=0.020D0
+      ibrent=0
 c
 c------------------------------------------------------------------
 c
@@ -224,7 +205,7 @@ c
 c       isotop(Iz(i))=1
        indmass = (Iz(i)-1)*4 + 1  !isotop(Iz(i))
        Pm(i) = xmass(indmass)
-       write(*,*) 'EAEAEAPP',Iz(i),Pm(i) 
+c       write(*,*) 'EAEAEAPP',Iz(i),Pm(i) 
 c -----------------------------------------------------
        enddo
 
@@ -239,17 +220,19 @@ c
       numcalc = 0
       numcalctot = 6*ntom
       nat3 = ntom*3
-      do i = 1,nt3
-        do j = 1,3
-          xU(i,j) = 0.D0
+c      do i = 1,nt3
+c        do j = 1,3
+c          xU(i,j) = 0.D0
+          xU = 0.D0
 *          xUU(i,j) = 0.D0
-        enddo
-      enddo
-      do i = 1,natom
-       do j = 1,natom
-         xH(i,j) = 0.D0 
-       enddo 
-      enddo
+c        enddo
+c      enddo
+c      do i = 1,natom
+c       do j = 1,natom
+c         xH(i,j) = 0.D0 
+c       enddo 
+c      enddo
+       xH=0.D0
       del2 = delta/2.D0
       istart1 = 1
       istart2 = 1
@@ -274,7 +257,7 @@ c
       do 201 i = istart1,ntom
        sqmi = dsqrt(Pm(i))
        udenom = delta*sqmi
-       write(*,*) 'udenom=',udenom,delta,sqmi
+c       write(*,*) 'udenom=',udenom,delta,sqmi
 
        do 51 k = istart2,3
         r(i,k) = r(i,k) + del2 
@@ -353,7 +336,6 @@ c
        f2(inan,3)=dxyz(3,inan)
        enddo
 
-
 c        call int1G(f2)
 c        call int3G(f2)
 *
@@ -382,6 +364,8 @@ c     xH  Force-constant matrix
            xH(ii,jj) = (f1(j,1) - f2(j,1))/hdenom
            xH(ii,jj+1) = (f1(j,2) - f2(j,2))/hdenom
            xH(ii,jj+2) = (f1(j,3) - f2(j,3))/hdenom
+          write(545,*) (f1(j,3) + f2(j,3)),(f1(j,3) + f2(j,3))/f1(j,3)
+          write(545,*) 'fuerzas' , -f1(j,3), f2(j,3)
  101    continue
         r(i,k) = r(i,k) + del2 
 *****
@@ -416,18 +400,26 @@ c     xH  Force-constant matrix
        do j = i,nat3
 c         RMM(i + j*(j-1)/2) = (xH(i,j) + xH(j,i))*0.5D0
          hess(i + j*(j-1)/2) = (xH(i,j) + xH(j,i))*0.5D0
-        
+       write(555,*) xH(i,j), xH(j,i), i, j
+       write(555,*) 'error rela',(xH(i,j)-xH(j,i))/hess(i + j*(j-1)/2) 
+       write(555,*) 'error abs',(xH(i,j)-xH(j,i))
        enddo
  489  continue
       nnx = nat3*2
+      XXX=0
+c      write(788,*) hess
 c ESSL option
 #ifdef essl
-      call dspev(21,hess,xWW,XX,Md,nat3,aux,nx)
+      call dspev(21,hess,xWW,XXX,Md,nat3,aux,nx)
 #endif
 c LAPACK OPTION
 #ifdef pack
-      call dspev('V','U',nat3,hess,xWW,XX,Md,aux,info)
+c      call dspev('V','U',nat3,hess,xWW,XXX,Md,aux,info)
+      call dspev('V','U',nat3,hess,xWW,XXX,nat3,aux,info)
 #endif
+
+c       write(789,*) XXX
+
 *
 *  CHECKS
 *
@@ -473,6 +465,7 @@ c
        Xi(5)=Xi(5)-pm(i)*y1*z1
 c
       enddo
+
 c
 c ESSL OPTION ----------------------------------------
 #ifdef essl
@@ -506,16 +499,16 @@ c
       do i = nat3,1,-1
          vecsum = 0.D0
          do j = 1,nat3
-            vecsum = vecsum + XX(j,i)**2
+            vecsum = vecsum + XXX(j,i)**2
          enddo
          check = dabs(vecsum - 1.D0)
          if (check.gt.1.D-6) then
             write(*,*)'check.gt.1.D-6',vecsum
             xnorm = dsqrt(vecsum)
             do j = 1,nat3
-               XX(j,i) = XX(j,i)/xnorm
+               XXX(j,i) = XXX(j,i)/xnorm
 cTEST
-            write(17,*) XX(j,i),j
+            write(17,*) XXX(j,i),j
             enddo
          endif
       enddo
@@ -530,7 +523,7 @@ cTEST
 *      do i = nat3,itemp,-1
       do i = nat3,1,-1
          do j = 1,nat3
-            autovet = XX(j,i)
+            autovet = XXX(j,i)
             xUU(i,1) = xUU(i,1) + autovet*xU(j,1)
             xUU(i,2) = xUU(i,2) + autovet*xU(j,2)
             xUU(i,3) = xUU(i,3) + autovet*xU(j,3)
@@ -540,7 +533,7 @@ cTEST
       do i = nat3,1,-1			          ! restoring
          do j = 1,nat3				  ! cartesian
             indm = (j-1)/3 + 1			  ! coordinates
-            XX(j,i) = XX(j,i)/dsqrt(Pm(indm))	  ! (no more 
+            XXX(j,i) = XXX(j,i)/dsqrt(Pm(indm))	  ! (no more 
          enddo					  !  mass-weighted) 
       enddo					  ! 
 *
@@ -588,7 +581,7 @@ c
            ni = nat3 - i + 1
            if(i.eq.(itemp)) write(46,669)
            write(44,664) ni,freqcm, xintensity 
-           write(44,667) (XX(iku,i),iku=1,nat3)
+           write(44,667) (XXX(iku,i),iku=1,nat3)
       enddo
       zpecm = zpecm * const3 
       write(46,*)'Zero-point energy (kcal/mol)  ',zpecm

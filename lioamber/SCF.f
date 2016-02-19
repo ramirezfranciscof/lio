@@ -764,7 +764,9 @@ c-------------------------------------------------------------------------------
 c IF DIIS=F
 c Always do damping (after first iteration)
 c-----------------------------------------------------------------------------------------
-        if (niter.gt.2.and.(DIIS)) then
+        if (niter.gt.20.and.(DIIS)) then
+
+           write(*,*) 'prendiendo DIIS'
           hagodiis=.true.
         endif
 
