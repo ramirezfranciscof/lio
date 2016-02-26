@@ -26,7 +26,7 @@ c
        real*8, dimension (:), ALLOCATABLE :: rmm5,rmm15,rmm13,
      >   bcoef, suma
       real*8, dimension (:,:), allocatable :: fock,fockm,rho,!,FP_PF,
-     >   FP_PFm,EMAT,Y,Ytrans,Xtrans,rho1,EMAT2
+     >   FP_PFm,EMAT,Y,Ytrans,Xtrans,rho1,EMAT2,Xcpy
 c
        integer ndiist
 c       dimension d(natom,natom)
@@ -41,6 +41,10 @@ c       REAL*8 , intent(in)  :: clcoords(4,nsolin)
         logical :: just_int3n,ematalloct
 
 !FFR!
+!      NewForce
+       real*8     :: Sinv(M,M),Fmtx(M,M),Bmat(M,M)
+       complex*16 :: Pmtx(M,M)
+
 !      vvterm
        logical             :: dovv
        real*8              :: weight
@@ -684,6 +688,7 @@ c-------------------------------------------------------------------------------
 ! FFR: Van Voorhis Term for DIIS
 !--------------------------------------------------------------------!
          if (dovv.eqv..true.) fock=fock+fockbias
+         Fmtx=fock ! TODO: Solo importa quedarse con la ultima
 
 c-----------------------------------------------------------------------------------------
 c Expand density matrix into full square form (before, density matrix was set up for triangular sums
@@ -843,6 +848,7 @@ c
 ! FFR: Van Voorhis Term for not DIIS
 !--------------------------------------------------------------------!
          if (dovv.eqv..true.) fock=fock+fockbias
+         Fmtx=fock ! TODO: Solo importa quedarse con la ultima
 !         write(601,*) Fmtx
 
 
@@ -1356,6 +1362,75 @@ c
        if (first_step) then
          RhoSave=DCMPLX(RealRho)
        endif
+
+
+
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+! TESTIN THE FORCE
+       if (allocated(kkind))  deallocate(kkind)
+       if (allocated(kkinds)) deallocate(kkinds)
+       if (allocated(cool))   deallocate(cool)
+       if (allocated(cools))  deallocate(cools)
+
+
+!       print*,'-------------------------------------IGNORE FROM HERE'
+       call aint_query_gpu_level(igpu)
+       if (igpu.le.1) then
+         call intsol(Energy1,Energy2,.true.)
+       else
+         call aint_qmmm_fock(Energy1,Energy2)
+       endif
+       call int2()
+       if (igpu.gt.2) then
+         call aint_coulomb_init()
+       endif
+       if (igpu.eq.5) MEMO = .false.
+       if (MEMO) then
+          call g2g_timer_start('int3mem')
+          call g2g_timer_sum_start('Coulomb precalc')
+          call int3mem()
+          call g2g_timer_stop('int3mem')
+          call g2g_timer_sum_stop('Coulomb precalc')
+       endif
+       call int3lu(E2)
+       call g2g_solve_groups(0,Ex,0)
+!       print*,'----------------------------------------------TO HERE'
+       call spunpack('L',M,RMM(M5),Fmtx)   !TODO: sacar si fock esta bien
+!       write(602,*) Fmtx
+       Sinv=matmul(Xmat,Xtrans)
+
+       do iii=1,M
+       do jjj=1,M
+         Pmtx(iii,jjj)=CMPLX(RealRho(iii,jjj),0.0d0)
+       enddo
+       enddo
+! NECESITO TESTFORCE PORQUE SETEA EL BASIS_DATA!
+!       call testforce(Sinv,Fmtx,Pmtx)
+
+       if (.not.allocated(qm_forces_ds)) then
+          allocate(qm_forces_ds(3,natom))
+          qm_forces_ds=0.0d0
+       endif
+
+
+       print*,natom,3
+       print*,size(nucvel,2),size(nucvel,1)
+       print*,size(qm_forces_ds,2),size(qm_forces_ds,1)
+       print*,'ALMOST';STOP!FFR-DELETE
+       do ii=1,natom
+       do kk=1,3
+          nucvel(kk,ii)=nucvel(kk,ii)-
+     >    dt*qm_forces_ds(kk,ii)/atom_mass(ii)
+       enddo
+       enddo
+       print*,'ALMOST';STOP!FFR-DELETE
+
+       call calc_forceDS(natom,M,nucpos,nucvel,Pmtx,Fmtx,Sinv,Bmat
+     >                  ,qm_forces_ds)
+
+
+!       print*,'----------------------------------------------DONE'
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 
 
 ! NOTE: If 'mulliken_calc' is renamed as 'mulliken', the code will

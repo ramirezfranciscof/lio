@@ -264,7 +264,7 @@ c        write(*,*) 'Lio init amber'
        allocate(RhoCero(M,M))
 
        first_step=.true.
-       do_ehrenfest=.false.
+       do_ehrenfest=.true.
        call basis_data_set
      > (nshell(0),nshell(1),nshell(2),nuc,ncont,a,c)
 

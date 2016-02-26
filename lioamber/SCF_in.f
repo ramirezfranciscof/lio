@@ -16,7 +16,6 @@
 !      enddo
 ! 123  FORMAT(3(3X,f12.8))
 
-
       deallocate (r,v,Em,Rm,pc,nnat)
 
       allocate (r(ntatom,3),v(ntatom,3),Em(ntatom)
