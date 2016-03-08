@@ -47,7 +47,6 @@ objects += testforce.o
 objects += calcDSM.o
 objects += ehrendyn.o Calculate_Fock.o Calculate_Overlap.o
 objects += writegeom.o
-#objects += read_lio_nml.o
 
 # garcha_mod: Description pending
 ######################################################################
@@ -62,7 +61,6 @@ tmplist += int1G.o int2G.o int3G.o intSG.o intsolG.o intsolGs.o
 tmplist += jarz.o lio_finalize.o predictor.o
 tmplist += SCF.o SCF_in.o SCFop.o TD.o cubegen.o
 tmplist += testmod.o
-#tmplist += read_lio_nml.o
 $(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/garcha_mod.mod
 
 # basis_data: Description pending
