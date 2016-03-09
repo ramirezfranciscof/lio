@@ -470,6 +470,7 @@ c Size criteria based on size of pre-factor in Gaussian Product Theorem
 c (applied to MO basis indices)
          call int3mem()
 c Small elements of t_i put into single-precision cools here
+c         call int3mems()
          call g2g_timer_stop('int3mem')
          call g2g_timer_sum_stop('Coulomb precalc')
       endif
@@ -796,7 +797,7 @@ c The real part of the density matrix in the atomic orbital basis is copied in R
               endif
               if ((propagator.eq.2).and.(istep.lt.lpfrg_steps)
      >      .and. (.not.tdrestart)) then
-                  if(mod ((istep-1),100) == 0) then
+                  if(mod ((istep-1),10) == 0) then
                      call g2g_timer_start('DIPOLE')
                      call dip(ux,uy,uz)
                      call g2g_timer_stop('DIPOLE')

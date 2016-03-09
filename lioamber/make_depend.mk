@@ -46,7 +46,6 @@ objects += elec.o
 objects += testforce.o
 objects += calcDSM.o
 objects += ehrendyn.o Calculate_Fock.o Calculate_Overlap.o
-objects += writegeom.o
 
 # garcha_mod: Description pending
 ######################################################################
