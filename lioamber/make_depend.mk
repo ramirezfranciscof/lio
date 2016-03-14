@@ -43,7 +43,6 @@ objects += sysdata.o
 objects += density.o
 objects += fterm_biaspot.o lowdinpop.o
 objects += elec.o
-objects += testforce.o
 objects += calcDSM.o
 objects += ehrendyn.o Calculate_Fock.o Calculate_Overlap.o
 
@@ -78,7 +77,7 @@ objects   += testmod.o
 #src_paths += liomods
 #include liomods/liomods.mk
 
-tmplist := testforce.o ehrensubs.o
+tmplist := ehrensubs.o
 $(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/testmod.mod
 
 
@@ -89,7 +88,7 @@ src_paths += ehrensubs
 include ehrensubs/ehrensubs.mk
 
 
-tmplist := testforce.o ehrendyn.o SCF.f SCF_in.o 
+tmplist := ehrendyn.o SCF.f SCF_in.o 
 $(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/ehrensubs.mod
 
 
