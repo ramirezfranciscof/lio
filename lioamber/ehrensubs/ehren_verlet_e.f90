@@ -6,7 +6,8 @@
   implicit none
   integer,intent(in)     :: Nsize
   real*8,intent(in)      :: dt
-  complex*16,intent(in)  :: Fmat(Nsize,Nsize)
+  real*8,intent(in)  :: Fmat(Nsize,Nsize)
+!  complex*16,intent(in)  :: Fmat(Nsize,Nsize)
   complex*16,intent(in)  :: Rold(Nsize,Nsize)
   complex*16,intent(in)  :: Rnow(Nsize,Nsize)
   complex*16,intent(out) :: Rnew(Nsize,Nsize)
@@ -20,8 +21,9 @@
   TermPos=matmul(Fmat,Rnow)
   TermNeg=matmul(Rnow,Fmat)
   ConmMat=TermPos-TermNeg
-  ConmMat=ConmMat*CMPLX(0.0d0,-1.0d0)
-  Rnew=Rold+(2.0d0)*dt*ConmMat
+  Rnew=Rold-dt*CMPLX(0.0d0,2.0d0)*ConmMat
+!  ConmMat=ConmMat*CMPLX(0.0d0,-1.0d0)
+!  Rnew=Rold+(2.0d0)*dt*ConmMat
 
   return;end subroutine
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!

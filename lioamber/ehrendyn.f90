@@ -2,34 +2,37 @@
   subroutine ehrendyn(Energy,Dipmom)
 !------------------------------------------------------------------------------!
 !
-! RhoSave should always remain in OA basis
+! Description Pending
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
   use ehrensubs
-  use garcha_mod, only: M, natom, nucpos, nucvel, RhoSaveA, RhoSaveB & 
-                      , qm_forces_ds, tdstep, first_step, rmm, atom_mass &
-                      , total_time, first_step, qm_forces_total !, Fock_a, Fock_b
+  use garcha_mod, only: M, rmm, natom, tdstep, total_time &
+                      , first_step, atom_mass, nucpos, nucvel &
+                      , qm_forces_ds, qm_forces_total &
+                      , RhoSaveA, RhoSaveB
   implicit none
   real*8,intent(inout) :: Energy,Dipmom(3)
 
   real*8,allocatable,dimension(:,:)     :: Smat,Sinv,Lmat,Umat,Linv,Uinv
   real*8,allocatable,dimension(:,:)     :: Fock,FockInt
-  real*8,allocatable,dimension(:,:)     :: DensAO
   complex*16,allocatable,dimension(:,:) :: RhoOld,RhoMid,RhoNew
 
   real*8,allocatable,dimension(:,:)     :: Bmat,Dmat
   complex*16,allocatable,dimension(:,:) :: Tmat
   real*8                                :: dt
-  integer                               :: ii,jj,kk,idx
   real*8                                :: ux,uy,uz
+  integer                               :: ii,jj,kk,idx
+
+
 
 ! Preliminaries
 !------------------------------------------------------------------------------!
-  allocate(Smat(M,M),Sinv(M,M),Lmat(M,M),Umat(M,M),Linv(M,M),Uinv(M,M))
+  allocate(Smat(M,M),Sinv(M,M))
+  allocate(Lmat(M,M),Umat(M,M),Linv(M,M),Uinv(M,M))
   allocate(Fock(M,M),FockInt(M,M))
-  allocate(DensAO(M,M))
   allocate(RhoOld(M,M),RhoMid(M,M),RhoNew(M,M))
   allocate(Bmat(M,M),Dmat(M,M),Tmat(M,M))
+
 
   if (.not.allocated(qm_forces_total)) then
     allocate(qm_forces_total(3,natom))
@@ -42,7 +45,10 @@
   endif
 
   dt=tdstep
-
+  RhoOld=RhoSaveA
+  RhoMid=RhoSaveB
+  ! in AO right now X (or trying...RhoMid is strange)
+  ! in ON right now
 
 ! Update velocities
 !------------------------------------------------------------------------------!
@@ -58,14 +64,14 @@
   call Calculate_Overlap(Smat)
   call ehren_cholesky(M,Smat,Lmat,Umat,Linv,Uinv,Sinv)
 
-  DensAO=real(RhoSaveB)
-!  DensAO=RealPart(RhoSaveB)
-!  DensAO=matmul(DensAO,Linv)
-!  DensAO=matmul(Uinv,DensAO)
+!  if (.not.first_step) then
+!    DensOld=matmul(DensOld,Linv)
+!    DensOld=matmul(Uinv,DensOld)
+!  endif
 
 ! Esto deja la Rho correcta en RMM, pero habria que ordenarlo mejor
-  call Calculate_Fock(DensAO,Fock,Energy)
-  call calc_forceDS(natom,M,nucpos,nucvel,RhoSaveB,Fock,Sinv,Bmat,qm_forces_ds)
+  call Calculate_Fock(RhoMid,Fock,Energy)
+  call calc_forceDS(natom,M,nucpos,nucvel,RhoMid,Fock,Sinv,Bmat,qm_forces_ds)
 
 
 ! Density Propagation (works in ON)
@@ -73,60 +79,27 @@
   Fock=matmul(Fock,Uinv)
   Fock=matmul(Linv,Fock)
   Dmat=calc_Dmat(M,Linv,Uinv,Bmat)
-  Tmat=DCMPLX(Fock)+CMPLX(0.0d0,1.0d0)*DCMPLX(Dmat)
+  Tmat=DCMPLX(Fock)+DCMPLX(0.0d0,1.0d0)*DCMPLX(Dmat)
 
-  RhoOld=RhoSaveA
+  RhoOld=matmul(RhoOld,Lmat)
+  RhoOld=matmul(Umat,RhoOld)
   RhoMid=matmul(RhoMid,Lmat)
   RhoMid=matmul(Umat,RhoMid)
-  RhoMid=RhoSaveB
-  RhoMid=matmul(RhoMid,Lmat)
-  RhoMid=matmul(Umat,RhoMid)
+
 
   if (first_step) then
-    call ehren_verlet_e(M,-(dt/2.0d0),Tmat,RhoMid,RhoMid,RhoOld)
+    call ehren_verlet_e(M,-(dt/2.0d0),Fock,RhoMid,RhoMid,RhoSaveA)
   endif
-  call ehren_verlet_e(M,dt,Tmat,RhoOld,RhoMid,RhoNew)
+  call ehren_verlet_e(M,dt,Fock,RhoSaveA,RhoMid,RhoNew)
 
-  RhoMid=matmul(RhoMid,Linv)
-  RhoMid=matmul(Uinv,RhoMid)
+!  RhoMid=matmul(RhoMid,Linv)
+!  RhoMid=matmul(Uinv,RhoMid)
   RhoSaveA=RhoMid
   RhoNew=matmul(RhoNew,Linv)
   RhoNew=matmul(Uinv,RhoNew)
   RhoSaveB=RhoNew
-
-  do jj=1,M
-    ii=jj
-    idx=ii+(2*M-jj)*(jj-1)/2
-    RMM(idx)=(REAL(RhoMid(ii,jj)))
-    do ii=jj+1,M
-       idx=ii+(2*M-jj)*(jj-1)/2
-       RMM(idx)=REAL(RhoMid(ii,jj))+REAL(RhoMid(jj,ii))
-    enddo
-  enddo
-
-
-!!  do_magnus=.false.
-!!  if (do_magnus) then
-!!    Tmat=DCMPLX(Fock)
-!    Tmat=DCMPLX((7.0d0/4.0d0)*FockB-(3.0d0/4.0d0)*FockA)
-!    Tmat=Tmat+DCMPLX(0.0d0,1.0d0)*DCMPLX(Dmat)
-!!    call ehren_magnus(M,10,dt/2,Tmat,DensOld,DensInt)
-
-!!    DensInt=matmul(DensInt,Linv)
-!!    DensInt=matmul(Uinv,DensInt)
-!!    call Calculate_Fock(DensInt,FockInt,Energy)
-!!    FockInt=matmul(FockInt,Uinv)
-!!    FockInt=matmul(Linv,FockInt)
-
-!!    Tmat=DCMPLX(FockInt)
-!    Tmat=Tmat+DCMPLX(0.0d0,1.0d0)*DCMPLX(Dmat)
-!!    call ehren_magnus(M,10,dt,Tmat,DensOld,DensNew)
-!!  else
-!!    Tmat=DCMPLX(Fock)+CMPLX(0.0d0,1.0d0)*DCMPLX(Dmat)
-!!    if (first_step) call ehren_verlet_e(M,-(dt/2.0d0),Tmat,DensOld,DensOld,RhoCero)
-!!    call ehren_verlet_e(M,dt,Tmat,RhoCero,DensOld,DensNew)
-!!    RhoCero=DensOld
-!!  endif
+!  RhoSaveB=matmul(RhoNew,Linv)
+!  RhoSaveB=matmul(Uinv,RhoSaveB)
 
 
 

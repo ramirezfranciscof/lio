@@ -263,6 +263,7 @@ c        write(*,*) 'Lio init amber'
        if (allocated(RhoSaveB)) deallocate(RhoSaveB)
        allocate(RhoSaveB(M,M))
 
+
        first_step=.true.
        do_ehrenfest=.true.
        call basis_data_set
@@ -271,7 +272,7 @@ c        write(*,*) 'Lio init amber'
 ! time units transform 1/20.455 ps to atomic units
 ! ( AU = 2.418884326505 x 10e-17 s )
 !       tdstep=(dt_i)/((20.455)*(2.418884326505E-5))
-       tdstep=(dt_i)*(41341.3734)
+       tdstep=(dt_i)/(2.418884326505E-5)
 
 
 !%%%%-FFR-STOPS-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!

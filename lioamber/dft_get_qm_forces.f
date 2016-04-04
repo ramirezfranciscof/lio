@@ -47,9 +47,9 @@
        call intSG(ffSG)
 !       write(666,101) ffSG
 !       write(666,*) ''
-       if (do_ehrenfest) then
-         ffSG=-transpose(qm_forces_ds)
-       endif
+!       if (do_ehrenfest) then
+!         ffSG=-transpose(qm_forces_ds)
+!       endif
        do ii=1,natom
          kk=620+ii
          write(kk,101) ffSG(ii,:)
@@ -128,12 +128,12 @@ c       factor=627.509391D0/0.5291772108D0
          call g2g_timer_clear()
        endif
 
-       if (first_step) first_step=.false.
        if (do_ehrenfest) then
          qm_forces_total=qm_forces_ds
          qm_forces_total=qm_forces_total-transpose(ff1G)
          qm_forces_total=qm_forces_total-transpose(ff3G)
        endif
+       if (first_step) first_step=.false.
 
 
 !--------------------------------------------------------------------!

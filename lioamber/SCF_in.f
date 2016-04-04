@@ -6,7 +6,6 @@
       REAL*8 , intent(in)  :: qmcoords(3,natom)
       REAL*8 , intent(in)  :: qmvels(3,natom)
       REAL*8 , intent(in)  :: clcoords(4,nsolin)
-      REAL*8 :: Kenergy_comp
       integer :: nn,kk,ii,jj
       nsol=nsolin
       ntatom=nsol+natom
@@ -54,7 +53,6 @@ c        write(18,345) 8,r(nn,1),r(nn,2),r(nn,3)
        write(18,345) Iz(ii),qmcoords(:,ii)
       enddo
 
-
 !%%%%-FFR-START-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 ! I am not sure this should be here, but it is the only
 ! place to put it right now
@@ -62,13 +60,9 @@ c        write(18,345) 8,r(nn,1),r(nn,2),r(nn,3)
        allocate(atom_mass(natom))
        call ehren_masses(natom,Iz,atom_mass)
 
-       call calc_kenergy(natom,atom_mass,qmvels,Kenergy_comp)
-       write(898,*) Kenergy_comp
-
        call liomain()
        if (.not.allocated(Smat))    allocate(Smat(M,M))
        if (.not.allocated(RealRho)) allocate(RealRho(M,M))
-
 !--------------------------------------------------------------------!
       if (do_ehrenfest) then
         if (first_step) then
@@ -82,7 +76,6 @@ c        write(18,345) 8,r(nn,1),r(nn,2),r(nn,3)
           call SCF(E,dipxyz)
         endif
       endif
-
 ! OLD CODE:
 !       if (OPEN) then
 !          call SCFOP(E,dipxyz)
