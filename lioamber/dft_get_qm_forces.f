@@ -47,9 +47,9 @@
        call intSG(ffSG)
 !       write(666,101) ffSG
 !       write(666,*) ''
-!       if (do_ehrenfest) then
-!         ffSG=-transpose(qm_forces_ds)
-!       endif
+       if (do_ehrenfest) then
+         ffSG=-transpose(qm_forces_ds)
+       endif
        do ii=1,natom
          kk=620+ii
          write(kk,101) ffSG(ii,:)

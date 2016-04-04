@@ -45,8 +45,6 @@
   endif
 
   dt=tdstep
-  RhoOld=RhoSaveA
-  RhoMid=RhoSaveB
   ! in AO right now X (or trying...RhoMid is strange)
   ! in ON right now
 
@@ -64,12 +62,12 @@
   call Calculate_Overlap(Smat)
   call ehren_cholesky(M,Smat,Lmat,Umat,Linv,Uinv,Sinv)
 
-!  if (.not.first_step) then
-!    DensOld=matmul(DensOld,Linv)
-!    DensOld=matmul(Uinv,DensOld)
-!  endif
-
 ! Esto deja la Rho correcta en RMM, pero habria que ordenarlo mejor
+  RhoMid=RhoSaveB
+  if (.not.first_step) then
+    RhoMid=matmul(RhoMid,Linv)
+    RhoMid=matmul(Uinv,RhoMid)
+  endif
   call Calculate_Fock(RhoMid,Fock,Energy)
   call calc_forceDS(natom,M,nucpos,nucvel,RhoMid,Fock,Sinv,Bmat,qm_forces_ds)
 
@@ -81,25 +79,21 @@
   Dmat=calc_Dmat(M,Linv,Uinv,Bmat)
   Tmat=DCMPLX(Fock)+DCMPLX(0.0d0,1.0d0)*DCMPLX(Dmat)
 
-  RhoOld=matmul(RhoOld,Lmat)
-  RhoOld=matmul(Umat,RhoOld)
-  RhoMid=matmul(RhoMid,Lmat)
-  RhoMid=matmul(Umat,RhoMid)
-
-
+  RhoOld=RhoSaveA
+  RhoMid=RhoSaveB
   if (first_step) then
-    call ehren_verlet_e(M,-(dt/2.0d0),Fock,RhoMid,RhoMid,RhoSaveA)
+    RhoMid=matmul(RhoMid,Lmat)
+    RhoMid=matmul(Umat,RhoMid)
+    call ehren_verlet_e(M,-(dt/2.0d0),Tmat,RhoMid,RhoMid,RhoOld)
   endif
-  call ehren_verlet_e(M,dt,Fock,RhoSaveA,RhoMid,RhoNew)
+  call ehren_verlet_e(M,dt,Tmat,RhoOld,RhoMid,RhoNew)
 
 !  RhoMid=matmul(RhoMid,Linv)
 !  RhoMid=matmul(Uinv,RhoMid)
   RhoSaveA=RhoMid
-  RhoNew=matmul(RhoNew,Linv)
-  RhoNew=matmul(Uinv,RhoNew)
+!  RhoNew=matmul(RhoNew,Linv)
+!  RhoNew=matmul(Uinv,RhoNew)
   RhoSaveB=RhoNew
-!  RhoSaveB=matmul(RhoNew,Linv)
-!  RhoSaveB=matmul(Uinv,RhoSaveB)
 
 
 

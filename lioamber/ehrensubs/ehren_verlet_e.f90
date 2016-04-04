@@ -6,8 +6,8 @@
   implicit none
   integer,intent(in)     :: Nsize
   real*8,intent(in)      :: dt
-  real*8,intent(in)  :: Fmat(Nsize,Nsize)
-!  complex*16,intent(in)  :: Fmat(Nsize,Nsize)
+!  real*8,intent(in)      :: Fmat(Nsize,Nsize)
+  complex*16,intent(in)  :: Fmat(Nsize,Nsize)
   complex*16,intent(in)  :: Rold(Nsize,Nsize)
   complex*16,intent(in)  :: Rnow(Nsize,Nsize)
   complex*16,intent(out) :: Rnew(Nsize,Nsize)
