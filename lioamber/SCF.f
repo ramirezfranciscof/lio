@@ -1352,9 +1352,11 @@ c
        call fixrho(M,RealRho)
        call mulliken_calc(natom,M,RealRho,Smat,Nuc,Iz,q)
        call mulliken_write(85,natom,Iz,q)
-       RhoCero=DCMPLX(RealRho)
        if (first_step) then
-         RhoSave=DCMPLX(RealRho)
+!         RealRho=matmul(RealRho,Ymat)
+!         RealRho=matmul(Ytrp,RealRho)
+         RhoSaveA=DCMPLX(RealRho)
+         RhoSaveB=DCMPLX(RealRho)
        endif
 
 

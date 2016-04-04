@@ -26,6 +26,7 @@
   include 'ehren_verlet_e.f90'
   include 'ehren_verlet_n.f90'
   include 'ehren_masses.f90'
+  include 'calc_kenergy.f90'
 
   end module
 !

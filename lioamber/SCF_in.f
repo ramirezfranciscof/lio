@@ -6,6 +6,7 @@
       REAL*8 , intent(in)  :: qmcoords(3,natom)
       REAL*8 , intent(in)  :: qmvels(3,natom)
       REAL*8 , intent(in)  :: clcoords(4,nsolin)
+      REAL*8 :: Kenergy_comp
       integer :: nn,kk,ii,jj
       nsol=nsolin
       ntatom=nsol+natom
@@ -48,11 +49,10 @@ c        write(18,345) 8,r(nn,1),r(nn,2),r(nn,3)
 ! velocity units in angstrom per 1/20.455 pico-second must go to atomic units
           nucpos(kk,ii) = r(ii,kk)
           nucvel(kk,ii) = qmvels(kk,ii)*(20.455)*(2.418884326505E-5)
-          nucvel(kk,ii) = qmvels(kk,ii)/(0.529177d0)
+          nucvel(kk,ii) = nucvel(kk,ii)/(0.529177d0)
        enddo
        write(18,345) Iz(ii),qmcoords(:,ii)
       enddo
-
 
 
 !%%%%-FFR-START-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
@@ -62,9 +62,13 @@ c        write(18,345) 8,r(nn,1),r(nn,2),r(nn,3)
        allocate(atom_mass(natom))
        call ehren_masses(natom,Iz,atom_mass)
 
+       call calc_kenergy(natom,atom_mass,qmvels,Kenergy_comp)
+       write(898,*) Kenergy_comp
+
        call liomain()
        if (.not.allocated(Smat))    allocate(Smat(M,M))
        if (.not.allocated(RealRho)) allocate(RealRho(M,M))
+
 !--------------------------------------------------------------------!
       if (do_ehrenfest) then
         if (first_step) then
@@ -78,6 +82,7 @@ c        write(18,345) 8,r(nn,1),r(nn,2),r(nn,3)
           call SCF(E,dipxyz)
         endif
       endif
+
 ! OLD CODE:
 !       if (OPEN) then
 !          call SCFOP(E,dipxyz)

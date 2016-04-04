@@ -111,7 +111,8 @@ c      parameter rmintsol=16.0D0
        real*8,allocatable,dimension(:,:)     :: RealRho
        real*8                                :: total_time
        real*8,allocatable,dimension(:,:)     :: qm_forces_ds
-       complex*16,allocatable,dimension(:,:) :: RhoSave,RhoCero
+       real*8,allocatable,dimension(:,:)     :: qm_forces_total
+       complex*16,allocatable,dimension(:,:) :: RhoSaveA,RhoSaveB
 !       real*8,allocatable,dimension(:,:)     :: FockA,FockB
 !       real*8,allocatable,dimension(:,:)     :: Gmat !DK
 !       real*8,allocatable,dimension(:,:)     :: Hmat !DK

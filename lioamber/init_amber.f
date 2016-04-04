@@ -258,10 +258,10 @@ c--------------------------------------------------------
 c        write(*,*) 'Lio init amber'
 
 !%%%%-FFR-START-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-       if (allocated(RhoSave)) deallocate(RhoSave)
-       allocate(RhoSave(M,M))
-       if (allocated(RhoCero)) deallocate(RhoCero)
-       allocate(RhoCero(M,M))
+       if (allocated(RhoSaveA)) deallocate(RhoSaveA)
+       allocate(RhoSaveA(M,M))
+       if (allocated(RhoSaveB)) deallocate(RhoSaveB)
+       allocate(RhoSaveB(M,M))
 
        first_step=.true.
        do_ehrenfest=.true.
@@ -269,8 +269,11 @@ c        write(*,*) 'Lio init amber'
      > (nshell(0),nshell(1),nshell(2),nuc,ncont,a,c)
 
 ! time units transform 1/20.455 ps to atomic units
-! ( AU = 2.418884326505 x 10e−17 s )
-       tdstep=(dt_i)/((20.455)*(2.418884326505E-5))
+! ( AU = 2.418884326505 x 10e-17 s )
+!       tdstep=(dt_i)/((20.455)*(2.418884326505E-5))
+       tdstep=(dt_i)*(41341.3734)
+
+
 !%%%%-FFR-STOPS-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 
 

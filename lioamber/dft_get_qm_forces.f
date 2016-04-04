@@ -5,8 +5,9 @@
 !
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-       use garcha_mod,only:natom,nsol,cubegen_only,qm_forces_ds,
-     >                     do_ehrenfest,first_step
+       use garcha_mod,only:natom,nsol, cubegen_only, do_ehrenfest,
+     >                     first_step,
+     >                     qm_forces_ds, qm_forces_total
        implicit none
        real*8,intent(out) :: dxyzqm(3,natom)
        real*8,allocatable :: ff1G(:,:),ffSG(:,:),ff3G(:,:)
@@ -46,9 +47,9 @@
        call intSG(ffSG)
 !       write(666,101) ffSG
 !       write(666,*) ''
-!       if (do_ehrenfest) then
-!         ffSG=-transpose(qm_forces_ds)
-!       endif
+       if (do_ehrenfest) then
+         ffSG=-transpose(qm_forces_ds)
+       endif
        do ii=1,natom
          kk=620+ii
          write(kk,101) ffSG(ii,:)
@@ -77,6 +78,7 @@ c       factor=627.509391D0/0.5291772108D0
        do ii=1,3
          dxyzqm(ii,kk)=ff1G(kk,ii)+ffSG(kk,ii)+ff3G(kk,ii)
          dxyzqm(ii,kk)=dxyzqm(ii,kk)*factor
+         ! NULL FORCES: NUCLEOS FIJOS
 !         dxyzqm(ii,kk)=0.0d0
        enddo
        enddo
@@ -127,6 +129,12 @@ c       factor=627.509391D0/0.5291772108D0
        endif
 
        if (first_step) first_step=.false.
+       if (do_ehrenfest) then
+         qm_forces_total=qm_forces_ds
+         qm_forces_total=qm_forces_total-transpose(ff1G)
+         qm_forces_total=qm_forces_total-transpose(ff3G)
+       endif
+
 
 !--------------------------------------------------------------------!
        deallocate(ff1G,ffSG,ff3G)
