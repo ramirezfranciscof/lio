@@ -2,7 +2,7 @@
   subroutine ehrendyn(Energy,Dipmom)
 !------------------------------------------------------------------------------!
 !
-! Description Pending
+! RhoSaveA and RhoSaveB are stored in ON basis, except for the first step
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
   use ehrensubs
@@ -45,8 +45,6 @@
   endif
 
   dt=tdstep
-  ! in AO right now X (or trying...RhoMid is strange)
-  ! in ON right now
 
 ! Update velocities
 !------------------------------------------------------------------------------!
