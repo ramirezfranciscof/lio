@@ -5,7 +5,6 @@
 ! RhoSaveA and RhoSaveB are stored in ON basis, except for the first step
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-  use ehrenfest
   use garcha_mod, only: M, rmm, natom, tdstep, total_time &
                       , first_step, atom_mass, nucpos, nucvel &
                       , qm_forces_ds, qm_forces_total &

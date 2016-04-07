@@ -7,7 +7,7 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
   use garcha_mod, &
       only:M,a,c,r,nshell,natom,ncont,nl,nuc,RMM,Md,nucvel
-  use ehrensubs
+  use ehrenfest
   use basis_data, &
       only:basis_data_set
   use testmod

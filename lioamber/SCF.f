@@ -8,7 +8,7 @@ c
 c Dario Estrin, 1992
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
       subroutine SCF(E,dipxyz)
-      use ehrensubs
+      use ehrenfest
       use garcha_mod
       use mathsubs
       use general_module

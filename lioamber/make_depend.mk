@@ -44,7 +44,7 @@ objects += density.o
 objects += fterm_biaspot.o lowdinpop.o
 objects += elec.o
 objects += calcDSM.o
-objects += ehrendyn.o Calculate_Fock.o Calculate_Overlap.o
+objects += Calculate_Fock.o Calculate_Overlap.o
 
 # garcha_mod: Description pending
 ######################################################################
@@ -67,7 +67,7 @@ objects   += basis_data.o
 #src_paths += liomods
 #include liomods/liomods.mk
 
-tmplist := ehrensubs.o
+tmplist := ehrenfest.o
 $(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/basis_data.mod
 
 
@@ -77,19 +77,19 @@ objects   += testmod.o
 #src_paths += liomods
 #include liomods/liomods.mk
 
-tmplist := ehrensubs.o
+tmplist := ehrenfest.o
 $(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/testmod.mod
 
 
-# ehrensubs: Description pending
+# ehrenfest: Description pending
 ######################################################################
-objects   += ehrensubs.o
-src_paths += ehrensubs
-include ehrensubs/ehrensubs.mk
+objects   += ehrenfest.o
+src_paths += ehrenfest
+include ehrenfest/ehrenfest.mk
 
 
-tmplist := ehrendyn.o SCF.f SCF_in.o 
-$(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/ehrensubs.mod
+tmplist := SCF.f SCF_in.o 
+$(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/ehrenfest.mod
 
 
 # maskrmm : Description pending

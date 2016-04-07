@@ -2,10 +2,11 @@
       Subroutine SCF_in(E,qmcoords,qmvels,clcoords,nsolin,dipxyz)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
       use garcha_mod
-      use ehrensubs
-      REAL*8 , intent(in)  :: qmcoords(3,natom)
-      REAL*8 , intent(in)  :: qmvels(3,natom)
-      REAL*8 , intent(in)  :: clcoords(4,nsolin)
+      use ehrenfest
+      REAL*8 , intent(in)    :: qmcoords(3,natom)
+      REAL*8 , intent(in)    :: qmvels(3,natom)
+      REAL*8 , intent(in)    :: clcoords(4,nsolin)
+      REAL*8 , intent(inout) :: E,dipxyz(3)
       integer :: nn,kk,ii,jj
       nsol=nsolin
       ntatom=nsol+natom

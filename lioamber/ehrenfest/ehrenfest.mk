@@ -1,6 +1,7 @@
 ######################################################################
 # INTERNAL DEPENDENCIES
 INCLUDES :=
+INCLUDES += ehrendyn.f90
 INCLUDES += fzaDS2.f90
 INCLUDES += setim.f90
 INCLUDES += ehren_magnus.f90
@@ -11,5 +12,5 @@ INCLUDES += calc_forceDS_dds.f90
 INCLUDES += ehren_masses.f90
 INCLUDES += calc_kenergy.f90
 
-$(obj_path)/ehrensubs.o : $(INCLUDES) ehrensubs.mk
+$(obj_path)/ehrenfest.o : $(INCLUDES) ehrenfest.mk
 ######################################################################
