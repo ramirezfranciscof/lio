@@ -1,5 +1,6 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
   subroutine Calculate_Fock(DensMao,FockMao,Energy)
+  use maskrmm
   use garcha_mod, only:M,RMM,kkind,kkinds,cool,cools,igrid2 & 
                       ,nuc,natom,natomc,d,r,atmin,rmax,jatc &
                       ,nnps,nnpp,nnpd,nshell,Md
@@ -22,14 +23,7 @@
 
 ! Store DensMao in RMM
 !------------------------------------------------------------------------------!
-  do jj=1,M
-    do ii=jj,M
-       idx=ii+(2*M-jj)*(jj-1)/2
-       RMM(idx)=(REAL(DensMao(ii,jj)))*2
-    enddo
-    idx=jj+(2*M-jj)*(jj-1)/2
-    RMM(idx)=RMM(idx)/2
-  enddo
+  call rmmput_dens(DensMao)
 
 
 ! Initializations: Copied from SCF
@@ -133,15 +127,7 @@
 
 ! Extract FockMao from RMM
 !------------------------------------------------------------------------------!
-  idx=0
-  idx0=M*(M+1)
-  do jj=1,M
-  do ii=jj,M
-     idx=ii+(2*M-jj)*(jj-1)/2+idx0
-     FockMao(ii,jj)=RMM(idx)
-     FockMao(jj,ii)=RMM(idx)
-  enddo
-  enddo
+  call rmmget_fock(FockMao)
 
   return; end subroutine
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!

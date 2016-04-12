@@ -28,7 +28,7 @@
   real*8,intent(in)  :: time
   real*8,intent(out) :: field(3)
 
-  real*8 :: time0, field0, sigma
+  real*8 :: sigma, time0, field0(3)
   real*8 :: factor, gexp
 
 !

@@ -94,9 +94,12 @@ $(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/ehrenfest.mod
 
 # maskrmm : Description pending
 ######################################################################
-#objects   += maskrmm.o
-#src_paths += maskrmm
-#include maskrmm/maskrmm.mk
+objects   += maskrmm.o
+src_paths += maskrmm
+include maskrmm/maskrmm.mk
+
+tmplist := SCF.f
+$(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/maskrmm.mod
 
 
 # mathsubs: Description pending
