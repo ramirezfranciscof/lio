@@ -16,6 +16,7 @@
   include 'nuclear_verlet.f90'
   include 'find_free_unit.f90'
   include 'catch_iostat.f90'
+  include 'get_electric_field.f90'
   end module
 !
 !

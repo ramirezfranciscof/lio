@@ -12,10 +12,6 @@
       ntatom=nsol+natom
 
       call g2g_timer_sum_start("Total")
-!      do kk=1,natom
-!        write(666,123) qmvels(1:3,kk)
-!      enddo
-! 123  FORMAT(3(3X,f12.8))
 
       deallocate (r,v,Em,Rm,pc,nnat)
 
