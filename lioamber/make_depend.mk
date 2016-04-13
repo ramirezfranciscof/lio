@@ -46,6 +46,7 @@ objects += elec.o
 objects += calcDSM.o
 objects += Calculate_Fock.o Calculate_Overlap.o
 
+
 # garcha_mod: Description pending
 ######################################################################
 objects   += garcha_mod.o
@@ -88,7 +89,7 @@ src_paths += ehrenfest
 include ehrenfest/ehrenfest.mk
 
 
-tmplist := SCF.f SCF_in.o 
+tmplist := SCF.o SCF_in.o 
 $(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/ehrenfest.mod
 
 
@@ -98,7 +99,7 @@ objects   += maskrmm.o
 src_paths += maskrmm
 include maskrmm/maskrmm.mk
 
-tmplist := SCF.f
+tmplist := ehrenfest.o SCF.o
 $(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/maskrmm.mod
 
 

@@ -30,6 +30,12 @@
   include 'ehren_masses.f90'
   include 'calc_kenergy.f90'
 
+  include 'RMMcalc0_Init.f90'
+  include 'RMMcalc1_Overlap.f90'
+  include 'RMMcalc2_FockMao.f90'
+
+
+
   end module
 !
 !

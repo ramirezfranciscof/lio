@@ -1360,6 +1360,30 @@ c
        endif
 
 
+       if (first_step) then
+         open(unit=134,file='x.dip')
+         open(unit=135,file='y.dip')
+         open(unit=136,file='z.dip')
+         write(134,*) 
+     >   '#Time (fs) vs DIPOLE MOMENT, X COMPONENT (DEBYES)'
+         write(135,*) 
+     >   '#Time (fs) vs DIPOLE MOMENT, Y COMPONENT (DEBYES)'
+         write(136,*) 
+     >   '#Time (fs) vs DIPOLE MOMENT, Z COMPONENT (DEBYES)'
+         total_time=0.0d0
+       endif
+
+       call dip(ux,uy,uz)
+       write(134,901) total_time,ux
+       write(135,901) total_time,uy
+       write(136,901) total_time,uz
+       print*,''
+       print*,' Timer: ',total_time
+       print*,''
+       total_time=total_time+tdstep*0.0241888
+ 901  format(F15.9,2x,F15.9)
+
+
 ! NOTE: If 'mulliken_calc' is renamed as 'mulliken', the code will
 ! malfunction. I DON'T KNOW WHY.
 !--------------------------------------------------------------------!
@@ -1481,6 +1505,7 @@ c       E=E*627.509391D0
   88  format(5(2x,f8.5))
   45  format(E15.6E4)
   91  format(F14.7,4x,F14.7)
+
 c
       !call g2g_timer_sum_stop('SCF');
       return
