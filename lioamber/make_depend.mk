@@ -44,7 +44,6 @@ objects += density.o
 objects += fterm_biaspot.o lowdinpop.o
 objects += elec.o
 objects += calcDSM.o
-objects += Calculate_Fock.o Calculate_Overlap.o
 
 
 # garcha_mod: Description pending
@@ -59,7 +58,7 @@ tmplist += int1.o int2.o int3lu.o int3mem.o intfld.o intsol.o
 tmplist += int1G.o int2G.o int3G.o intSG.o intsolG.o intsolGs.o
 tmplist += jarz.o lio_finalize.o predictor.o
 tmplist += SCF.o SCF_in.o SCFop.o TD.o cubegen.o
-tmplist += testmod.o
+tmplist += testmod.o liosubs.o
 $(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/garcha_mod.mod
 
 # basis_data: Description pending

@@ -1,10 +1,10 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-  subroutine ehren_verlet_n &
+  subroutine nuclear_verlet &
   (Npart,dt,mass,force,oldpos,nowpos,newpos,nowvel,Kenergy)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
   implicit none
-  integer,intent(in)     :: Npart ! Degrees of Freedom
-  real*8,intent(in)      :: dt  ! Time step
+  integer,intent(in)     :: Npart
+  real*8,intent(in)      :: dt
 
   real*8,intent(in)      :: mass(Npart)
   real*8,intent(in)      :: force(Npart,3)

@@ -23,8 +23,10 @@
       case (8);  Vmass(kk)=15.99940d0
       case (9);  Vmass(kk)=18.99840d0
       case (10); Vmass(kk)=20.17970d0
+      case (16); Vmass(kk)=32.06500d0
+      case (26); Vmass(kk)=55.84500d0
       case default
-        print*,'ATOMIC NUMBER IS NOT SUPPORTED'
+        print*,'ATOMIC NUMBER ',Vatnum(kk),' IS NOT SUPPORTED'
         stop
     endselect
     Vmass(kk)=Vmass(kk)*(1822.88857149)
