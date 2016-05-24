@@ -44,7 +44,7 @@ objects += density.o
 objects += fterm_biaspot.o lowdinpop.o
 objects += elec.o
 objects += calcDSM.o
-
+objects += fockon_diagonlize.o
 
 # garcha_mod: Description pending
 ######################################################################
