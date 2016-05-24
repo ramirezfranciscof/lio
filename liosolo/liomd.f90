@@ -2,7 +2,7 @@
   program liomd
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
   use garcha_mod
-  use ehrensubs
+  use ehrenfest
   use basis_data
   use liosubs
 #ifdef CUBLAS

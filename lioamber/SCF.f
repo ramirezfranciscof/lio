@@ -295,7 +295,7 @@ c Diagonalization of S matrix, after this is not needed anymore
 c S = YY^T ; X = (Y^-1)^T
 c => (X^T)SX = 1
 c
-      docholesky=.true.
+      docholesky=.false.
       call g2g_timer_start('cholesky')
       call g2g_timer_sum_start('Overlap decomposition')
       IF (docholesky) THEN
@@ -1034,20 +1034,20 @@ c-------nano tratando de usar magma
       enddo
 c---------------------
        LWORK=-1
+
 #ifdef magma
       call magmaf_dsyevd('V','L',M,fock,M,RMM(M13),WORK,LWORK
      > ,IWORK,LWORK,info)
 #else
-      call dsyevd('V','L',M,fock,M,RMM(M13),WORK,LWORK
+       call dsyevd('V','L',M,fock,M,RMM(M13),WORK,LWORK
      > ,IWORK,LWORK,info)
 #endif
 
-       LWORK=work(1)
-      LIWORK=IWORK(1)
+       LWORK=WORK(1)
+       LIWORK=IWORK(1)
 
-      if(allocated(WORK2)) deallocate (WORK2)
-      if(allocated(IWORK2)) deallocate (IWORK2)
-
+       if(allocated(WORK2)) deallocate (WORK2)
+       if(allocated(IWORK2)) deallocate (IWORK2)
        allocate (WORK2(LWORK),IWORK2(LIWORK))
 
 
@@ -1102,20 +1102,6 @@ c new coefficients
              X(i,M2+j)=xnano(i,j)
           enddo
        enddo
-!       do i=1,M
-!         do k=1,M
-!           xnano(i,k)=X(k,i)
-!         enddo
-!       enddo
-!       do i=1,M
-!        do j=1,M
-!            X(i,M2+j)=0.D0
-!            ! xnano is lower triangular
-!            do k=i,M
-!              X(i,M2+j)=X(i,M2+j)+xnano(k,i)*fock(k,j)
-!            enddo
-!          enddo
-!      enddo
 #endif
       call g2g_timer_stop('coeff')
       call g2g_timer_start('otras cosas')
@@ -1211,6 +1197,7 @@ c-------------------------------------------------------------------
         noconverge = 0
         converge=converge+1
       endif
+
 
 c      old3=old2
 
@@ -1479,6 +1466,7 @@ c       E=E*627.509391D0
       call g2g_timer_stop('SCF')
       call g2g_timer_sum_stop('Finalize SCF')
       call g2g_timer_sum_stop('SCF')
+
  500  format('SCF TIME ',I6,' sec')
  450  format ('SCF ENERGY = ',F19.12)
  400  format(4(E14.7E2,2x))
