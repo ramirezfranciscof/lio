@@ -26,6 +26,7 @@
 
 ! Preliminaries
 !------------------------------------------------------------------------------!
+  call g2g_timer_start('ehrendyn step')
   allocate(Smat(M,M),Sinv(M,M))
   allocate(Lmat(M,M),Umat(M,M),Linv(M,M),Uinv(M,M))
   allocate(Fock(M,M),FockInt(M,M))
@@ -70,6 +71,7 @@
   call calc_forceDS(natom,M,nucpos,nucvel,RhoMid,Fock,Sinv,Bmat,qm_forces_ds)
 
 
+
 ! Density Propagation (works in ON)
 !------------------------------------------------------------------------------!
   Fock=matmul(Fock,Uinv)
@@ -89,18 +91,17 @@
   RhoSaveB=RhoNew
 
 
-
 ! Calculation of the dipole moment
 !------------------------------------------------------------------------------!
-!  if (first_step) then
-!    open(unit=134,file='x.dip')
-!    open(unit=135,file='y.dip')
-!    open(unit=136,file='z.dip')
-!    write(134,*) '#Time (fs) vs DIPOLE MOMENT, X COMPONENT (DEBYES)'
-!    write(135,*) '#Time (fs) vs DIPOLE MOMENT, Y COMPONENT (DEBYES)'
-!    write(136,*) '#Time (fs) vs DIPOLE MOMENT, Z COMPONENT (DEBYES)'
-!    total_time=0.0d0
-!  endif
+  if (first_step) then
+    open(unit=134,file='x.dip')
+    open(unit=135,file='y.dip')
+    open(unit=136,file='z.dip')
+    write(134,*) '#Time (fs) vs DIPOLE MOMENT, X COMPONENT (DEBYES)'
+    write(135,*) '#Time (fs) vs DIPOLE MOMENT, Y COMPONENT (DEBYES)'
+    write(136,*) '#Time (fs) vs DIPOLE MOMENT, Z COMPONENT (DEBYES)'
+    total_time=0.0d0
+  endif
 
   if (.not.first_step) then
    call dip(ux,uy,uz)
@@ -112,6 +113,8 @@
    print*,''
    total_time=total_time+dt*0.0241888
   endif
+
+  call g2g_timer_stop('ehrendyn step')
 
  901 format(F15.9,2x,F15.9)
 

@@ -59,17 +59,6 @@
   MatDir=DensMao*dcmplx(0.0d0, 1.0d0)
   InputMat=transpose(MatTrp)+MatDir
   call calc_forceDS_dds(Natoms,Nbasis,nucpos,nucvel,InputMat,fterm3)
-  do ii=1,Natoms
-  do jj=1,3
-    write(777,*) 'Atom: ',ii,'   Dir: ',jj
-    write(777,*) fterm1(jj,ii)
-    write(777,*) fterm2(jj,ii)
-    write(777,*) fterm3(jj,ii)
-    write(777,*) '---'
-  enddo
-  enddo
-  write(777,*) ''
-
 
   forceDS=dble(real(fterm1+fterm2+fterm3))
 

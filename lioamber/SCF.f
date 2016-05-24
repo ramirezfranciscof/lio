@@ -1322,7 +1322,6 @@ c--------------------------------------------------------------
         E=E-Ex
       endif
       endif
-      write(888,*) 'SCF energy = ',E
 
 c calculation of energy weighted density matrix
 c

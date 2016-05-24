@@ -48,17 +48,18 @@
   if (igpu.eq.5) MEMO = .false.
   if (MEMO) then
     call g2g_timer_start('int3mem')
-    call g2g_timer_sum_start('Coulomb precalc')
     call int3mem()
     call g2g_timer_stop('int3mem')
-    call g2g_timer_sum_stop('Coulomb precalc')
   endif
 
 !
 ! Calculate unfixed Fock in RMM
 !--------------------------------------------------------------------!
+  call g2g_timer_start('g2g-solve + int3lu')
   call int3lu(Energy_Coulomb)
   call g2g_solve_groups(0,Energy_Exchange,0)
+  call g2g_timer_stop('g2g-solve + int3lu')
+
   MM=M*(M+1)/2
   MMd=Md*(Md+1)/2
   idx0=3*MM+2*MMd
