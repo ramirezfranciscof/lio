@@ -12,7 +12,7 @@
        real*8,intent(out) :: dxyzqm(3,natom)
        real*8,allocatable :: ff1G(:,:),ffSG(:,:),ff3G(:,:)
        real*8             :: factor
-       integer            :: fileunit,kk,ii,igpu
+       integer            :: fileunit,kk,ii,jj,igpu
        logical            :: print_forces
 
 !--------------------------------------------------------------------!
@@ -40,9 +40,25 @@
        call g2g_timer_sum_start('Overlap gradients')
        ffSG=0.0d0
        call intSG(ffSG)
+       do ii=1,natom
+       do jj=1,3
+!          write(667,*) ffSG(ii,jj)
+!          write(669,*) ffSG(ii,jj)-qm_forces_ds(jj,ii), ffSG(ii,jj),
+!     >                 qm_forces_ds(jj,ii)
+       enddo
+       enddo
+!       write(667,*) '-------------'
        if (do_ehrenfest) then
          ffSG=-transpose(qm_forces_ds)
        endif
+       do ii=1,natom
+       do jj=1,3
+!          write(668,*) ffSG(ii,jj)
+       enddo
+       enddo
+!       write(668,*) '-------------'
+
+
        call g2g_timer_stop('intSG')
        call g2g_timer_sum_stop('Overlap gradients')
 

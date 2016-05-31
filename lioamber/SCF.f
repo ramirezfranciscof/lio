@@ -40,8 +40,7 @@ c       REAL*8 , intent(in)  :: clcoords(4,nsolin)
         INTEGER, ALLOCATABLE :: IWORK2(:),IPIV(:)
         logical :: just_int3n,ematalloct
 
-!FFR!
-!      vvterm
+!FFR - vvterm !
        logical             :: dovv
        real*8              :: weight
        integer,allocatable :: atom_group(:)
@@ -297,7 +296,7 @@ c Diagonalization of S matrix, after this is not needed anymore
 c S = YY^T ; X = (Y^-1)^T
 c => (X^T)SX = 1
 c
-      docholesky=.false.
+      docholesky=.true.
       call g2g_timer_start('cholesky')
       call g2g_timer_sum_start('Overlap decomposition')
       IF (docholesky) THEN

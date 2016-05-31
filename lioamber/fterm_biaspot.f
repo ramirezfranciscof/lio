@@ -12,13 +12,10 @@
 
        do ii=1,M
        do jj=1,M
-!         foruri=0.0d0
          do kk=1,M
            newterm=sqsmat(ii,kk)*weight*sqsmat(kk,jj)
            outmat(ii,jj)=outmat(ii,jj)+newterm*real(vector(kk))
-!           foruri=foruri+sqsmat(ii,kk)*real(vector(kk))*sqsmat(kk,jj)
          enddo
-!         write(666,*) ii,jj,foruri
        enddo
        enddo
 
