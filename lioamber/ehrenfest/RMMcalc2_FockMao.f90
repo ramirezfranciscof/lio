@@ -20,10 +20,6 @@
   logical  :: MEMO
 
 !
-! Store DensMao in RMM
-!--------------------------------------------------------------------!
-  call rmmput_dens(DensMao)
-
 !
 ! Calculate fixed-parts of fock
 !--------------------------------------------------------------------!
@@ -55,6 +51,7 @@
 !
 ! Calculate unfixed Fock in RMM
 !--------------------------------------------------------------------!
+  call rmmput_dens(DensMao)
   call g2g_timer_start('g2g-solve + int3lu')
   call int3lu(Energy_Coulomb)
   call g2g_solve_groups(0,Energy_Exchange,0)
