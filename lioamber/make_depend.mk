@@ -44,7 +44,13 @@ objects += density.o
 objects += fterm_biaspot.o lowdinpop.o
 objects += elec.o
 objects += calcDSM.o
-objects += fockon_diagonlize.o
+#
+#
+#     Trying a new way of makefile organization: put every important
+# information inside of the module.mk
+######################################################################
+include linear_algebra/linear_algebra.mk
+
 
 # garcha_mod: Description pending
 ######################################################################
