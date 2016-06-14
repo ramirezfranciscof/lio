@@ -42,7 +42,7 @@ c        write(18,345) 8,r(nn,1),r(nn,2),r(nn,3)
        do kk=1,3
           r(ii,kk)   = qmcoords(kk,ii)/0.529177D0
           rqm(ii,kk) = qmcoords(kk,ii)/0.529177D0
-! velocity units in angstrom per 1/20.455 pico-second must go to atomic units
+!         velocity units in angstrom per 1/20.455 pico-second must go to atomic units
           nucpos(kk,ii) = r(ii,kk)
           nucvel(kk,ii) = qmvels(kk,ii)*(20.455)*(2.418884326505E-5)
           nucvel(kk,ii) = nucvel(kk,ii)/(0.529177d0)
@@ -50,22 +50,21 @@ c        write(18,345) 8,r(nn,1),r(nn,2),r(nn,3)
        write(18,345) Iz(ii),qmcoords(:,ii)
       enddo
 
-!%%%%-FFR-START-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-! I am not sure this should be here, but it is the only
-! place to put it right now
-       if (allocated(atom_mass)) deallocate(atom_mass)
-       allocate(atom_mass(natom))
-       call ehren_masses(natom,Iz,atom_mass)
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+! FFR - Setups : I am not sure this should be here, but it is the 
+! only place to put it right now
 
        call liomain()
        if (.not.allocated(Smat))    allocate(Smat(M,M))
        if (.not.allocated(RealRho)) allocate(RealRho(M,M))
+
 !--------------------------------------------------------------------!
+! FFR - Ehrenfest:
+
       if (do_ehrenfest) then
-        if (first_step) then
-          call SCF(E,dipxyz)
-        endif
-        call ehrendyn(E,dipxyz)
+        call ehrentest( E, dipxyz )
+!        call ehrendyn( E, dipxyz )
+
       else
         if (OPEN) then 
           call SCFOP(E,dipxyz)
@@ -73,13 +72,15 @@ c        write(18,345) 8,r(nn,1),r(nn,2),r(nn,3)
           call SCF(E,dipxyz)
         endif
       endif
+
 ! OLD CODE:
 !       if (OPEN) then
 !          call SCFOP(E,dipxyz)
 !       else
 !          call SCF(E,dipxyz)
 !       endif
-!%%%%-FFR-START-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 
 
 !

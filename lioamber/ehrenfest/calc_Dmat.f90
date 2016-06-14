@@ -1,5 +1,5 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-  function calc_Dmat_cholesky(nbasis,Lmat,Umat,Bmat) result(Dmat)
+  function calc_Dmat(nbasis,Lmat,Umat,Bmat) result(Dmat)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
   implicit none
   integer,intent(in) :: nbasis

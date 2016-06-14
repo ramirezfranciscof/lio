@@ -1381,15 +1381,14 @@ c
        call fixrho(M,RealRho)
        call mulliken_calc(natom,M,RealRho,Smat,Nuc,Iz,q)
        call mulliken_write(85,natom,Iz,q)
-       if (first_step) then
-!         RealRho=matmul(RealRho,Ymat)
-!         RealRho=matmul(Ytrp,RealRho)
-         RhoSaveA=DCMPLX(RealRho)
-         RhoSaveB=DCMPLX(RealRho)
+       if ( is_first_step ) then
+         RealRho=matmul(RealRho,Ymat)
+         RealRho=matmul(Ytrp,RealRho)
+         rhosave_now=DCMPLX(RealRho)
        endif
 
 
-       if (first_step) then
+       if (is_first_step) then
          open(unit=134,file='x.dip')
          open(unit=135,file='y.dip')
          open(unit=136,file='z.dip')

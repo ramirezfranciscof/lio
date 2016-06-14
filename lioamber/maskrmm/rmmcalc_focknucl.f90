@@ -1,13 +1,12 @@
-!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-subroutine rmmcalc_overlap( overlap_m, energy )
-!
-!
-!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-  use garcha_mod, only: M, Md, nuc, natom, natomc, d, r, atmin, &
-                        rmax, jatc, nnps, nnpp, nnpd, nshell, &
-                        igrid2, kkind, kkinds, cool, cools
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+subroutine rmmcalc_focknucl( olap_mat, energy )
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+  use garcha_mod, only: M, Md, nuc, natom, natomc, d, r, atmin, rmax, &
+                      & jatc, nnps, nnpp, nnpd, nshell, igrid2, &
+                      & kkind, kkinds, cool, cools
+
   implicit none
-  real*8,intent(out) :: overlap_m(M,M)
+  real*8,intent(out) :: olap_mat(M,M)
   real*8,intent(out) :: energy
 
   real*8   :: energy_nuc
@@ -19,7 +18,7 @@ subroutine rmmcalc_overlap( overlap_m, energy )
   integer  :: igpu, ii, jj
   logical  :: MEMO
 
-  call g2g_timer_start('rmmcalc_overlap')
+  call g2g_timer_start('rmmcalc_focknucl')
   energy_nuc = 0.0d0
   energy_solv_t = 0.0d0
   energy_solv_f = 0.0d0
@@ -62,7 +61,7 @@ subroutine rmmcalc_overlap( overlap_m, energy )
   call aint_query_gpu_level(igpu)
   if (igpu.gt.1) call aint_new_step()
   call int1(energy_nuc)
-  call rmmget_fock(overlap_m)
+  call rmmget_fock(olap_mat)
 
 
   if (allocated(kkind))  deallocate(kkind)
@@ -93,7 +92,7 @@ subroutine rmmcalc_overlap( overlap_m, energy )
   energy=0.0d0
   energy=energy+energy_nuc
   energy=energy+energy_solv_t
-  call g2g_timer_stop('rmmcalc_overlap')
+  call g2g_timer_stop('rmmcalc_focknucl')
 
 end subroutine
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!

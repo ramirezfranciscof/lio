@@ -1,12 +1,19 @@
 ######################################################################
+# EXTERNAL MAKE VARIABLES
+objects   += maskrmm.o
+src_paths += maskrmm
+
 # INTERNAL DEPENDENCIES
-INCLUDES :=
-INCLUDES += rmmput_dens_all.f90  rmmput_dens_h.f90
-INCLUDES += rmmget_dens_all.f90  rmmget_dens_h.f90
-INCLUDES += rmmput_fock_all.f90  rmmput_fock_h.f90
-INCLUDES += rmmget_fock_all.f90  rmmget_fock_h.f90
-INCLUDES += rmmcalc_fockmao.f90  rmmcalc_overlap.f90
+internal_files := maskrmm.mk
+internal_files += maskrmm.f90
+internal_files += rmmput_dens.f90  rmmget_dens.f90
+internal_files += rmmput_fock.f90  rmmget_fock.f90
+internal_files += rmmcalc_focknucl.f90
+internal_files += rmmcalc_fockdens.f90
+$(obj_path)/maskrmm.o : $(internal_files)
 
-
-$(obj_path)/maskrmm.o : $(INCLUDES) maskrmm.mk
+# EXTERNAL USERS
+object_users := ehrenfest.o
+object_users := SCF.o
+$(object_users:%.o=$(obj_path)/%.o) : $(obj_path)/maskrmm.mod
 ######################################################################
