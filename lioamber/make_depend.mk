@@ -44,15 +44,12 @@ objects += density.o
 objects += fterm_biaspot.o lowdinpop.o
 objects += elec.o
 objects += calcDSM.o
-objects += ehrendyn.o ehrentest.o
 #
 #
 #     Trying a new way of makefile organization: put every important
 # information inside of the module.mk
 ######################################################################
-include maskrmm/maskrmm.mk
 include linear_algebra/linear_algebra.mk
-#include magnus_propagator/magnus_propagator.mk
 
 
 # garcha_mod: Description pending
@@ -100,6 +97,16 @@ include ehrenfest/ehrenfest.mk
 
 tmplist := SCF.o SCF_in.o 
 $(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/ehrenfest.mod
+
+
+# maskrmm : Description pending
+######################################################################
+objects   += maskrmm.o
+src_paths += maskrmm
+include maskrmm/maskrmm.mk
+
+tmplist := ehrenfest.o SCF.o
+$(tmplist:%.o=$(obj_path)/%.o) : $(obj_path)/maskrmm.mod
 
 
 # mathsubs: Description pending

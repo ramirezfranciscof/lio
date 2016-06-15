@@ -1,5 +1,5 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-subroutine ehren_verlet_e(Nsize,dt,Fmat,Rold,Rnow,Rnew)
+  subroutine ehren_verlet_e(Nsize,dt,Fmat,Rold,Rnow,Rnew)
 !
 ! Fmat,Rold,Rnew => All in the ON basis
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
@@ -22,6 +22,8 @@ subroutine ehren_verlet_e(Nsize,dt,Fmat,Rold,Rnow,Rnew)
   TermNeg=matmul(Rnow,Fmat)
   ConmMat=TermPos-TermNeg
   Rnew=Rold-dt*CMPLX(0.0d0,2.0d0)*ConmMat
+!  ConmMat=ConmMat*CMPLX(0.0d0,-1.0d0)
+!  Rnew=Rold+(2.0d0)*dt*ConmMat
 
-end subroutine
+  return;end subroutine
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!

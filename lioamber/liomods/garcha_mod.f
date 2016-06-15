@@ -104,23 +104,15 @@ c      parameter rmintsol=16.0D0
 !
 ! FFR - My global variables
 !------------------------------------------------------------------------------!
-       logical                               :: do_ehrenfest
-       logical                               :: is_first_step
-       real*8                                :: delta_time_au
-       real*8                                :: total_time_au
-
+       logical                               :: do_ehrenfest,first_step
        real*8,allocatable,dimension(:)       :: atom_mass
-       real*8,allocatable,dimension(:,:)     :: nucpos
-       real*8,allocatable,dimension(:,:)     :: nucvel
+       real*8,allocatable,dimension(:,:)     :: nucpos,nucvel
        real*8,allocatable,dimension(:,:)     :: Smat
        real*8,allocatable,dimension(:,:)     :: RealRho
-
+       real*8                                :: total_time
        real*8,allocatable,dimension(:,:)     :: qm_forces_ds
        real*8,allocatable,dimension(:,:)     :: qm_forces_total
-
-       complex*16,allocatable,dimension(:,:) :: rhosave_old
-       complex*16,allocatable,dimension(:,:) :: rhosave_now
-       complex*16,allocatable,dimension(:,:) :: rhosave_new
+       complex*16,allocatable,dimension(:,:) :: RhoSaveA,RhoSaveB
 !       real*8,allocatable,dimension(:,:)     :: FockA,FockB
 !       real*8,allocatable,dimension(:,:)     :: Gmat !DK
 !       real*8,allocatable,dimension(:,:)     :: Hmat !DK

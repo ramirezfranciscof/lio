@@ -217,7 +217,7 @@
   time_step=time_step*41341.0d0  ! time from ps to au
   open(unit=501,file='liomd-trays.xyz')
   open(unit=502,file='liomd-energy.dat')
-!  call write_energy(-1.0d0,escf,Kenergy,escf+Kenergy,502)
+  call write_energy(-1.0d0,escf,Kenergy,escf+Kenergy,502)
 
   do nn=1,md_steps+1
     call SCF(escf,dipxyz)
@@ -230,8 +230,8 @@
     enddo
     call nuclear_verlet(natom,time_step,atom_mass,nowfza, &
                         oldpos,nowpos,newpos,nowvel,Kenergy)
-!    call write_geom(natom,Iz,nowpos,501)
-!    call write_energy(nn*tdstep,escf,Kenergy,escf+Kenergy,502)
+    call write_geom(natom,Iz,nowpos,501)
+    call write_energy(nn*tdstep,escf,Kenergy,escf+Kenergy,502)
 
     oldpos=nowpos
     nowpos=newpos

@@ -1,5 +1,5 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-  subroutine RMMcalc2_FockMao( DensMao, FockMao, Energy)
+  subroutine RMMcalc2_FockMao(DensMao,FockMao,Energy)
 !
 !
 !
@@ -18,6 +18,7 @@
   integer  :: kk,idx0
   integer  :: MM,MMd,igpu
   logical  :: MEMO
+
 !
 !
 ! Calculate fixed-parts of fock

@@ -6,6 +6,7 @@
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
        use garcha_mod,only:natom,nsol, cubegen_only, do_ehrenfest,
+     >                     first_step,
      >                     qm_forces_ds, qm_forces_total
        implicit none
        real*8,intent(out) :: dxyzqm(3,natom)
@@ -39,12 +40,27 @@
        call g2g_timer_sum_start('Overlap gradients')
        ffSG=0.0d0
        call intSG(ffSG)
+       do ii=1,natom
+       do jj=1,3
+!          write(667,*) ffSG(ii,jj)
+!          write(669,*) ffSG(ii,jj)-qm_forces_ds(jj,ii), ffSG(ii,jj),
+!     >                 qm_forces_ds(jj,ii)
+       enddo
+       enddo
+!       write(667,*) '-------------'
+       if (do_ehrenfest) then
+         ffSG=-transpose(qm_forces_ds)
+       endif
+       do ii=1,natom
+       do jj=1,3
+!          write(668,*) ffSG(ii,jj)
+       enddo
+       enddo
+!       write(668,*) '-------------'
+
+
        call g2g_timer_stop('intSG')
        call g2g_timer_sum_stop('Overlap gradients')
-       if (do_ehrenfest) then
-!         ffSG=-transpose(qm_forces_ds)
-       endif
-
 
        call g2g_timer_start('int3G')
        call g2g_timer_sum_start('Coulomb+Exchange-correlation')
@@ -110,6 +126,7 @@ c       factor=627.509391D0/0.5291772108D0
          qm_forces_total=qm_forces_total-transpose(ff1G)
          qm_forces_total=qm_forces_total-transpose(ff3G)
        endif
+       if (first_step) first_step=.false.
 
 
 !--------------------------------------------------------------------!

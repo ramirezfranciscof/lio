@@ -257,19 +257,25 @@ c--------------------------------------------------------
       call drive(ng2,ngDyn,ngdDyn)
 c        write(*,*) 'Lio init amber'
 
-!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-! FFR - SETUP
-       do_ehrenfest = .true.
-       is_first_step = .true.
+!%%%%-FFR-START-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+       if (allocated(RhoSaveA)) deallocate(RhoSaveA)
+       allocate(RhoSaveA(M,M))
+       if (allocated(RhoSaveB)) deallocate(RhoSaveB)
+       allocate(RhoSaveB(M,M))
 
+
+       first_step=.true.
+       do_ehrenfest=.true.
        call basis_data_set
-     >    ( nshell(0), nshell(1), nshell(2), nuc, ncont, a, c )
+     > (nshell(0),nshell(1),nshell(2),nuc,ncont,a,c)
 
 ! time units transform 1/20.455 ps to atomic units
 ! ( AU = 2.418884326505 x 10e-17 s )
-! apparently time is not in 1/20.455 ps...
-      delta_time_au = (dt_i) / (2.418884326505E-5)
-!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+!       tdstep=(dt_i)/((20.455)*(2.418884326505E-5))
+       tdstep=(dt_i)/(2.418884326505E-5)
+
+
+!%%%%-FFR-STOPS-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 
 
       end
