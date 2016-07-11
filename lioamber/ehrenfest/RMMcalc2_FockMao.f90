@@ -1,24 +1,36 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-  subroutine RMMcalc2_FockMao(DensMao,FockMao,Energy)
+  subroutine RMMcalc2_FockMao( DensMao, FockMao, DipMom, Energy )
 !
-!
+! Time is in ps
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
   use maskrmm
-  use garcha_mod, only:M,Md,RMM,kkind,kkinds,cool,cools,igrid2
+  use garcha_mod, only:M,Md,RMM,kkind,kkinds,cool,cools,igrid2, &
+                     & total_time,field,Fx,Fy,Fz,epsilon,a0,    &
+                     & natom,tdstep,Iz,NCO,Nunp
   implicit none
   complex*16,intent(in) :: DensMao(M,M)
   real*8,intent(out)    :: FockMao(M,M)
+  real*8,intent(out)    :: DipMom(3)
   real*8,intent(out)    :: Energy
 
   real*8   :: Energy_1e
   real*8   :: Energy_Coulomb
   real*8   :: Energy_SolvT,Energy_SolvF
   real*8   :: Energy_Exchange
+  real*8   :: Energy_Efield
+
+  real*8   :: FieldNow(3)
+  real*8   :: factor, g, Qc
+  real*8   :: alpha, timeof_pert, timeof_peak
+  real*8   :: time_gaus, dip_times_field, strange_term
   integer  :: kk,idx0
   integer  :: MM,MMd,igpu
   logical  :: MEMO
 
+  logical  :: laser_is_on
+  real*8   :: efield_shape, laser_freq
+  
 !
 !
 ! Calculate fixed-parts of fock
@@ -57,6 +69,66 @@
   call g2g_solve_groups(0,Energy_Exchange,0)
   call g2g_timer_stop('g2g-solve + int3lu')
 
+  Energy_Efield = 0.0d0
+  alpha       = 0.2 / ( tdstep * 0.0241888 )**2
+  timeof_peak =  50 * ( tdstep * 0.0241888 )
+  timeof_pert = 100 * ( tdstep * 0.0241888 )
+  if ( field .and. ( total_time <= timeof_pert ) ) then
+    Qc=-2*NCO+Nunp
+    do kk=1,natom
+      Qc=Qc+Iz(kk)
+    end do
+
+    g = 1.0d0
+    factor = 2.54d0
+    time_gaus = exp( (-alpha) * ( total_time - timeof_peak )**2 )
+    FieldNow(1) = Fx * time_gaus
+    FieldNow(2) = Fy * time_gaus
+    FieldNow(3) = Fz * time_gaus
+    write(999,*) ' ==> ', FieldNow
+
+    call dip( DipMom(1), DipMom(2), DipMom(3) )
+    call intfld( g, FieldNow(1), FieldNow(2), FieldNow(3) )
+    dip_times_field = 0.0d0
+    dip_times_field = dip_times_field + FieldNow(1) * DipMom(1)
+    dip_times_field = dip_times_field + FieldNow(2) * DipMom(2)
+    dip_times_field = dip_times_field + FieldNow(3) * DipMom(3)
+    strange_term = (0.5d0) * (1.0d0 - 1.0d0/epsilon) * Qc**2 / a0
+
+    Energy_Efield = Energy_Efield - g * dip_times_field / factor
+    Energy_Efield = Energy_Efield - strange_term
+  end if
+
+  laser_is_on = .true.
+  laser_freq = 6.28318530718 / 1.0417
+  if ( laser_is_on ) then
+    print*,'Doing laser'
+    Qc=-2*NCO+Nunp
+    do kk=1,natom
+      Qc=Qc+Iz(kk)
+    end do
+
+    g = 1.0d0
+    factor = 2.54d0
+    efield_shape = sin( laser_freq * total_time )
+    FieldNow(1) = Fx * efield_shape
+    FieldNow(2) = Fy * efield_shape
+    FieldNow(3) = Fz * efield_shape
+
+    call dip( DipMom(1), DipMom(2), DipMom(3) )
+    call intfld( g, FieldNow(1), FieldNow(2), FieldNow(3) )
+    dip_times_field = 0.0d0
+    dip_times_field = dip_times_field + FieldNow(1) * DipMom(1)
+    dip_times_field = dip_times_field + FieldNow(2) * DipMom(2)
+    dip_times_field = dip_times_field + FieldNow(3) * DipMom(3)
+    strange_term = (0.5d0) * (1.0d0 - 1.0d0/epsilon) * Qc**2 / a0
+
+    Energy_Efield = Energy_Efield - g * dip_times_field / factor
+    Energy_Efield = Energy_Efield - strange_term
+  endif
+!
+! Calculate Energy
+!--------------------------------------------------------------------!
   MM=M*(M+1)/2
   MMd=Md*(Md+1)/2
   idx0=3*MM+2*MMd
@@ -70,6 +142,7 @@
   Energy=Energy+Energy_Coulomb
   Energy=Energy+Energy_SolvT
   Energy=Energy+Energy_Exchange
+  Energy=Energy+Energy_Efield
 
 !
 ! Extract FockMao from RMM

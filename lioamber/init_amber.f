@@ -265,7 +265,17 @@ c        write(*,*) 'Lio init amber'
 
 
        first_step=.true.
-       do_ehrenfest=.true.
+       fix_nuclei=.false.
+       do_ehrenfest=.false.
+
+       if ( timedep .eq. 2 ) then
+         fix_nuclei=.true.
+         do_ehrenfest=.true.
+       else if ( timedep .eq. 3 ) then
+         fix_nuclei=.false.
+         do_ehrenfest=.true.
+       end if
+
        call basis_data_set
      > (nshell(0),nshell(1),nshell(2),nuc,ncont,a,c)
 

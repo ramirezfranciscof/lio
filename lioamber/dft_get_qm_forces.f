@@ -5,9 +5,9 @@
 !
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-       use garcha_mod,only:natom,nsol, cubegen_only, do_ehrenfest,
-     >                     first_step,
-     >                     qm_forces_ds, qm_forces_total
+       use garcha_mod,only: natom, nsol, cubegen_only, do_ehrenfest
+     >                    , first_step, fix_nuclei
+     >                    , qm_forces_ds, qm_forces_total
        implicit none
        real*8,intent(out) :: dxyzqm(3,natom)
        real*8,allocatable :: ff1G(:,:),ffSG(:,:),ff3G(:,:)
@@ -81,7 +81,7 @@ c       factor=627.509391D0/0.5291772108D0
        enddo
        enddo
 
-
+       if ( fix_nuclei ) dxyzqm(:,:)=0.0d0
 !--------------------------------------------------------------------!
        print_forces=.false.
        if (print_forces) then

@@ -1,5 +1,5 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-  subroutine ehrendyn(Energy,Dipmom)
+  subroutine ehrendyn(Energy,DipMom)
 !------------------------------------------------------------------------------!
 !
 ! RhoSaveA and RhoSaveB are stored in ON basis, except for the first step
@@ -10,7 +10,7 @@
                       , qm_forces_ds, qm_forces_total &
                       , RhoSaveA, RhoSaveB
   implicit none
-  real*8,intent(inout) :: Energy,Dipmom(3)
+  real*8,intent(inout) :: Energy,DipMom(3)
 
   real*8,allocatable,dimension(:,:)     :: Smat,Sinv,Lmat,Umat,Linv,Uinv
   real*8,allocatable,dimension(:,:)     :: Fock,FockInt
@@ -67,7 +67,7 @@
     RhoMid=matmul(RhoMid,Linv)
     RhoMid=matmul(Uinv,RhoMid)
   endif
-  call RMMcalc2_FockMao(RhoMid,Fock,Energy)
+  call RMMcalc2_FockMao(RhoMid,Fock,DipMom,Energy)
   call calc_forceDS(natom,M,nucpos,nucvel,RhoMid,Fock,Sinv,Bmat,qm_forces_ds)
 
 

@@ -15,7 +15,8 @@ subroutine matrix_diagon_d( matrix_in, eigen_vecs, eigen_vals , info )
   if ( present(info) ) info=0
 
 
-  call matrix_diagon_dsyevd &
+!  call matrix_diagon_dsyevd &
+  call matrix_diagon_dsyevr &
        ( matrix_in, eigen_vecs, eigen_vals , info=local_stat )
 
   if ( local_stat /= 0 ) then

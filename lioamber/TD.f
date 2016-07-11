@@ -56,7 +56,9 @@ c       USE latom
      >   pert_steps,lpfrg_steps,chkpntF1a,chkpntF1b
        REAL*8 ::
      >   dt_magnus,dt_lpfrg
-        logical :: just_int3n,ematalloct
+       logical :: just_int3n,ematalloct
+       real*8, allocatable :: xmat(:,:)
+!
 !! CUBLAS
 #ifdef CUBLAS
       integer sizeof_real
@@ -525,10 +527,17 @@ c ELECTRIC FIELD CASE - Type=gaussian (ON)
                  endif
                  write(*,*) 'epsilon =', epsilon
                  call intfld(g,Fxx,Fyy,Fzz)
-                 E1=-1.00D0*g*(Fx*ux+Fy*uy+Fz*uz)/factor -
+                 E1=-1.00D0*g*(Fxx*ux+Fyy*uy+Fzz*uz)/factor -
      >        0.50D0*(1.0D0-1.0D0/epsilon)*Qc2/a0
               endif
             endif
+! FFR TEST
+            write(999,*) istep * tdstep * 0.0241888, 
+     >                   pert_steps * tdstep * 0.0241888
+            write(999,*) ' ==> ', fxx, fyy, fzz
+            write(999,*) ' ==> ', ux, uy, uz
+            write(999,*) ' ==> ', E1
+            write(999,*) ' ==> '
 !------------------------------------------------------------------------------!
 ! E1 includes solvent 1 electron contributions
             do k=1,MM
@@ -742,7 +751,17 @@ c with matmul:
              call g2g_timer_stop('complex_rho_on_to_ao-cu')
 #else
              call g2g_timer_start('complex_rho_on_to_ao')
-             rho1=matmul(x,rho)
+!------------!
+!            FFR-FIX
+             if (.not.allocated(xmat)) allocate(xmat(M,M))
+             do ii=1,M
+             do jj=1,M
+               xmat(ii,jj) = x(ii,jj)
+             end do
+             end do
+             rho1=matmul(xmat,rho)
+!            rho1=matmul(x,rho)
+!------------!
              rho1=matmul(rho1,xtrans)
              call g2g_timer_stop('complex_rho_on_to_ao')
 #endif
