@@ -29,7 +29,7 @@
   logical  :: MEMO
 
   logical  :: laser_is_on
-  real*8   :: efield_shape, laser_freq
+  real*8   :: efield_shape, laser_freq, laser_long
   
 !
 !
@@ -100,9 +100,10 @@
   end if
 
   laser_is_on = .true.
-  laser_freq = 6.28318530718 / 1.0417
+  laser_long = 139.3 !nm
+  laser_freq = (6.28318530718) * (299.792458) / (laser_long)
+  ! [freq fs-1] = [2pi] * [c in nm/fs] / [long]
   if ( laser_is_on ) then
-    print*,'Doing laser'
     Qc=-2*NCO+Nunp
     do kk=1,natom
       Qc=Qc+Iz(kk)
@@ -114,6 +115,7 @@
     FieldNow(1) = Fx * efield_shape
     FieldNow(2) = Fy * efield_shape
     FieldNow(3) = Fz * efield_shape
+    print*,'Doing laser: ',FieldNow
 
     call dip( DipMom(1), DipMom(2), DipMom(3) )
     call intfld( g, FieldNow(1), FieldNow(2), FieldNow(3) )
