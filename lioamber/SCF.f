@@ -1718,10 +1718,6 @@ c       E=E*627.509391D0
   45  format(E15.6E4)
   91  format(F14.7,4x,F14.7)
 
-<<<<<<< HEAD
-c
-=======
-
 !%%%%%%%%%%%%%%%%%%%%%%%%% Nuevos Formatos, Nick %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  8503 FORMAT(4x,"╔════════════════",
      >"══╦══════╦═══════╗")
@@ -1732,7 +1728,6 @@ c
  8704 FORMAT(4x,4("║"F13.9,2x),"║")
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
->>>>>>> be31ea4374d5bb5f7435bc5581e7cfc3364cbe76
       !call g2g_timer_sum_stop('SCF');
 
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
