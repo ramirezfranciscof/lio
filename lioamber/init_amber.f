@@ -164,7 +164,6 @@ c      include 'param'
 
 c      parameter (norbit=800,Ngrid=0)
 
-
          natom=natomin
 
 c       integer, intent(in) :: Iiiz(natom)
