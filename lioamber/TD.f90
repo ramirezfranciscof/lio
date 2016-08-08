@@ -1,79 +1,90 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
        SUBROUTINE TD()
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-c REAL TIME-TDDFT
-c 
-c Dario Estrin, 1992
-c Nano, Dario, Uriel, Damian 2012
-c
-c  This subrutine takes the converged density matrix from an SCF calculation
-c  and evolves it in time. In the input file the total number of propagation
-c  steps is specified (nstep) as well as the time of each evolution step 
-c  (tdstep). 
-c  This implementation has two alternatives to evolve the density in time. The 
-c  first one (propagator=1) is the Verlet algorithm that uses a convination of 
-c  Liouville von Newmann expresion for the time derivative of the density matrix 
-c  and a first order Taylor expansion of the density matrix. The second one 
-c  (propagator=2) is the Magnus propagation scheme that uses Backer Campbell
-c  Hausdorff (BCH) formula. For this reason when Magnus is used the number of 
-c  total conmutators in the BCH espansion has to be specified (NBCH, default=10). 
-c  A narrow gaussian type electric field can be introduced during the time 
-c  evolution in order to excite all electronic frequencies with the same intensity.
-c  Once this perturbation is turned on (Field=t, exter=t) each component of the
-c  external electric field has to be specified in the input file (Fx,Fy,Fz).
-c  In each step of the propagation the cartesian components of the sistems dipole
-c  are stored in files x.dip, y.dip, z.dip.
+!c REAL TIME-TDDFT
+!c 
+!c Dario Estrin, 1992
+!c Nano, Dario, Uriel, Damian 2012
+!c
+!c  This subrutine takes the converged density matrix from an SCF calculation
+!c  and evolves it in time. In the input file the total number of propagation
+!c  steps is specified (nstep) as well as the time of each evolution step 
+!c  (tdstep). 
+!c  This implementation has two alternatives to evolve the density in time. The 
+!c  first one (propagator=1) is the Verlet algorithm that uses a convination of 
+!c  Liouville von Newmann expresion for the time derivative of the density matrix 
+!c  and a first order Taylor expansion of the density matrix. The second one 
+!c  (propagator=2) is the Magnus propagation scheme that uses Backer Campbell
+!c  Hausdorff (BCH) formula. For this reason when Magnus is used the number of 
+!c  total conmutators in the BCH espansion has to be specified (NBCH, default=10). 
+!c  A narrow gaussian type electric field can be introduced during the time 
+!c  evolution in order to excite all electronic frequencies with the same intensity.
+!c  Once this perturbation is turned on (Field=t, exter=t) each component of the
+!c  external electric field has to be specified in the input file (Fx,Fy,Fz).
+!c  In each step of the propagation the cartesian components of the sistems dipole
+!c  are stored in files x.dip, y.dip, z.dip.
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-c       USE latom
-       USE garcha_mod
-       use ECP_mod, only : ecpmode, term1e, VAAA, VAAB, VBAC
-       use mathsubs
+       USE garcha_mod, ONLY : RMM,propagator,NBCH,tdstep,idip,tdrestart,&
+       exists,M,NCO,natom,Nang,Nunp,Iz,natomc,d,r,atmin,rmax,jatc,&
+       nshell,nuc, nnps, nnpp, nnpd, igrid2, predcoef, npas, nsol, pc &
+       ,X, Smat, Md, MEMO, ntdstep,tdstep, field, exter, Fx, Fy, Fz, a0 &
+       ,writedens, sol,kkind,kkinds,cool,cools, GRAD, epsilon
+
+       USE ECP_mod, ONLY : ecpmode, term1e, VAAA, VAAB, VBAC
+       USE mathsubs
+
 #ifdef CUBLAS
-        use cublasmath
+       USE cublasmath
 #endif
-       IMPLICIT REAL*8 (a-h,o-z)
+       IMPLICIT NONE
+!!!!!!!!!!!!! agregadas por nick
+       INTEGER :: ipop,Ndens, MM, MM2, MMd, Md2, M2, niter, Nel, igpu, initial_step
+       INTEGER :: M1,M3,M5,M7,M9,M11,M13,M15,M17,M18,M19,M20, info
+       REAL*8 :: E,E1,En,Ex,Es, sq2,Qc,Qc2,E1s,Ens, ux, uy, uz, g, factor, &
+       fxx,fyy,fzz,Enick
+       INTEGER :: i,j,k,kk !auxiliares
+       REAL*8 :: zij, ti, tj, alf,rexp,n,t0,ff !auxiliares
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+
        INTEGER :: istep
        REAL*8 :: t,E2
-       REAL*8,ALLOCATABLE,DIMENSION(:,:) :: 
-     >   xnano2,xmm,xtrans,ytrans,Y,fock,
-     >   F1a,F1b,overlap,rhoscratch
+       REAL*8,ALLOCATABLE,DIMENSION(:,:) :: xnano2,xmm,xtrans,ytrans,Y,&
+       fock,F1a,F1b,overlap,rhoscratch
        real*8, dimension (:,:), ALLOCATABLE :: elmu
 #ifdef TD_SIMPLE
        COMPLEX*8 :: Im,Ix
-       COMPLEX*8,ALLOCATABLE,DIMENSION(:,:) ::
-     >   rho,rhonew,rhold,xnano,rho1
+       COMPLEX*8,ALLOCATABLE,DIMENSION(:,:) :: rho,rhonew,rhold,xnano,&
+       rho1
 #else
        COMPLEX*16 :: Im,Ix
-       COMPLEX*16,ALLOCATABLE,DIMENSION(:,:) ::
-     >   rho,rhonew,rhold,xnano,rho1
+       COMPLEX*16,ALLOCATABLE,DIMENSION(:,:) :: rho,rhonew,rhold,xnano,&
+       rho1
 #endif
-       DIMENSION q(natom)
+       INTEGER, DIMENSION (natom) :: q
        REAL*8,dimension(:),ALLOCATABLE :: factorial
        INTEGER            :: LWORK,ii,jj
        REAL*8,ALLOCATABLE :: WORK(:)
 !!------------------------------------!!
 !! FFR ADD
-       INTEGER ::
-     >   pert_steps,lpfrg_steps,chkpntF1a,chkpntF1b
-       REAL*8 ::
-     >   dt_magnus,dt_lpfrg
-        logical :: just_int3n,ematalloct
+       INTEGER :: pert_steps,lpfrg_steps,chkpntF1a,chkpntF1b
+       REAL*8 :: dt_magnus,dt_lpfrg
+       logical :: just_int3n,ematalloct
 !! CUBLAS
 #ifdef CUBLAS
-      integer sizeof_real
+      integer :: sizeof_real
       parameter(sizeof_real=8)
-      integer sizeof_complex
+      integer :: sizeof_complex
 #ifdef TD_SIMPLE
       parameter(sizeof_complex=8)
 #else
       parameter(sizeof_complex=16)
 #endif
-      integer stat
-      integer*8 devPtrX, devPtrY,devPtrXc
-      external CUBLAS_INIT, CUBLAS_SET_MATRIX
-      external CUBLAS_SHUTDOWN, CUBLAS_ALLOC,CUBLAS_GET_MATRIX
-      external CUBLAS_FREE
-      integer CUBLAS_ALLOC, CUBLAS_SET_MATRIX,CUBLAS_GET_MATRIX
+      integer :: stat
+      integer*8 :: devPtrX, devPtrY,devPtrXc
+      external :: CUBLAS_INIT, CUBLAS_SET_MATRIX
+      external :: CUBLAS_SHUTDOWN, CUBLAS_ALLOC,CUBLAS_GET_MATRIX
+      external :: CUBLAS_FREE
+      integer :: CUBLAS_ALLOC, CUBLAS_SET_MATRIX,CUBLAS_GET_MATRIX
 #endif
 !!   GROUP OF CHARGES
        LOGICAL             :: groupcharge
@@ -85,6 +96,7 @@ c       USE latom
        call g2g_timer_start('TD')
        call g2g_timer_start('inicio')
        just_int3n = .false.
+       initial_step=0 !para restart
        ALLOCATE(factorial(NBCH))
 !!------------------------------------!!
 ! Mulliken
@@ -94,7 +106,7 @@ c       USE latom
 !!------------------------------------!!
 #ifdef CUBLAS
        write(*,*) 'USING CUBLAS'
-       stat=CUBLAS_INIT()
+       call CUBLAS_INIT()
        if (stat.NE.0) then
            write(*,*) "initialization failed -TD"
            call CUBLAS_SHUTDOWN
@@ -136,8 +148,10 @@ c       USE latom
        E1=0.0D0
        En=0.0D0
        E2=0.0D0
+       Ens=0.d0 !agregada por nick
+       Ex=0.d0 !agregada por nick
        idip=1
-       ngeo=ngeo+1
+!       ngeo=ngeo+1
        Im=(0.0D0,2.0D0)
        sq2=sqrt(2.D0)
        MM=M*(M+1)/2 
@@ -146,110 +160,39 @@ c       USE latom
        Md2=2*Md
        M2=2*M
 !
-       ALLOCATE(xnano(M,M),xnano2(M,M),fock(M,M),rhonew(M,M),
-     >   rhold(M,M),rho(M,M),xmm(M,M),xtrans(M,M),Y(M,M),ytrans(M,M),
-     >   rho1(M,M))
+       ALLOCATE(xnano(M,M),xnano2(M,M),fock(M,M),rhonew(M,M), &
+       rhold(M,M),rho(M,M),xmm(M,M),xtrans(M,M),Y(M,M),ytrans(M,M),&
+       rho1(M,M))
 !
       if(propagator.eq.2) allocate (F1a(M,M),F1b(M,M))
 !--------------------------------------------------------------------!
-      if (tdrestart) then
-         inquire(file='rho.restart',exist=exists)
-         if (.not.exists) then
-             write(*,*) 'ERROR CANNOT FIND rho.restart'
-             write(*,*) '(if you are not restarting a previous 
-     > run set tdrestart= false)'
-             stop
-         endif
-         open(unit=1544,file='rho.restart',status='old')
-         do j=1,M
-            do k=1,M
-               read(1544,*) rho(j,k)
-            enddo
-         enddo
-         do j=1,M
-            do k=j,M
-               if(j.eq.k) then
-                  RMM(k+(M2-j)*(j-1)/2)=REAL(rho(j,k))
-               else
-                  RMM(k+(M2-j)*(j-1)/2)=(REAL(rho(j,k)))*2
-               endif
-            enddo
-         enddo
-         if (propagator .eq. 2) then
-            inquire(file='F1a.restart',exist=exists)
-            if (.not.exists) then
-               write(*,*) 'ERROR CANNOT FIND F1a.restart'
-               write(*,*) '(if you are not restarting a 
-     > previous run set tdrestart= false)'
-               stop
-            endif
-            inquire(file='F1b.restart',exist=exists)
-            if (.not.exists) then
-               write(*,*) 'ERROR CANNOT FIND F1b.restart'
-               write(*,*) '(if you are not restarting a
-     > previous run set tdrestart= false)'
-               stop
-            endif
-            open(unit=7777,file='F1a.restart',status='old')
-            do i=1,M
-               do j=1,M
-                  read(7777,*) F1a(i,j)
-               enddo
-            enddo
-            open(unit=7399,file='F1b.restart',status='old')
-            do i=1,M
-               do j=1,M
-                  read(7399,*) F1b(i,j)
-               enddo
-            enddo
-         endif
-!--------------------------------------------------------------------!
+      if (tdrestart) then  !pasar a un modulo y en formato binario, Nick
 ! We read the density matrix stored in RMM(1,2,3,...,MM) and it is copied in rho matrix.
-         else
-!          do j=1,M
-!             do k=1,j-1
-!                rho(j,k)=RMM(j+(M2-k)*(k-1)/2)/2
-!             enddo
-!             rho(j,j)=RMM(j+(M2-k)*(j-1)/2)
-!             do k=j+1,M
-!                rho(j,k)=RMM(k+(M2-j)*(j-1)/2)/2
-!             enddo
-!           enddo
+        call READ_TD_RESTART(rho,RMM,F1a,F1b,M2,initial_step,t)
+      else
             call spunpack_rtc('L',M,RMM,rho)
-         endif
+      endif
 !------------------------------------------------------------------------------!
-c first i
-            M1=1
-c now Fold
-            M3=M1+MM
-c now S, F also uses the same position after S was used
-            M5=M3+MM
-c now G
-            M7=M5+MM
-c now Gm
-            M9=M7+MMd
-c now H
-            M11=M9+MMd
-c W ( eigenvalues ), also this space is used in least squares
-            M13=M11+MM
-c aux ( vector for ESSl)
-            M15=M13+M
-c Least squares
-            M17=M15+MM
-c vectors of MO
-            M18=M17+MMd
-c weights (in case of using option )
-            M19=M18+M*NCO
-c RAM storage of two-electron integrals (if MEMO=T)
-            M20 = M19 + natom*50*Nang   
-c
+
+!!%%%%%%%%%%%%%%%%%%% POINTERS %%%%%%%%%%%%%%%%%%%%%%%%%%%!
+            M1=1 !c first i
+            M3=M1+MM !c now Fold
+            M5=M3+MM !c now S, F also uses the same position after S was used
+            M7=M5+MM !c now G
+            M9=M7+MMd !c now Gm
+            M11=M9+MMd !c now H
+            M13=M11+MM !c W ( eigenvalues ), also this space is used in least squares
+            M15=M13+M !c aux ( vector for ESSl)
+            M17=M15+MM !c Least squares
+            M18=M17+MMd !c vectors of MO
+            M19=M18+M*NCO !c weights (in case of using option )
+            M20 = M19 + natom*50*Nang   !c RAM storage of two-electron integrals (if MEMO=T)
             Nel=2*NCO+Nunp
-c Initializations/Defaults
-       write(*,*) ' TD CALCULATION  '
+
+!c Initializations/Defaults
+       write(*,*) ' Starting TD CALCULATION  '
 !--------------------------------------!
            niter=0
-           D1=1.D0
-           D2=1.D0
 !--------------------------------------!
            Qc=0.0D0
            do i=1,natom
@@ -258,14 +201,15 @@ c Initializations/Defaults
            Qc=Qc-Nel
            Qc2=Qc**2
 !------------------------------------------------------------------------------!
-! Two electron integral with neighbor list.
+! Two electron integral with neighbor list., Ver si esto se usa -pasar a un modulo (y agregarlo a scf)
 !
             do i=1,natom
               natomc(i)=0
 !
               do j=1,natom
-                d(i,j)=(r(i,1)-r(j,1))**2+(r(i,2)-r(j,2))**2+
-     >            (r(i,3)-r(j,3))**2
+                d(i,j)=(r(i,1)-r(j,1))**2+(r(i,2)-r(j,2))**2+&
+                 (r(i,3)-r(j,3))**2
+
                 zij=atmin(i)+atmin(j)
                 ti=atmin(i)/zij
                 tj=atmin(j)/zij
@@ -287,12 +231,12 @@ c Initializations/Defaults
               nnpd(nuc(ii))=ii
             enddo
 !------------------------------------------------------------------!
-c
-c Create integration grid for XC here
-c Assign points to groups (spheres/cubes)
-c Assign significant functions to groups
-c -Calculate point weights
-c
+!c
+!c Create integration grid for XC here
+!c Assign points to groups (spheres/cubes)
+!c Assign significant functions to groups
+!c -Calculate point weights
+!c
       call g2g_timer_sum_start('Exchange-correlation grid setup')
       call g2g_reload_atom_positions(igrid2)
       call g2g_timer_sum_stop('Exchange-correlation grid setup')
@@ -302,12 +246,12 @@ c
 
       if (predcoef.and.npas.gt.3) then
 
-c        if (.not.OPEN) then
-c          if(verbose) write(*,*) 'prediciendo densidad'
-c          do i=1,MM
-c            RMM(i)=(3*old1(i))-(3*old2(i))+(old3(i))
-c          enddo
-c         endif
+!c        if (.not.OPEN) then
+!c          if(verbose) write(*,*) 'prediciendo densidad'
+!c          do i=1,MM
+!c            RMM(i)=(3*old1(i))-(3*old2(i))+(old3(i))
+!c          enddo
+!c         endif
        endif
 !------------------------------------------------------------------------------!
 ! H H core, 1 electron matrix elements
@@ -316,17 +260,11 @@ c         endif
       call int1(En)
 
       if (ecpmode) then
-          write(*,*) "agrego terminos AAA,AAB a los de 1e"
           do k=1,MM
-               term1e(k)=RMM(M11+k-1)
-!copia los terminos de 1e
-!               write(89,*) RMM(M11+k-1),VAAA(k),VAAB(k)
-               RMM(M11+k-1)=RMM(M11+k-1)+VAAA(k)+VAAB(k)+VBAC(k)
-!               write(89,*) RMM(M11+k-1)
-!agrega el ECP AAA a los terminos de 1 e
+               term1e(k)=RMM(M11+k-1) !copia los terminos de 1e-
+               RMM(M11+k-1)=RMM(M11+k-1)+VAAA(k)+VAAB(k)+VBAC(k) !agrega el ECP a los terminos de 1 e
           enddo
       end if
-
 
       call g2g_timer_sum_stop('Nuclear attraction')
       if(nsol.gt.0.or.igpu.ge.4) then
@@ -355,8 +293,8 @@ c         endif
               call spunpack('L',M,RMM(M5),overlap)
             endif
 !--------------------------------------!
-c Diagonalization of S matrix, after this is not needed anymore
-c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
+!c Diagonalization of S matrix, after this is not needed anymore
+!c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
 !--------------------------------------!
 ! ESSL OPTION
 #ifdef essl
@@ -468,10 +406,10 @@ c s is in RMM(M13,M13+1,M13+2,...,M13+MM)
 !            rho=rho1
 !            rho=basechange(M,Ytrans,rho,Y)
 !--------------------------------------!
-c Precalculate three-index (two in MO basis, one in density basis) matrix
-c used in density fitting / Coulomb F element calculation here
-c (t_i in Dunlap)
-c
+!c Precalculate three-index (two in MO basis, one in density basis) matrix
+!c used in density fitting / Coulomb F element calculation here
+!c (t_i in Dunlap)
+!c
       call aint_query_gpu_level(igpu)
       if (igpu.gt.2) then
         call aint_coulomb_init()
@@ -481,12 +419,12 @@ c
       if (MEMO) then
          call g2g_timer_start('int3mem')
          call g2g_timer_sum_start('Coulomb precalc')
-c Large elements of t_i put into double-precision cool here
-c Size criteria based on size of pre-factor in Gaussian Product Theorem
-c (applied to MO basis indices)
+!c Large elements of t_i put into double-precision cool here
+!c Size criteria based on size of pre-factor in Gaussian Product Theorem
+!c (applied to MO basis indices)
          call int3mem()
-c Small elements of t_i put into single-precision cools here
-c         call int3mems()
+!c Small elements of t_i put into single-precision cools here
+!c         call int3mems()
          call g2g_timer_stop('int3mem')
          call g2g_timer_sum_stop('Coulomb precalc')
       endif
@@ -498,54 +436,32 @@ c         call int3mems()
 !##############################################################################!
 ! HERE STARTS THE TIME EVOLUTION
 !##############################################################################!
+
             write(*,*) 'PROPAGATION'
             do 999 istep=1, ntdstep
 !--------------------------------------!
               call g2g_timer_start('TD step')
-              if ((propagator.eq.2).and.(istep.lt.lpfrg_steps)
-     >      .and. (.not.tdrestart)) then
-                 t=(istep-1)*tdstep*0.1
-              else
-                 t=20*tdstep
-                 t=t+(istep-200)*tdstep
-              endif
-              if (propagator.eq.1) then
-                 t=(istep-1)*tdstep
-              endif
-              t=t*0.02419
-              write(*,*) 'evolution time (fs)  =', t
+              call CALC_CURRENT_TIME(propagator,lpfrg_steps, initial_step &
+            , istep, tdstep,t) !calcula t del paso actual
 !--------------------------------------!
-              call int3lu(E2)
-              call g2g_solve_groups(0,Ex,0)
-              write(*,*) '! step & energy', istep,E
+              call int3lu(E2) !calvula fock
+              call g2g_solve_groups(0,Ex,0) !otra parte de fock, intercambio y correlacion (no calcula energia)
+!              call g2g_solve_groups(1,Ex,0) !calcula energia, creo q es mas caro en el calculo, nick
+
+                E=E1+E2+En+Ex
+
+              write(*,*) '! step & energy', istep+initial_step,E !despues poner step -1  ahora puse +500 para comparar facil
+!              write(*,*) "!# E1,E2,En,Ex",E1,E2,En,Ex
+
               E1=0.0D0
-c ELECTRIC FIELD CASE - Type=gaussian (ON)
-            if(istep.lt.pert_steps) then
-               if (field) then
-                 call dip(ux,uy,uz)
-                 if (exter) then
-                   g=1.0D0
-                   factor=2.54D0
-                   fxx=fx*exp(-0.2*(real(istep-50))**2)
-                   fyy=fy*exp(-0.2*(real(istep-50))**2)
-                   fzz=fz*exp(-0.2*(real(istep-50))**2)
-                   write(*,*) fxx,fyy,fzz
-!
-                 else
-                   g=2.0D0*(epsilon-1.0D0)/((2.0D0*epsilon+1.0D0)*a0**3)
-                   Fx=ux/2.54D0
-                   Fy=uy/2.54D0
-                   Fz=uz/2.54D0
-                   factor=(2.54D0*2.00D0)
-!
-                 endif
-                 write(*,*) 'epsilon =', epsilon
-                 call intfld(g,Fxx,Fyy,Fzz)
-                 E1=-1.00D0*g*(Fx*ux+Fy*uy+Fz*uz)/factor -
-     >        0.50D0*(1.0D0-1.0D0/epsilon)*Qc2/a0
-              endif
+!c ELECTRIC FIELD CASE - Type=gaussian (ON)
+
+!c ELECTRIC FIELD CASE - Type=gaussian (ON)  !rutina field o fld !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            if(istep+initial_step.lt.pert_steps) then
+              call FIELD_INT(istep+ initial_step,Qc2,E1) !calcula los terminos de fock y la energia debidos al campo electrico aplicado
+!               write(*,*) "campo prendido!!!!!!!!!!!!!!!!!"
             else
-            field=.false.
+              field=.false.
             endif
 !------------------------------------------------------------------------------!
 ! E1 includes solvent 1 electron contributions
@@ -611,7 +527,7 @@ c ELECTRIC FIELD CASE - Type=gaussian (ON)
 !               enddo
 !            enddo
 !
-c Fock triangular matrix contained in RMM(M5,M5+1,M5+2,...,M5+MM) is copied to square matrix fock.
+!c Fock triangular matrix contained in RMM(M5,M5+1,M5+2,...,M5+MM) is copied to square matrix fock.
 !            do j=1,M
 !               do k=1,j
 !                  fock(j,k)=RMM(M5+j+(M2-k)*(k-1)/2-1)
@@ -622,8 +538,8 @@ c Fock triangular matrix contained in RMM(M5,M5+1,M5+2,...,M5+MM) is copied to s
 !            enddo
              call sprepack('L',M,RMM(M5),fock)
              call g2g_timer_stop('fock')
-c Now fock is stored in molecular orbital basis.
-c
+!c Now fock is stored in molecular orbital basis.
+!c
 !  stores F1a and F1b for magnus propagation
             if((propagator.eq.2) .and. (.not.tdrestart)) then
                if(istep.eq.chkpntF1a) then
@@ -661,18 +577,18 @@ c
                 E=E+Es
             endif
 !--------------------------------------------------------------------!
-            if ((propagator.eq.1).or.
-     >      (((propagator.eq.2).and.(istep.lt.lpfrg_steps))
-     >      .and. (.not.tdrestart))) then
+            if ((propagator.eq.1).or. &
+           (((propagator.eq.2).and.(istep.lt.lpfrg_steps)) &
+           .and. (.not.tdrestart))) then
            write(*,*) 'Verlet'
-c In the first step of the propagation we extrapolate rho back in time
-c using Verlet algorithm to calculate rhold.
-c using matmul 
+!c In the first step of the propagation we extrapolate rho back in time
+!c using Verlet algorithm to calculate rhold.
+!c using matmul 
 !           if(istep.eq.1) then
 !             rhold=rho+(dt_lpfrg*Im*(matmul(fock,rho)))
 !             rhold=rhold-(dt_lpfrg*Im*(matmul(rho,fock)))
 !           endif
-c using commutator
+!c using commutator
               if(istep.eq.1) then
 #ifdef CUBLAS
                 call g2g_timer_start('cuconmut')
@@ -691,7 +607,7 @@ c using commutator
 ! using matmul:
 !           rhonew=rhold-(dt_lpfrg*Im*(matmul(fock,rho)))
 !           rhonew=rhonew+(dt_lpfrg*Im*(matmul(rho,fock)))
-c--------------------------------------c
+!c--------------------------------------c
 ! using commutator:
             call g2g_timer_start('commutator')
 #ifdef CUBLAS
@@ -702,7 +618,7 @@ c--------------------------------------c
               rhonew=rhold-dt_lpfrg*(Im*rhonew)
 #endif
             call  g2g_timer_stop('commutator')
-c Density update (rhold-->rho, rho-->rhonew)
+!c Density update (rhold-->rho, rho-->rhonew)
               do i=1,M
                  do j=1,M
                     rhold(i,j)=rho(i,j)
@@ -717,12 +633,12 @@ c Density update (rhold-->rho, rho-->rhonew)
                  write(*,*) 'Magnus'
 #ifdef CUBLAS
                 call g2g_timer_start('cupredictor')
-                call cupredictor(F1a,F1b,fock,rho,devPtrX,factorial,
-     > fxx,fyy,fzz,g,devPtrXc) 
+                call cupredictor(F1a,F1b,fock,rho,devPtrX,factorial, &
+      fxx,fyy,fzz,g,devPtrXc) 
                 call g2g_timer_stop('cupredictor')
                 call g2g_timer_start('cumagnus')
-                call cumagnusfac(fock,rho,rhonew,M,NBCH,dt_magnus,
-     >factorial)
+                call cumagnusfac(fock,rho,rhonew,M,NBCH,dt_magnus, &
+      factorial)
                 call g2g_timer_stop('cumagnus')
 !                rhold=rhonew
 !                call g2g_timer_start('MAGNUS_MODIFIED')
@@ -734,8 +650,8 @@ c Density update (rhold-->rho, rho-->rhonew)
 !                stop 'hemos escrito rhold'
 #else
                 call g2g_timer_start('predictor')
-                call predictor(F1a,F1b,fock,rho,factorial,
-     > fxx,fyy,fzz,g)
+                call predictor(F1a,F1b,fock,rho,factorial, &
+       fxx,fyy,fzz,g)
                 call g2g_timer_stop('predictor')
                 call g2g_timer_start('magnus')
                 call magnus(fock,rho,rhonew,M,NBCH,dt_magnus,factorial)
@@ -748,10 +664,10 @@ c Density update (rhold-->rho, rho-->rhonew)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
               endif
 !####################################################################!
-c Here we transform the density to the atomic orbital basis and take the real part of it. The imaginary part of the density 
-c can be descarted since for a basis set of purely real functions the fock matrix is real and symetric and depends only on 
-c the real part of the complex density matrix. (This wont be true in the case of hybrid functionals)
-c with matmul:
+!c Here we transform the density to the atomic orbital basis and take the real part of it. The imaginary part of the density 
+!c can be descarted since for a basis set of purely real functions the fock matrix is real and symetric and depends only on 
+!c the real part of the complex density matrix. (This wont be true in the case of hybrid functionals)
+!c with matmul:
 #ifdef CUBLAS
              call g2g_timer_start('complex_rho_on_to_ao-cu')
 !             call cumxp(rho,devPtrX,rho1,M)
@@ -765,12 +681,12 @@ c with matmul:
              call g2g_timer_stop('complex_rho_on_to_ao')
 #endif
 !       rho1=REAL(rho1)
-c with matmulnanoc:
-c (NO LONGER AVAILABLE; USE BASECHANGE INSTEAD)
-c          call matmulnanoc(rho,xtrans,rho1,M)
-c          rho1=basechange(M,X,rho,Xtrans)
-c          rho1 = REAL(rho1)
-c The real part of the density matrix in the atomic orbital basis is copied in RMM(1,2,3,...,MM) to compute the corresponding fock matrix.
+!c with matmulnanoc:
+!c (NO LONGER AVAILABLE; USE BASECHANGE INSTEAD)
+!c          call matmulnanoc(rho,xtrans,rho1,M)
+!c          rho1=basechange(M,X,rho,Xtrans)
+!c          rho1 = REAL(rho1)
+!c The real part of the density matrix in the atomic orbital basis is copied in RMM(1,2,3,...,MM) to compute the corresponding fock matrix.
               do j=1,M
                   do k=j,M
                       if(j.eq.k) then
@@ -780,27 +696,9 @@ c The real part of the density matrix in the atomic orbital basis is copied in R
                       endif
                   enddo
               enddo
-! Stores the density matrix each 500 steps to be able to restart the dynamics
-              if(writedens) then
-                 if(mod (istep,500) == 0) then
-                     open(unit=5374,file='rho.restart')
-                     rewind 5374
-                     do j=1,M
-                        do k=1,M
-                           write(5374,*) rho1(j,k)
-                        enddo
-                     enddo
-                  endif
-! In the last step density matrix is stored
-                  if (istep.eq.ntdstep) then
-                    open(unit=44,file='rholast')
-                    do j=1,M
-                       do k=1,M
-                          write(44,*) rho1(j,k)
-                       enddo
-                    enddo
-                  endif
-              endif
+
+           call WRITE_DENSITY_RESTART(istep+ initial_step,t,rho1) !Stores the density matrix each 500 steps to be able to restart the dynamics
+
 !###################################################################!
 !# DIPOLE MOMENT CALCULATION
               if(istep.eq.1) then
@@ -815,8 +713,8 @@ c The real part of the density matrix in the atomic orbital basis is copied in R
         write(136,*) '#Time (fs) vs DIPOLE MOMENT, Z COMPONENT (DEBYES)'
         write(13600,*) '#Time (fs) vs DIPOLE MOMENT (DEBYES)'
               endif
-              if ((propagator.eq.2).and.(istep.lt.lpfrg_steps)
-     >      .and. (.not.tdrestart)) then
+              if ((propagator.eq.2).and.(istep.lt.lpfrg_steps) &
+           .and. (.not.tdrestart)) then
                   if(mod ((istep-1),10) == 0) then
                      call g2g_timer_start('DIPOLE')
                      call dip(ux,uy,uz)
@@ -833,23 +731,23 @@ c The real part of the density matrix in the atomic orbital basis is copied in R
                   write(135,901) t,uy
                   write(136,901) t,uz
               endif
-c u in Debyes
+!c u in Debyes
 !# END OF DIPOLE MOMENT CALCULATION
-c------------------------------------------------------------------------------------
+!c------------------------------------------------------------------------------------
 !       if (nopt.ne.3) then
 !       write(*,300) niter,DAMP,E
 !       endif
-c
-c      write(*,*) 'Coulomb E',E2-Ex,Ex
+!c
+!c      write(*,*) 'Coulomb E',E2-Ex,Ex
                call g2g_timer_stop('TD step')
                write(*,*)
-	if (istep .eq. 1000) then
-		call g2g_timer_start('corrida 1000')
-		tiempo1000=t
-	elseif (istep .eq. 2000) then
-		call g2g_timer_stop('corrida 1000')
-		write(*,*) t-tiempo1000
-	end if
+!	if (istep .eq. 1000) then
+!		call g2g_timer_start('corrida 1000')
+!		tiempo1000=t
+!	elseif (istep .eq. 2000) then
+!		call g2g_timer_stop('corrida 1000')
+!		write(*,*) t-tiempo1000
+!	end if
 
  999           continue
 !
@@ -858,8 +756,8 @@ c      write(*,*) 'Coulomb E',E2-Ex,Ex
 !##############################################################################!
 
  995   continue
-c
-c
+!c
+!c
          if (memo) then
             deallocate (kkind,kkinds)
             deallocate(cool,cools)
@@ -867,24 +765,27 @@ c
          if(propagator.eq.2) then
            deallocate (F1a,F1b)
          endif
-         if (GRAD) then
-            if(nopt.eq.0) then
-              write(*,*)
-              write(*,600)
-              write(*,610)
-              write(*,620) E1,E2-Ex,En
-              if (sol) then
-                 write(*,615)
-                 write(*,625) Es
-              endif
-            endif
-            write(*,*)
-            write(*,450) E
-         else
-            E=E-Ex
-         endif
-c calculation of energy weighted density matrix
-c
+
+!         if (GRAD) then
+!ver despues esto por q nopt no esta definida, Nick
+!            if(nopt.eq.0) then
+!              write(*,*)
+!              write(*,600)
+!              write(*,610)
+!              write(*,620) E1,E2-Ex,En
+!              if (sol) then
+!                 write(*,615)
+!                 write(*,625) Es
+!              endif
+!            endif
+!            write(*,*)
+!            write(*,450) E
+!         else
+!            E=E-Ex
+!         endif
+
+!c calculation of energy weighted density matrix
+!c
           kk=0
           do 307 j=1,M
              do 307 i=j,M
@@ -896,13 +797,15 @@ c
                     ff=4.D0
                 endif
                 do 309 k=1,NCO
-                   RMM(M15+kk-1)=RMM(M15+kk-1)-RMM(M13+k-1)
-     >  *ff*X(i,M2+k)*X(j,M2+k)
+                   RMM(M15+kk-1)=RMM(M15+kk-1)-RMM(M13+k-1) &
+       *ff*X(i,M2+k)*X(j,M2+k)
  309  continue
  307   continue
-c
-          if (nopt.eq.0) then
-c calculates Mulliken poputations
+!c
+
+!despues ver este nopt, nick
+!          if (nopt.eq.0) then
+!c calculates Mulliken poputations
              if (ipop.eq.1) then
                 call int1(En)
                 do n=1,natom
@@ -929,21 +832,21 @@ c calculates Mulliken poputations
                     write(*,760) n,Iz(n),q(n)
                  enddo
                  write(*,*)
-             endif
-c ELECTRICAL POTENTIAL AND POINT CHARGES EVALUATION
-c
-c        if (icharge.eq.1) then
-c          Q1=-(2*NCO+Nunp)
-c         do n=1,natom
-c          Q1=Q1+Iz(n)
-c         enddo
-c         call charge(NORM,natom,r,Nuc,Iz,M,Md,ncont,nshell,
-c     >            c,a,RMM,map,Q1)
-c        endif
-c
-c outputs final  MO ---------------------
+!             endif
+!c ELECTRICAL POTENTIAL AND POINT CHARGES EVALUATION
+!c
+!c        if (icharge.eq.1) then
+!c          Q1=-(2*NCO+Nunp)
+!c         do n=1,natom
+!c          Q1=Q1+Iz(n)
+!c         enddo
+!c         call charge(NORM,natom,r,Nuc,Iz,M,Md,ncont,nshell,
+!c     >            c,a,RMM,map,Q1)
+!c        endif
+!c
+!!c outputs final  MO ---------------------
 !      do l=1,M
-c      do n=1,NCO+3
+!c      do n=1,NCO+3
 !      do n=1,M
 !        X(indexii(l),M+n)=X(l,M2+n)
 !      enddo
@@ -972,12 +875,12 @@ c      do n=1,NCO+3
             call CUBLAS_FREE(devPtrY)
             call CUBLAS_SHUTDOWN()
 #endif
-c
-c
-c---- DEBUGGINGS
-c      write(*,*) 'Exc, integrated and calculated',Exc,Ex
-c      write(*,*) 'Coulomb energy',E2-Ex
-c
+!c
+!c
+!c---- DEBUGGINGS
+!c      write(*,*) 'Exc, integrated and calculated',Exc,Ex
+!c      write(*,*) 'Coulomb energy',E2-Ex
+!c
        call g2g_timer_stop('TD')
        deallocate(xnano,fock,rho)
        DEALLOCATE(factorial)
@@ -994,13 +897,146 @@ c
  760  format(I3,9x,I3,6x,F10.4)
  770  format('ATOM #',4x,'ATOM TYPE',4x,'POPULATION')
  850  format('MOLECULAR ORBITAL #',2x,I3,3x,'ORBITAL ENERGY ',F14.7)
- 851  format('MOLECULAR ORBITAL #',2x,I3,3x,'ORBITAL ENERGY ',F14.7,
-     >    '(NON OCC.)')
+ 851  format('MOLECULAR ORBITAL #',2x,I3,3x,'ORBITAL ENERGY ',F14.7, &
+         '(NON OCC.)')
  900  format(F15.9,2x,3(F15.9,2x),2x,F15.9)
  901  format(F15.9,2x,F15.9)
  777  format(4(F8.4,2x))
  776  format (3(F8.4,2x))
 
+      RETURN
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-       RETURN;END SUBROUTINE
+
+       CONTAINS
+
+      SUBROUTINE CALC_CURRENT_TIME(propagator,lpfrg_steps, initial_step &
+      , istep, tdstep,t)
+      IMPLICIT NONE
+      integer, intent(in) :: propagator,lpfrg_steps, initial_step
+      real*8, intent(inout) :: t
+      integer, intent(in) :: istep
+      real*8, intent(in) :: tdstep
+!------------------------------------------------------------------------------!
+!------------------------------------------------------------------------------!
+      if (istep.gt.1) then
+        if ((propagator.eq.2) .and. (initial_step+istep.le.lpfrg_steps)) then
+          t=t+tdstep*0.002419
+        else
+          t=t+tdstep*0.02419
+        endif
+        write(*,*) 'evolution time (fs)  =', t
+      endif
+!------------------------------------------------------------------------------!
+       RETURN
+      END SUBROUTINE
+
+
+
+      SUBROUTINE FIELD_INT(istep,Qc2,E1)
+      USE garcha_mod, ONLY : field,exter, Fx, Fy, Fz, epsilon,a0
+      IMPLICIT NONE
+      INTEGER, INTENT(IN) :: istep
+      REAL*8, INTENT(IN) :: Qc2
+      REAL*8, INTENT(INOUT) :: E1
+      DOUBLE PRECISION :: g, ux, uy, uz, factor, fxx,fyy,fzz
+        if (field) then
+          call dip(ux,uy,uz)
+          if (exter) then
+            g=1.0D0
+            factor=2.54D0
+            fxx=fx*exp(-0.2*(real(istep-50))**2)
+            fyy=fy*exp(-0.2*(real(istep-50))**2)
+            fzz=fz*exp(-0.2*(real(istep-50))**2)
+!            write(*,*) fxx,fyy,fzz
+          else
+            g=2.0D0*(epsilon-1.0D0)/((2.0D0*epsilon+1.0D0)*a0**3)
+            Fx=ux/2.54D0
+            Fy=uy/2.54D0
+            Fz=uz/2.54D0
+            factor=(2.54D0*2.00D0)
+          endif
+          call intfld(g,Fxx,Fyy,Fzz) !calcula integrales del campo con mom dipolar y da fock
+           E1=-1.00D0*g*(Fx*ux+Fy*uy+Fz*uz)/factor -&
+           0.50D0*(1.0D0-1.0D0/epsilon)*Qc2/a0  !E de 1 electron por el campo
+        endif
+      RETURN
+      END SUBROUTINE FIELD_INT
+
+      SUBROUTINE WRITE_DENSITY_RESTART(istep,t,rho1)
+      USE garcha_mod, ONLY : writedens, M, ntdstep
+      IMPLICIT NONE
+      INTEGER :: j,k
+      INTEGER, INTENT(IN) :: istep
+      REAL*8, INTENT(IN) :: t
+#ifdef TD_SIMPLE
+       COMPLEX*8,INTENT(IN), DIMENSION(M,M) :: rho1
+#else
+       COMPLEX*16,INTENT(IN),DIMENSION(M,M) :: rho1
+#endif
+
+      if(writedens) then
+        if(mod (istep,500) == 0) then
+          OPEN(UNIT=5374,FILE="rho.restart",STATUS='UNKNOWN', &
+          ACCESS='STREAM')
+          REWIND 5374
+          WRITE (5374) istep, t
+          write(5374) rho1
+          CLOSE(5374)
+        endif
+! In the last step density matrix is stored
+        if (istep.eq.ntdstep) then
+          OPEN(UNIT=235,FILE="rholast",STATUS='UNKNOWN', &
+          ACCESS='STREAM')
+          REWIND 235
+          WRITE (235) istep, t
+          write(235) rho1
+          CLOSE(235)
+         endif
+       endif
+       END SUBROUTINE WRITE_DENSITY_RESTART
+
+      SUBROUTINE READ_TD_RESTART(rho,RMM,F1a,F1b,M2,initial_step,t)
+!luego mejorar y hacer que escriba en binario
+      USE garcha_mod, ONLY : propagator, M
+      IMPLICIT NONE
+      INTEGER, INTENT(IN) :: M2
+      INTEGER, INTENT(INOUT) :: initial_step
+      REAL*8, INTENT(INOUT), DIMENSION(M,M) :: F1a,F1b
+      DOUBLE PRECISION, INTENT(INOUT), DIMENSION(*) :: RMM
+      INTEGER :: i,j,k
+      LOGICAL :: exists
+      real*8, intent(inout) :: t
+#ifdef TD_SIMPLE
+      COMPLEX*8,INTENT(INOUT), DIMENSION(M,M) :: rho
+#else
+      COMPLEX*16,INTENT(INOUT), DIMENSION(M,M) :: rho
+#endif
+
+         inquire(file='rho.restart',exist=exists)
+         if (.not.exists) then
+             write(*,*) 'ERROR CANNOT FIND rho.restart'
+             write(*,*) "(if you are not restarting a previous run",&
+            " set tdrestart= false)"
+             stop
+         endif
+
+	open(unit=1544,file='rho.restart',STATUS='UNKNOWN', ACCESS='STREAM')
+        read(1544) initial_step, t
+        read(1544) rho
+        CLOSE(1544)
+
+         do j=1,M
+            do k=j,M
+               if(j.eq.k) then
+                  RMM(k+(M2-j)*(j-1)/2)=REAL(rho(j,k))
+               else
+                  RMM(k+(M2-j)*(j-1)/2)=(REAL(rho(j,k)))*2
+               endif
+            enddo
+         enddo
+
+        RETURN
+      END SUBROUTINE READ_TD_RESTART
+
+       END SUBROUTINE TD
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
