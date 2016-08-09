@@ -151,7 +151,6 @@
        Ens=0.d0 !agregada por nick
        Ex=0.d0 !agregada por nick
        idip=1
-!       ngeo=ngeo+1
        Im=(0.0D0,2.0D0)
        sq2=sqrt(2.D0)
        MM=M*(M+1)/2 
@@ -170,7 +169,7 @@
 ! We read the density matrix stored in RMM(1,2,3,...,MM) and it is copied in rho matrix.
         call READ_TD_RESTART(rho,RMM,F1a,F1b,M2,initial_step,t)
       else
-            call spunpack_rtc('L',M,RMM,rho)
+        call spunpack_rtc('L',M,RMM,rho)
       endif
 !------------------------------------------------------------------------------!
 
@@ -542,40 +541,42 @@
 !c
 !  stores F1a and F1b for magnus propagation
             if((propagator.eq.2) .and. (.not.tdrestart)) then
-               if(istep.eq.chkpntF1a) then
-                  F1a=fock         
-               endif
-               if(istep.eq.chkpntF1b) then
-                  F1b=fock         
-               endif         
+               if(istep.eq.chkpntF1a) F1a=fock         
+               if(istep.eq.chkpntF1b) F1b=fock         
             endif
 !  stores F1a and F1b checkpoints to restart the dynamics
-            if(writedens .and. propagator.eq.2) then
-               kk=istep+5
-               ii=istep+15
-            if(mod (kk,500) == 0) then
-               open(unit=7624,file='F1b.restart')
-               rewind 7624
-               do i=1,M
-                  do j=1,M
-                     write(7624,*) fock(i,j)
-                  enddo
-               enddo
-               endif 
-               if(mod (ii,500) == 0) then
-                 open(unit=7625,file='F1a.restart')
-                 rewind 7625
-                 do i=1,M
-                    do j=1,M
-                       write(7625,*) fock(i,j)
-                    enddo
-                 enddo
-               endif
-            endif
-            E=E1+E2+En
-            if (sol) then
-                E=E+Es
-            endif
+
+
+!            if(writedens .and. propagator.eq.2) call WRITE_MAGNUS_RESTART(istep+initial_step, fock)
+
+
+!            if(writedens .and. propagator.eq.2) then
+!               kk=istep+5
+!               ii=istep+15
+!            if(mod (kk,500) == 0) then
+!               open(unit=7624,file='F1b.restart')
+!               rewind 7624
+!               do i=1,M
+!                  do j=1,M
+!                     write(7624,*) fock(i,j)
+!                  enddo
+!               enddo
+!               endif 
+!               if(mod (ii,500) == 0) then
+!                 open(unit=7625,file='F1a.restart')
+!                 rewind 7625
+!                 do i=1,M
+!                    do j=1,M
+!                       write(7625,*) fock(i,j)
+!                    enddo
+!                 enddo
+!               endif
+!            endif
+ 
+!           E=E1+E2+En
+!            if (sol) then
+!                E=E+Es
+!            endif
 !--------------------------------------------------------------------!
             if ((propagator.eq.1).or. &
            (((propagator.eq.2).and.(istep.lt.lpfrg_steps)) &
@@ -697,40 +698,14 @@
                   enddo
               enddo
 
-           call WRITE_DENSITY_RESTART(istep+ initial_step,t,rho1) !Stores the density matrix each 500 steps to be able to restart the dynamics
+           if (writedens) call WRITE_DENSITY_RESTART(istep+ initial_step,t,rho1,f1a,f1b) !Stores the density matrix each 500 steps to be able to restart the dynamics
+!           if(writedens .and. propagator.eq.2) call WRITE_MAGNUS_RESTART(istep+initial_step, fock)
+
+
 
 !###################################################################!
 !# DIPOLE MOMENT CALCULATION
-              if(istep.eq.1) then
-                open(unit=134,file='x.dip')
-                open(unit=135,file='y.dip')
-                open(unit=136,file='z.dip')
-                open(unit=13600,file='abs.dip')
-
-!aca hay q agregar q escriba ts  NCO  field en cada archivo, si o es splito propagation en NCO poner 1
-        write(134,*) '#Time (fs) vs DIPOLE MOMENT, X COMPONENT (DEBYES)'
-        write(135,*) '#Time (fs) vs DIPOLE MOMENT, Y COMPONENT (DEBYES)'
-        write(136,*) '#Time (fs) vs DIPOLE MOMENT, Z COMPONENT (DEBYES)'
-        write(13600,*) '#Time (fs) vs DIPOLE MOMENT (DEBYES)'
-              endif
-              if ((propagator.eq.2).and.(istep.lt.lpfrg_steps) &
-           .and. (.not.tdrestart)) then
-                  if(mod ((istep-1),10) == 0) then
-                     call g2g_timer_start('DIPOLE')
-                     call dip(ux,uy,uz)
-                     call g2g_timer_stop('DIPOLE')
-                     write(134,901) t,ux
-                     write(135,901) t,uy
-                     write(136,901) t,uz
-                  endif
-              else
-                  call g2g_timer_start('DIPOLE')
-                  call dip(ux,uy,uz)
-                  call g2g_timer_stop('DIPOLE')
-                  write(134,901) t,ux
-                  write(135,901) t,uy
-                  write(136,901) t,uz
-              endif
+           call WRITE_DIPOLE_MOMENT(istep,t, lpfrg_steps)
 !c u in Debyes
 !# END OF DIPOLE MOMENT CALCULATION
 !c------------------------------------------------------------------------------------
@@ -762,9 +737,8 @@
             deallocate (kkind,kkinds)
             deallocate(cool,cools)
          endif
-         if(propagator.eq.2) then
-           deallocate (F1a,F1b)
-         endif
+
+         if(propagator.eq.2) deallocate (F1a,F1b)
 
 !         if (GRAD) then
 !ver despues esto por q nopt no esta definida, Nick
@@ -962,19 +936,71 @@
       RETURN
       END SUBROUTINE FIELD_INT
 
-      SUBROUTINE WRITE_DENSITY_RESTART(istep,t,rho1)
+
+      SUBROUTINE WRITE_DIPOLE_MOMENT(istep,t, lpfrg_steps)
+      USE garcha_mod, ONLY : propagator, tdrestart, ntdstep
+      IMPLICIT NONE
+      INTEGER, INTENT(IN) :: istep, lpfrg_steps
+      REAL*8, INTENT(IN) :: t
+      DOUBLE PRECISION :: ux,uy,uz
+
+        if(istep.eq.1) then
+          open(unit=134,file='x.dip')
+          open(unit=135,file='y.dip')
+          open(unit=136,file='z.dip')
+          open(unit=13600,file='abs.dip')
+
+!aca hay q agregar q escriba ts  NCO  field en cada archivo, si o es splito propagation en NCO poner 1
+        write(134,*) '#Time (fs) vs DIPOLE MOMENT, X COMPONENT (DEBYES)'
+        write(135,*) '#Time (fs) vs DIPOLE MOMENT, Y COMPONENT (DEBYES)'
+        write(136,*) '#Time (fs) vs DIPOLE MOMENT, Z COMPONENT (DEBYES)'
+        write(13600,*) '#Time (fs) vs DIPOLE MOMENT (DEBYES)'
+        endif
+
+              if ((propagator.eq.2).and.(istep.lt.lpfrg_steps) &
+             .and. (.not.tdrestart)) then
+                  if(mod ((istep-1),10) == 0) then
+                     call g2g_timer_start('DIPOLE')
+                     call dip(ux,uy,uz)
+                     call g2g_timer_stop('DIPOLE')
+                     write(134,901) t,ux
+                     write(135,901) t,uy
+                     write(136,901) t,uz
+                  endif
+              else
+                  call g2g_timer_start('DIPOLE')
+                  call dip(ux,uy,uz)
+                  call g2g_timer_stop('DIPOLE')
+                  write(134,901) t,ux
+                  write(135,901) t,uy
+                  write(136,901) t,uz
+              endif
+
+        if(istep.eq.ntdstep) then
+          close (134)
+          close(135)
+          close(136)
+          close(13600)
+        endif
+
+!c u in Debyes
+ 901  format(F15.9,2x,F15.9)
+      END SUBROUTINE WRITE_DIPOLE_MOMENT
+
+
+
+      SUBROUTINE WRITE_DENSITY_RESTART(istep,t,rho1,f1a,f1b)
       USE garcha_mod, ONLY : writedens, M, ntdstep
       IMPLICIT NONE
       INTEGER :: j,k
       INTEGER, INTENT(IN) :: istep
       REAL*8, INTENT(IN) :: t
+      REAL*8, INTENT(IN), DIMENSION(M,M) :: f1a,f1b
 #ifdef TD_SIMPLE
        COMPLEX*8,INTENT(IN), DIMENSION(M,M) :: rho1
 #else
        COMPLEX*16,INTENT(IN),DIMENSION(M,M) :: rho1
 #endif
-
-      if(writedens) then
         if(mod (istep,500) == 0) then
           OPEN(UNIT=5374,FILE="rho.restart",STATUS='UNKNOWN', &
           ACCESS='STREAM')
@@ -982,6 +1008,8 @@
           WRITE (5374) istep, t
           write(5374) rho1
           CLOSE(5374)
+          if(propagator.eq.2) call WRITE_MAGNUS_RESTART(F1a,F1b) !WRITE_MAGNUS_RESTART(istep, fock)
+
         endif
 ! In the last step density matrix is stored
         if (istep.eq.ntdstep) then
@@ -992,8 +1020,51 @@
           write(235) rho1
           CLOSE(235)
          endif
-       endif
        END SUBROUTINE WRITE_DENSITY_RESTART
+
+      SUBROUTINE WRITE_MAGNUS_RESTART(F1a,F1b)!istep, fock)
+!  stores F1a and F1b checkpoints to restart the dynamics
+      USE garcha_mod, ONLY : propagator, M
+      IMPLICIT NONE
+      REAL*8, INTENT(IN), DIMENSION(M,M) :: F1a,F1b
+!      REAL*8, INTENT(IN), DIMENSION(M,M) :: fock
+      INTEGER :: kk,ii
+!      INTEGER, INTENT(IN) :: istep
+!               kk=istep+5
+!               ii=istep+15
+!               if(mod (kk,500) == 0) then
+                 OPEN(UNIT=7624,FILE="F1b.restart",STATUS='UNKNOWN', &
+                 ACCESS='STREAM')
+                 rewind 7624
+                 write(7624) fock
+                 close(7624)
+
+!               end if
+                 
+!               if(mod (ii,500) == 0) then
+                 OPEN(UNIT=7625,FILE="F1a.restart",STATUS='UNKNOWN', &
+                 ACCESS='STREAM')
+                 rewind 7625
+                 write(7625) fock
+                 close(7625)
+
+
+!               endif
+!               if(mod (ii,500) == 0) then
+!          OPEN(UNIT=7625,FILE="F1a.restart",STATUS='UNKNOWN', &
+!          ACCESS='STREAM')
+
+!                 open(unit=7625,file='F1a.restart')
+!                 rewind 7625
+!                 do i=1,M
+!                    do j=1,M
+!                       write(7625,*) fock(i,j)
+!                    enddo
+!                 enddo
+!               endif
+!            endif
+      END SUBROUTINE WRITE_MAGNUS_RESTART
+
 
       SUBROUTINE READ_TD_RESTART(rho,RMM,F1a,F1b,M2,initial_step,t)
 !luego mejorar y hacer que escriba en binario
@@ -1035,6 +1106,44 @@
             enddo
          enddo
 
+
+         if (propagator .eq. 2) then
+            inquire(file='F1a.restart',exist=exists)
+            if (.not.exists) then
+               write(*,*) 'ERROR CANNOT FIND F1a.restart'
+               write(*,*) "(if you are not restarting a previous run ",&
+               "set tdrestart= false)"
+               stop
+            endif
+            inquire(file='F1b.restart',exist=exists)
+            if (.not.exists) then
+               write(*,*) 'ERROR CANNOT FIND F1b.restart'
+               write(*,*) "(if you are not restarting a previous run ",&
+               "set tdrestart= false)"
+               stop
+            endif
+
+            OPEN(UNIT=7777,FILE="F1b.restart",STATUS='UNKNOWN', &
+            ACCESS='STREAM')
+            read(7777) F1a
+            CLOSE(7777)
+
+	    OPEN(UNIT=7222,FILE="1a-leido")
+            write(7222,*) f1a
+            close(7222)
+
+            OPEN(UNIT=7399,FILE="F1a.restart",STATUS='UNKNOWN', &
+            ACCESS='STREAM')
+            read(7399) F1b!(i,j)
+
+            OPEN(UNIT=7221,FILE="1b-leido")
+            write(7221,*) f1b
+            close(7221)
+
+
+
+
+         endif
         RETURN
       END SUBROUTINE READ_TD_RESTART
 
