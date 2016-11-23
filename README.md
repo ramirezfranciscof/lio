@@ -1,7 +1,7 @@
 LIO Project
 ============
 
-LIO is a Quantum Mechanical software based on _Density Functional Theory_ (DFT) and real time _Time Dependent Density Functional Theory_ (TD-DFT).
+aaaLIO is a Quantum Mechanical software based on _Density Functional Theory_ (DFT) and real time _Time Dependent Density Functional Theory_ (TD-DFT).
 
 The most computationally intensive calculations are ported to use graphical processors which support CUDA
 (e.g. Nvidia Maxwell, Fermi, Kepler and Tesla families).
