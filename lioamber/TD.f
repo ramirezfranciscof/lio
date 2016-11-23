@@ -32,8 +32,8 @@ c       USE latom
         use cublasmath
 #endif
        IMPLICIT REAL*8 (a-h,o-z)
-       INTEGER :: istep
-       REAL*8 :: t,E2
+       INTEGER :: istep, initial_step
+       REAL*8 :: t,E2,initial_time
        REAL*8,ALLOCATABLE,DIMENSION(:,:) :: 
      >   xnano2,xmm,xtrans,ytrans,Y,fock,
      >   F1a,F1b,overlap,rhoscratch
@@ -57,7 +57,7 @@ c       USE latom
      >   pert_steps,lpfrg_steps,chkpntF1a,chkpntF1b
        REAL*8 ::
      >   dt_magnus,dt_lpfrg
-        logical :: just_int3n,ematalloct
+        logical :: just_int3n,ematalloct,lpop
 !! CUBLAS
 #ifdef CUBLAS
       integer sizeof_real
@@ -69,8 +69,8 @@ c       USE latom
       parameter(sizeof_complex=16)
 #endif
       integer stat
-      integer*8 devPtrX, devPtrY,devPtrXc
-      external CUBLAS_INIT, CUBLAS_SET_MATRIX
+      integer*8 devPtrX, devPtrY,devPtrXc,devPtrS
+      external CUBLAS_INIT, CUBLAS_SET_MATRIX,CUBLAS_FREE
       external CUBLAS_SHUTDOWN, CUBLAS_ALLOC,CUBLAS_GET_MATRIX
       external CUBLAS_FREE
       integer CUBLAS_ALLOC, CUBLAS_SET_MATRIX,CUBLAS_GET_MATRIX
@@ -81,7 +81,30 @@ c       USE latom
        INTEGER,ALLOCATABLE :: group(:)
        REAL*8,ALLOCATABLE  :: qgr(:)
        REAL*8 :: tiempo1000
+! juanderboy--------------------------------------------------!
+!! TRANSPORT - ELECTROSTAT -
+       COMPLEX*8,ALLOCATABLE,DIMENSION(:,:) :: rho_et
+       LOGICAL :: ET
+!       LOGICAL :: TRANSPORT_CALC
+#ifdef TD_SIMPLE
+       COMPLEX*8, allocatable :: rhofirst(:,:)
+#else
+       COMPLEX*16, allocatable :: rhofirst(:,:)
+#endif
+       INTEGER,ALLOCATABLE,DIMENSION(:,:) :: mapmat
+!FFR!
+       logical             :: dovv
+       real*8              :: weight
+       integer,allocatable :: atom_group(:)
+       integer,allocatable :: orb_group(:)
+       integer,allocatable :: orb_selection(:)
+
+       real*8,dimension(:,:),allocatable :: fockbias
+       real*8,dimension(:,:),allocatable :: sqsm
+       real*8,dimension(:,:),allocatable :: Vmat
+       real*8,dimension(:),allocatable   :: Dvec
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+
        call g2g_timer_start('TD')
        call g2g_timer_start('inicio')
        just_int3n = .false.
@@ -90,7 +113,7 @@ c       USE latom
 ! Mulliken
        ipop=1
 ! Group of charges
-       groupcharge=.false.
+       groupcharge=.true.
 !!------------------------------------!!
 #ifdef CUBLAS
        write(*,*) 'USING CUBLAS'
@@ -130,6 +153,37 @@ c       USE latom
        chkpntF1a=185
        chkpntF1b=195
 !--------------------------------------------------------------------!
+! CASO RHOFIRST
+       ALLOCATE(rhofirst(M,M))
+! LOWDIN POPULATION
+       lpop=.true.
+! TRANSPORT
+       IF (TRANSPORT_CALC) THEN
+       ALLOCATE(mapmat(M,M))
+       ENDIF
+       if (groupcharge) then
+           inquire(file='atomgroup',exist=exists)
+           if (.not.exists) then
+               write(*,*) 'ERROR CANNOT FIND atomgroup file'
+               stop
+           endif
+           open(unit=678,file='atomgroup')
+           allocate(group(natom))
+           ngroup=0
+           do n=1,natom
+               read(678,*) kk
+               group(n)=kk
+               if (kk.gt.ngroup) ngroup=kk
+           enddo
+           allocate(qgr(ngroup))
+           if(ngroup.gt.3) write(*,*) 'if the number of group
+     > is greater than 3 then group 1 should be the donor and 2 the 
+     > acceptor'
+           close(unit=678)
+       endif
+       IF(TRANSPORT_CALC) THEN
+        call mat_map(group,mapmat)
+       ENDIF
 ! Pointers -
        Ndens=1
        E=0.0D0
@@ -160,12 +214,17 @@ c       USE latom
      > run set tdrestart= false)'
              stop
          endif
-         open(unit=1544,file='rho.restart',status='old')
-         do j=1,M
-            do k=1,M
-               read(1544,*) rho(j,k)
-            enddo
-         enddo
+! juanderboy --------------------------------------------------------!
+!         open(unit=1544,file='rho.restart',status='old')
+!         do j=1,M
+!            do k=1,M
+!               read(1544,*) rho(j,k)
+!            enddo
+!         enddo
+      open (unit=5374,file='rho.restart',form='unformatted',
+     > access='direct',recl=m*m*sizeof_complex)
+         read (5374,rec=1) rho1
+!---------------------------------------------------------------------!
          do j=1,M
             do k=j,M
                if(j.eq.k) then
@@ -175,6 +234,7 @@ c       USE latom
                endif
             enddo
          enddo
+         rho=rho1
          if (propagator .eq. 2) then
             inquire(file='F1a.restart',exist=exists)
             if (.not.exists) then
@@ -189,23 +249,31 @@ c       USE latom
                write(*,*) '(if you are not restarting a
      > previous run set tdrestart= false)'
                stop
-            endif
-            open(unit=7777,file='F1a.restart',status='old')
-            do i=1,M
-               do j=1,M
-                  read(7777,*) F1a(i,j)
-               enddo
-            enddo
-            open(unit=7399,file='F1b.restart',status='old')
-            do i=1,M
-               do j=1,M
-                  read(7399,*) F1b(i,j)
-               enddo
-            enddo
+!            endif
+!            open(unit=7777,file='F1a.restart',status='old')
+!            do i=1,M
+!               do j=1,M
+!                  read(7777,*) F1a(i,j)
+!               enddo
+!            enddo
+!            open(unit=7399,file='F1b.restart',status='old')
+!            do i=1,M
+!               do j=1,M
+!                  read(7399,*) F1b(i,j)
+!               enddo
+!            enddo
+!         endif
+      open (unit=7624,file='F1b.restart',form='unformatted',
+     > access='direct',recl=m*m*sizeof_real)
+      open (unit=7625,file='F1a.restart',form='unformatted',
+     > access='direct',recl=m*m*sizeof_real)
+         read (7624,rec=1) F1b
+         read (7625,rec=1) F1a
          endif
 !--------------------------------------------------------------------!
 ! We read the density matrix stored in RMM(1,2,3,...,MM) and it is copied in rho matrix.
          else
+            write(*,*) 'NO-TDRESTART'
 !          do j=1,M
 !             do k=1,j-1
 !                rho(j,k)=RMM(j+(M2-k)*(k-1)/2)/2
@@ -257,6 +325,22 @@ c Initializations/Defaults
            enddo
            Qc=Qc-Nel
            Qc2=Qc**2
+! FFR: Variable Allocation
+!--------------------------------------------------------------------!
+       allocate(Vmat(M,M),Dvec(M))
+       allocate(sqsm(M,M))
+       allocate(fockbias(M,M))
+
+       dovv=.true.
+       if (dovv.eq..true.) then
+        if (.not.allocated(orb_group)) then
+          allocate(orb_group(M))
+          call atmorb(group,nuc,orb_group)
+        endif
+        if (.not.allocated(orb_selection)) then
+          allocate(orb_selection(M))
+        endif
+       endif
 !------------------------------------------------------------------------------!
 ! Two electron integral with neighbor list.
 !
