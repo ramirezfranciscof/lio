@@ -114,7 +114,11 @@ c      parameter rmintsol=16.0D0
 
 !       real*8,allocatable,dimension(:,:) :: Lmat,Linv,Umat,Uinv
 !------------------------------------------------------------------------------!
-
+!     TRANSPORT STUFF
+      real*8  :: driving_rate
+      logical :: transport_calc,generate_rho0
+      integer :: save_charge_freq
+!
 !-Variables for hibrid damping-diis
       logical :: hybrid_converg
       double precision :: good_cut

@@ -39,8 +39,10 @@
                      verbose, FOCK_ECP_read, FOCK_ECP_write, Fulltimer_ECP,    &
                      cut2_0, cut3_0, hybrid_converg, good_cut, style, allnml,  &
                      cube_elec, cube_dens, cube_dens_file, cube_orb_file,      &
-                     cube_orb, cube_sel, cubegen_only, cube_res, cube_elec_file
-
+                     cube_orb, cube_sel, cubegen_only, cube_res, & 
+                     cube_elec_file,driving_rate,transport_calc,&
+                     generate_rho0,save_charge_freq ! agregadas las cosas de transporte. Juanderboy.
+!
       ! Calls default values for variables.
       call lio_defaults()
  
