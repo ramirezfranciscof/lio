@@ -14,11 +14,15 @@
                              intsoldouble, m, nbch, ntatom,ntdstep, nunp,      &
                              omit_bas, predcoef, propagator, rmax, rmaxs,      &
                              style, tdrestart, tdstep, timedep, told, vcinp,   &
-                             verbose, writedens, writeforces, writexyz, ndiis
+                             verbose, writedens, writeforces, writexyz, ndiis, &
+                             driving_rate,transport_calc,                      &
+                             generate_rho0,save_charge_freq ! agregadas las cosas de transporte. Juanderboy.
+
       use ECP_mod   , only : ecpmode, ecptypes, tipeECP, ZlistECP, cutECP,     &
                              local_nonlocal, ecp_debug, ecp_full_range_int,    &
                              verbose_ECP, FOCK_ECP_read, FOCK_ECP_write,       &
                              Fulltimer_ECP, cut2_0, cut3_0
+      use mathsubs
 #ifdef CUBLAS
       use cublasmath
 #endif
@@ -39,12 +43,74 @@
                      verbose, FOCK_ECP_read, FOCK_ECP_write, Fulltimer_ECP,    &
                      cut2_0, cut3_0, hybrid_converg, good_cut, style, allnml,  &
                      cube_elec, cube_dens, cube_dens_file, cube_orb_file,      &
-                     cube_orb, cube_sel, cubegen_only, cube_res, & 
-                     cube_elec_file,driving_rate,transport_calc,&
+                     cube_orb, cube_sel, cubegen_only, cube_res,               &
+                     cube_elec_file,driving_rate,transport_calc,               &
                      generate_rho0,save_charge_freq ! agregadas las cosas de transporte. Juanderboy.
 !
       ! Calls default values for variables.
       call lio_defaults()
+     !defaults
+!      basis='input'  ! name of the base file
+!      basis_set='DZVP'
+!      fitting_set='DZVP Coulomb Fitting'
+!      int_basis=.false.
+!      cubegen_only=.false.
+!      cube_res=40
+!      cube_dens=.false.
+!      cube_dens_file='dens.cube'
+!      cube_orb=.false.
+!      cube_sel=0
+!      cube_orb_file="orb.cube"
+!      cube_elec=.false.
+!      cube_elec_file="field.cube"
+!      restart_freq=1
+!      energy_freq=1 
+!      output='output'
+!      fcoord='qm.xyz'
+!      fmulliken='mulliken'
+!      frestart='restart.out'
+!      frestartin='restart.in'
+!      verbose=.false.
+!      OPEN=.false. 
+!      NMAX= 100
+!      NUNP= 0
+!      VCINP= .false.
+!      GOLD= 10.
+!      told=1.0D-6
+!      rmax=16
+!      rmaxs=5
+!      predcoef=.false.
+!      idip=1
+!      writexyz=.true.
+!      intsoldouble=.true.
+!      DIIS=.true.
+!      ndiis=30
+!      dgtrig=100.
+!      Iexch=9
+!      integ=.true.
+!      DENS = .true.
+!      IGRID = 2
+!      IGRID2 = 2
+!      timedep = 0
+!      tdstep = 2.D-3
+!      field=.false.
+!      a0=1000.0
+!      epsilon=1.D0
+!      Fx=0.05
+!      Fy=0.05
+!      Fz=0.05
+!      NBCH=10
+!      propagator=1
+!      tdrestart=.false.
+!      writedens=.true.
+!      writeforces=.false.
+!
+! TRANSPORT STUFF
+      driving_rate=0.0D0
+      transport_calc=.false.
+      generate_rho0=.false.
+      save_charge_freq=1
+
  
       ! Reads command line arguments for LIO.
       narg=command_argument_count()
@@ -90,7 +156,6 @@
           write(*,*) 'input file ',adjustl(inpcoords),' not found'
           stop
       endif
-
       ! Reads coordinates file.
       ntatom = natom + nsol
       allocate (iz(natom), r(ntatom,3), rqm(natom,3), pc(ntatom))
@@ -103,7 +168,21 @@
       enddo
       r  = r   / 0.529177D0
       rqm= rqm / 0.529177D0
-  
+!--------------------------------------------------------
+!       call lio_init()   !initialize lio
+       call liomain()
+       if (.not.allocated(Smat))    allocate(Smat(M,M))
+       if (.not.allocated(RealRho)) allocate(RealRho(M,M))
+!--------------------------------------------------------
+       if(OPEN) then
+         call SCFOP(escf,dipxyz)
+       else
+         call SCF(escf,dipxyz)
+       endif
+!--------------------------------------------------------
+
+       write(*,*) 'SCF ENRGY=',escf
+!---------------------------------------------------------!
       ! The last argument indicates LIO is being used alone.
       call init_lio_common(natom, Iz, nsol, charge, 0)
 
@@ -133,6 +212,12 @@
               allocate ( dxyzcl(3, natom+nsol) )
               dxyzcl = 0.0
           endif
+! juanderboy-------------------------------------------------------------!
+       call dft_get_qm_forces(dxyzqm)
+       if (nsol.gt.0) then
+         call dft_get_mm_forces(dxyzcl,dxyzqm)
+       endif
+! juanderboy -------------------------------------------------------------!
 
           call dft_get_qm_forces(dxyzqm)
           if (nsol.gt.0) then
