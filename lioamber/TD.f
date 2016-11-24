@@ -72,7 +72,7 @@ c       USE latom
       integer*8 devPtrX, devPtrY,devPtrXc,devPtrS
       external CUBLAS_INIT, CUBLAS_SET_MATRIX,CUBLAS_FREE
       external CUBLAS_SHUTDOWN, CUBLAS_ALLOC,CUBLAS_GET_MATRIX
-      external CUBLAS_FREE
+!     external CUBLAS_FREE
       integer CUBLAS_ALLOC, CUBLAS_SET_MATRIX,CUBLAS_GET_MATRIX
 #endif
 !!   GROUP OF CHARGES
@@ -249,6 +249,14 @@ c       USE latom
                write(*,*) '(if you are not restarting a
      > previous run set tdrestart= false)'
                stop
+            endif
+            inquire(file='F1b.restart',exist=exists)
+            if (.not.exists) then
+               write(*,*) 'ERROR CANNOT FIND F1b.restart'
+               write(*,*) '(if you are not restarting a
+     > previous run set tdrestart= false)'
+               stop
+            endif
 !            endif
 !            open(unit=7777,file='F1a.restart',status='old')
 !            do i=1,M

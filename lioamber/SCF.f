@@ -373,13 +373,32 @@ c
         CALL MAGMAF_DTRTRI('L','N',M,Xtrans,M,ErrID)
         if(ErrID.ne.0) STOP ('Error in cholesky decomp.')
         xnano= transpose(Xtrans)
-        do i=1,M;doj=1,M
+        do i=1,M;do j=1,M
           X(i,j)=Xnano(i,j)
         enddo;enddo
         PRINT*,'CHOLESKY MAGMA'
 
 #else
+        PRINT*,'DOING CHOLESKY'
+        ALLOCATE(Y(M,M),Ytrans(M,M),Xtrans(M,M))
 
+        Y=Smat
+        CALL dpotrf('L',M,Y,M,info)
+        DO iii=1,M;DO jjj=1,M
+          IF (jjj.GT.iii) THEN
+            Y(iii,jjj)=0.0d0
+          ENDIF
+          Ytrans(jjj,iii)=Y(iii,jjj)
+        ENDDO;ENDDO
+
+        Xtrans=Y
+        CALL dtrtri('L','N',M,Xtrans,M,info)
+        DO iii=1,M;DO jjj=1,M
+          IF (jjj.GT.iii) THEN
+            Xtrans(iii,jjj)=0.0d0
+          ENDIF
+          X(jjj,iii)=Xtrans(iii,jjj)
+        ENDDO;ENDDO
 ! FFR: Cholesky Decomposition of Overlap
 !--------------------------------------------------------------------!
 ! I am keeping Y,Ytrans and Xtrans but they should be replaced
@@ -404,7 +423,7 @@ c
          do kk=1,M
            RMM(M13+kk-1)=0.0d0
          enddo
-
+!
 #endif
       ELSE
 
@@ -469,7 +488,7 @@ c          write(56,*) RMM(M15+1)
               Ytrans(i,j)=Y(j,i)
               Xtrans(i,j)=X(j,i)
             enddo
-
+         enddo
          if (dovv.eqv..true.) then
           fockbias=0.0d0
 
@@ -496,6 +515,7 @@ c          write(56,*) RMM(M15+1)
          enddo
 
       ENDIF
+
       call g2g_timer_stop('cholesky')
 !! CUBLAS ---------------------------------------------------------------------!
 #ifdef CUBLAS
@@ -680,7 +700,7 @@ c         call int3mems()
       endif
 ****
 c!---- juanderboy ---------------------------------------------------!
-     if ((timedep.eq.1).and.(tdrestart)) then
+      if ((timedep.eq.1).and.(tdrestart)) then
        call g2g_timer_sum_start('TD')
         call TD()
         call g2g_timer_sum_stop('TD')
@@ -1618,87 +1638,8 @@ c
          dipxyz(3)=uz
          call g2g_timer_sum_stop('dipole')
        endif
+      endif !juanderboy------------------------------------!
 !----------------------------------------------------------!
-
-
-
-       call g2g_timer_sum_start('Mulliken')
-! MULLIKEN POPULATION ANALYSIS (FFR - Simplified)
-!--------------------------------------------------------------------!
-
-       call int1(En)
-       call spunpack('L',M,RMM(M5),Smat)
-       call spunpack('L',M,RMM(M1),RealRho)
-       call fixrho(M,RealRho)
-       call mulliken_calc(natom,M,RealRho,Smat,Nuc,Iz,q)
-
-       if (ecpmode) then
-!Modification for Effective Core Potential, Nick
-          call mulliken_write(85,natom,IzECP,q)
-       else
-          call mulliken_write(85,natom,Iz,q)
-       end if
-
-! NOTE: If 'mulliken_calc' is renamed as 'mulliken', the code will
-! malfunction. I DON'T KNOW WHY.
-!--------------------------------------------------------------------!
-       call g2g_timer_sum_stop('Mulliken')
-!       do kk=1,natom
-!         q(kk)=real(Iz(kk))
-!       enddo
-!       call lowdinpop(M,natom,RealRho,sqsm,Nuc,q)
-!       call mulliken_write(85,natom,Iz,q)
-       endif
-
-c
-c        endif
-c ELECTRICAL POTENTIAL AND POINT CHARGES EVALUATION
-c
-c        if (icharge.eq.1) then
-c          Q1=-(2*NCO+Nunp)
-c         do n=1,natom
-c          Q1=Q1+Iz(n)
-c         enddo
-c          stop
-c         call charge(NORM,natom,r,Nuc,Iz,M,Md,ncont,nshell,
-c     >            c,a,RMM,map,Q1)
-c        endif
-c
-c--------------------------------------------------------------
-c outputs final  MO ---------------------
-
-      if (MOD(npas,restart_freq).eq.0) then
-      call g2g_timer_sum_start('restart write')
-      rewind 88
-      do l=1,M
-        do n=1,M
-          X(indexii(l),M+n)=X(l,M2+n)
-        enddo
-      enddo
-c
-
-      do l=1,M
-c graba un restart de los coeficientes
-        write(88,400) (X(l,M+n),n=1,NCO)
-      enddo
-
-
-      call g2g_timer_sum_stop('restart write')
-      endif
-c-------------------------------------------------
-c writes down MO coefficients and orbital energies
-      if(1.gt.2) then
-        write(29,*) 'ORBITAL COEFFICIENTS eh AND ENERGIES, CLOSED SHELL'
-        do n=1,NCO
-          write(29,850) n,RMM(M13+n-1)
-          write(29,400) (X(l,M+n),l=1,M)
-        enddo
-        do n=NCO+1,M
-          write(29,851) n,RMM(M13+n-1)
-          write(29,400) (X(l,M+n),l=1,M)
-        enddo
-        close(29)
-      endif
 
       if (cube_dens.or.cube_orb.or.cube_elec) then
         call g2g_timer_sum_start('cube gen')
