@@ -418,6 +418,58 @@ c
          sqsm=matmul(Vmat,Ytrp)
 
 
+c ESSL OPTION ------------------------------------------
+        do i=1,MM
+         rmm5(i)=RMM(M5+i-1)
+c        write(56,*) RMM(M15+1)
+        enddo
+#ifdef essl
+        call DSPEV(1,RMM(M5),RMM(M13),X,M,M,RMM(M15),M2)
+#endif
+c
+c LAPACK OPTION -----------------------------------------
+#ifdef pack
+c       call magmaf_dsyev('V','L',M,xxx,M,
+       do ii=1,M; do jj=1,M
+         X(ii,jj)=Smat(ii,jj)
+       enddo; enddo
+       if (allocated(WORK2)) deallocate(WORK2); allocate(WORK2(1))
+       call dsyev('V','L',M,X,M,RMM(M13),WORK2,-1,info)
+       LWORK2=int(WORK2(1)); deallocate(WORK2); allocate(WORK2(LWORK2))
+       call dsyev('V','L',M,X,M,RMM(M13),WORK2,LWORK2,info)
+#endif
+c-----------------------------------------------------------
+c
+c LINEAR DEPENDENCY ELIMINATION
+        allocate (Y(M,M),Ytrans(M,M),Xtrans(M,M))
+c
+        do i=1,MM
+          RMM(M5+i-1)=rmm5(i)
+          ! WHAT IS THE POINT OF DOING THIS?
+c          write(56,*) RMM(M15+1)
+        enddo
+
+        do j=1,M
+          if (RMM(M13+j-1).lt.1.0D-06) then
+            write(*,*) 'LINEAR DEPENDENCY DETECTED'
+            do i=1,M
+              X(i,j)=0.0D0
+              Y(i,j)=0.0D0
+            enddo
+          else
+            do i=1,M
+              X(i,j)=X(i,j)/sqrt(RMM(M13+j-1))
+              Y(i,j)=X(i,j)*(RMM(M13+j-1))
+            enddo
+          endif
+         enddo
+
+         do i=1,M
+            do j=1,M
+              Ytrans(i,j)=Y(j,i)
+              Xtrans(i,j)=X(j,i)
+            enddo
+
          if (dovv.eqv..true.) then
           fockbias=0.0d0
 
@@ -627,6 +679,14 @@ c         call int3mems()
          call g2g_timer_sum_stop('Coulomb precalc')
       endif
 ****
+c!---- juanderboy ---------------------------------------------------!
+     if ((timedep.eq.1).and.(tdrestart)) then
+       call g2g_timer_sum_start('TD')
+        call TD()
+        call g2g_timer_sum_stop('TD')
+        return
+      endif
+
 c---------------------------------------------------------------------
 c Now, damping is performed on the density matrix
 c The first 4 iterations ( it may be changed, if necessary)
