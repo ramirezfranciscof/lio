@@ -50,6 +50,7 @@ objects += extras.o
 objects += fterm_biaspot.o lowdinpop.o
 objects += elec.o
 objects += SCF_gro.o
+objects += transport.o
 # objects += init_gromacs.o init_amber.o init.o lio_init.o
 #
 #

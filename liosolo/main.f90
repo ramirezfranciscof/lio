@@ -6,7 +6,7 @@
       use garcha_mod, only : natom, nsol, OPEN, NMAX, rqm, pc, Smat, RealRho,  &
                              Iz, r, a0, allnml, basis, basis_set, cube_dens,   &
                              cube_dens_file, cube_elec, cube_elec_file,        &
-                             cube_orb, cube_orb_file, cube_res, cube_sel,      &     
+                             cube_orb, cube_orb_file, cube_res, cube_sel,      &
                              cubegen_only, dens, dgtrig, DIIS, epsilon, etold, &
                              exter, field, fitting_set, frestartin, frestart,  &
                              fx, fy, fz, gold, good_cut, hybrid_converg,       &
