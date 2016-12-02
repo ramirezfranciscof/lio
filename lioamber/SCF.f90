@@ -7,7 +7,7 @@
 !
 ! Dario Estrin, 1992
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-      subroutine SCF(E,dipxyz)
+      SUBROUTINE SCF(E,dipxyz)
       use linear_algebra
       use garcha_mod
       use mathsubs
@@ -18,9 +18,12 @@
       use cublasmath
 #endif
 !      use qmmm_module, only : qmmm_struct, qmmm_nml
-      implicit real*8 (a-h,o-z)
+!      implicit real*8 (a-h,o-z)
+      IMPLICIT NONE     
       integer:: l
-       dimension q(natom),work(1000),IWORK(1000)
+       REAL*8, DiMENSION(natom) :: q
+       REAL*8, DiMENSION(1000) :: work, IWORK
+       INTEGER ::  LIWORK
        REAL*8 , intent(inout)  :: dipxyz(3)
        real*8, dimension (:,:), ALLOCATABLE::xnano,znano,scratch
        real*8, dimension (:,:), ALLOCATABLE::scratch1
@@ -59,7 +62,7 @@
 #ifdef CUBLAS
         integer sizeof_real
         parameter(sizeof_real=8)
-        integer stat
+       integer stat
         integer*8 devPtrX, devPtrY
         external CUBLAS_INIT, CUBLAS_SET_MATRIX
         external CUBLAS_SHUTDOWN, CUBLAS_ALLOC,CUBLAS_FREE
@@ -71,6 +74,26 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
         double precision :: Egood, Evieja !variables para criterio de convergencia por energia
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+        INTEGER :: IDAMP !al pedo
+	INTEGER :: LWORK, info
+        REAL*8 :: sq2, Qc, Qc2, zij, alf, rexp, ff
+!Energia
+        REAL*8 :: E, E0, E1, E1s, E2, Eecp, En, Ens, Es, Ex, Exc
+! paso y convergencia
+        REAL*8 :: good, D1, D2, DAMP0, DAMP
+        INTEGER :: niter
+!GPU level
+        INTEGER :: igpu
+!punteros
+        INTEGER :: M2, Md2, MM, MM2, MMd
+	INTEGER :: M1, M3, M5, M7, M9, M11, M13, M15, M17, M18, M19, M20
+!
+        INTEGER :: Nel
+!dipolo
+        REAL*8 :: u, ux, uy, uz
+!auxiliares
+        INTEGER :: i, ii, iij, iik, iikk,j, jnuevo,k, kk, kk2,kknueva,n, ti, tj
+        REAL*8 :: factor, del
 
 !------------------------------------------------------
 
@@ -116,7 +139,7 @@
 !
 ! chequeo -----------
 !
-      Ndens=1
+!      Ndens=1
 !---------------------
 !       write(*,*) 'M=',M
       allocate (znano(M,M),xnano(M,M),scratch(M,M),scratch1(M,M), &
@@ -444,7 +467,7 @@
       call g2g_timer_stop('cholesky')
 !! CUBLAS ---------------------------------------------------------------------!
 #ifdef CUBLAS
-            stat=CUBLAS_INIT()
+            call CUBLAS_INIT()
             stat = CUBLAS_ALLOC(M*M, sizeof_real, devPtrX)
             stat = CUBLAS_ALLOC(M*M, sizeof_real, devPtrY)
             if (stat.NE.0) then
@@ -999,7 +1022,7 @@
 ! constant to diagonal (virtual) elements
           do i=NCO+1,M
             ii=i+(i-1)*(M2-i)/2
-            RMM(M5+ii-1)=RMM(M5+ii-1)+shi
+!            RMM(M5+ii-1)=RMM(M5+ii-1)+shi        !!!!!!!!!!!! shi no esta definido !!!!!!!!!!!!!!!!!!!!
           enddo
         endif
 
