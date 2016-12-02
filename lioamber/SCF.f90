@@ -9,9 +9,16 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
       SUBROUTINE SCF(E,dipxyz)
       use linear_algebra
-      use garcha_mod
+      USE garcha_mod, ONLY : RMM, M, Md, npas, ngeo, NCO, Nang, &
+      cubegen_only, cube_dens, cube_orb, cube_elec, VCINP, Nunp,&
+      GOLD, Iz, nuc, natomc, r, d, atmin, rmax, jatc, MEMO, SHFT, &
+      DIIS, nnps, nnpp, nnpd, verbose, good_cut, NMAX, X, idip, &
+      RealRho, nshell, igrid2, predcoef, nsol, pc, Smat, ATRHO, &
+      primera, timedep, tdrestart, hybrid_converg, ndiis, told, &
+      Etold, noconverge, converge, energy_freq, GRAD, igrid, npasw, &
+      restart_freq, indexii, kkind, kkinds, cool,cools, natom 
       use mathsubs
-      use ECP_mod, only : ecpmode, term1e, VAAA, VAAB, VBAC, &
+      USE ECP_mod, ONLY : ecpmode, term1e, VAAA, VAAB, VBAC, &
       FOCK_ECP_read,FOCK_ECP_write,IzECP
       use general_module
 #ifdef CUBLAS
