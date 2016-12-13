@@ -236,7 +236,7 @@ c-----------------------------------------------------------
 c 
 c X transformation matrix , canonical orthogonalization
 c LINEAR DEPENDENCY ELIMINATION
-        allocate (Y(M,M),Ytrans(M,M),Xtrans(M,M))
+        allocate (Ytrans(M,M),Xtrans(M,M),Y(M,M)) 
 c
         do j=1,M
           if (RMM(M13+j-1).lt.1.0D-06) then

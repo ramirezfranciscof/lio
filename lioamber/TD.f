@@ -35,8 +35,8 @@ c       USE latom
        INTEGER :: istep
        REAL*8 :: t,E2
        REAL*8,ALLOCATABLE,DIMENSION(:,:) :: 
-     >   xnano2,xmm,xtrans,ytrans,Y,fock,
-     >   F1a,F1b,overlap,rhoscratch
+     >   xnano2,xmm,xtrans,ytrans,fock,
+     >   F1a,F1b,overlap,rhoscratch, Y
        real*8, dimension (:,:), ALLOCATABLE :: elmu
 #ifdef TD_SIMPLE
        COMPLEX*8 :: Im,Ix
@@ -147,8 +147,8 @@ c       USE latom
        M2=2*M
 !
        ALLOCATE(xnano(M,M),xnano2(M,M),fock(M,M),rhonew(M,M),
-     >   rhold(M,M),rho(M,M),xmm(M,M),xtrans(M,M),Y(M,M),ytrans(M,M),
-     >   rho1(M,M))
+     >   rhold(M,M),rho(M,M),xmm(M,M),xtrans(M,M),ytrans(M,M),
+     >   rho1(M,M), Y(M,M))
 !
       if(propagator.eq.2) allocate (F1a(M,M),F1b(M,M))
 !--------------------------------------------------------------------!

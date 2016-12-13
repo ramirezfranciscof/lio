@@ -16,7 +16,7 @@
       RealRho, nshell, igrid2, predcoef, nsol, pc, Smat, ATRHO, &
       primera, timedep, tdrestart, hybrid_converg, ndiis, told, &
       Etold, noconverge, converge, energy_freq, GRAD, igrid, npasw, &
-      restart_freq, indexii, kkind, kkinds, cool,cools, natom 
+      restart_freq, indexii, kkind, kkinds, cool,cools, natom
       use mathsubs
       USE ECP_mod, ONLY : ecpmode, term1e, VAAA, VAAB, VBAC, &
       FOCK_ECP_read,FOCK_ECP_write,IzECP
@@ -36,7 +36,7 @@
        real*8, dimension (:,:), ALLOCATABLE::scratch1
        real*8, dimension (:), ALLOCATABLE :: rmm5,rmm15,rmm13,bcoef,suma
       real*8, dimension (:,:), allocatable :: fock,fockm,rho, &
-        FP_PFm,EMAT,Y,Ytrans,Xtrans,rho1,EMAT2
+        FP_PFm,EMAT,Ytrans,Xtrans,rho1,EMAT2, Y
 !
        integer ndiist
 !       dimension d(natom,natom)
@@ -51,16 +51,16 @@
         logical :: just_int3n,ematalloct
 !FFR!
        logical             :: dovv
-       real*8              :: weight
-       integer,allocatable :: atom_group(:)
-       integer,allocatable :: orb_group(:)
-       integer,allocatable :: orb_selection(:)
+!       real*8              :: weight
+!       integer,allocatable :: atom_group(:)
+!       integer,allocatable :: orb_group(:)
+!       integer,allocatable :: orb_selection(:)
 
        real*8,dimension(:,:),allocatable :: fockbias
-       real*8,dimension(:,:),allocatable :: Xmat,Xtrp,Ymat,Ytrp
-       real*8,dimension(:,:),allocatable :: sqsm
-       real*8,dimension(:,:),allocatable :: Vmat
-       real*8,dimension(:),  allocatable :: Dvec
+!       real*8,dimension(:,:),allocatable :: Xmat,Xtrp!,Ymat!,Ytrp
+!       real*8,dimension(:,:),allocatable :: sqsm
+!       real*8,dimension(:,:),allocatable :: Vmat
+!       real*8,dimension(:),  allocatable :: Dvec
 
        real*8,allocatable :: eigen_vecs(:,:), eigen_vals(:)
 !--------------------------------------------------------------------!
@@ -142,13 +142,6 @@
 
 !------------------------------------------------------------------
 !
-! Pointers
-!
-! chequeo -----------
-!
-!      Ndens=1
-!---------------------
-!       write(*,*) 'M=',M
       allocate (znano(M,M),xnano(M,M),scratch(M,M),scratch1(M,M), &
       fock(M,M))
 
@@ -169,30 +162,19 @@
       Md2=2*Md
       M2=2*M
 
-! first P
-      M1=1
-! now Pnew
-      M3=M1+MM
-! now S, F also uses the same position after S was used
-      M5=M3+MM
-! now G
-      M7=M5+MM
-! now Gm
-      M9=M7+MMd
-! now H
-      M11=M9+MMd
-! W ( eigenvalues ), also this space is used in least squares
-      M13=M11+MM
-! aux ( vector for ESSl)
-      M15=M13+M
-! Least squares
-      M17=M15+MM
-! vectors of MO
-      M18=M17+MMd
-! weights (in case of using option )
-      M19=M18+M*NCO
-! RAM storage of two-electron integrals (if MEMO=T)
-      M20 = M19 + natom*50*Nang
+! Pointers
+      M1=1 ! first P
+      M3=M1+MM ! now Pnew
+      M5=M3+MM ! now S, F also uses the same position after S was used
+      M7=M5+MM ! now G
+      M9=M7+MMd ! now Gm
+      M11=M9+MMd ! now H
+      M13=M11+MM ! W ( eigenvalues ), also this space is used in least squares
+      M15=M13+M ! aux ( vector for ESSl)
+      M17=M15+MM ! Least squares
+      M18=M17+MMd ! vectors of MO
+      M19=M18+M*NCO ! weights (in case of using option )
+      M20 = M19 + natom*50*Nang ! RAM storage of two-electron integrals (if MEMO=T)
 
       if (cubegen_only.and.(cube_dens.or.cube_orb.or.cube_elec)) then
         if (.not.VCINP) then
@@ -211,7 +193,7 @@
         call cubegen(M15,Xnano)
         call g2g_timer_sum_stop('cube gen')
 
-        deallocate (znano,xnano,scratch,scratch1)
+        deallocate (znano,xnano,scratch,scratch1)  !!!! ACA SE DESALOCATEA XNANO, pero despues se sigue usando, NICK
         call g2g_timer_sum_stop('Initialize SCF')
         call g2g_timer_sum_stop('SCF')
         return
@@ -241,63 +223,30 @@
 
 ! FFR: Variable Allocation
 !--------------------------------------------------------------------!
-       allocate(Xmat(M,M),Xtrp(M,M),Ymat(M,M),Ytrp(M,M))
-       allocate(Vmat(M,M),Dvec(M))
-       allocate(sqsm(M,M))
+!       allocate(Xmat(M,M),Xtrp(M,M))!,Ymat(M,M))!,Ytrp(M,M))
+!       allocate(Vmat(M,M),Dvec(M))
+!       allocate(sqsm(M,M))
        allocate(fockbias(M,M))
 
-       dovv=.false.
-       if (dovv.eqv..true.) then
+       dovv=.false.  !preguntar por esta variable, Nick
+!       if (dovv.eqv..true.) then
 
-        if (.not.allocated(atom_group)) then
-          allocate(atom_group(natom))
-          call read_list('atomgroup',atom_group)
-        endif
-        if (.not.allocated(orb_group)) then
-          allocate(orb_group(M))
-          call atmorb(atom_group,nuc,orb_group)
-        endif
-        if (.not.allocated(orb_selection)) then
-          allocate(orb_selection(M))
-        endif
-       endif
+!        if (.not.allocated(atom_group)) then
+!          allocate(atom_group(natom))
+!          call read_list('atomgroup',atom_group)
+!        endif
+!        if (.not.allocated(orb_group)) then
+!          allocate(orb_group(M))
+!          call atmorb(atom_group,nuc,orb_group)
+!        endif
+!        if (.not.allocated(orb_selection)) then
+!          allocate(orb_selection(M))
+!        endif
+!       endif
 
 
 !----------------------------------------
-! Para hacer lineal la integral de 2 electrone con lista de vecinos. Nano
-
-      do i=1,natom
-        natomc(i)=0
-        do j=1,natom
-          d(i,j)=(r(i,1)-r(j,1))**2+(r(i,2)-r(j,2))**2+ &
-             (r(i,3)-r(j,3))**2
-
-          zij=atmin(i)+atmin(j)
-          ti=atmin(i)/zij
-          tj=atmin(j)/zij
-          alf=atmin(i)*tj
-          rexp=alf*d(i,j)
-          if (rexp.lt.rmax) then
-            natomc(i)=natomc(i)+1
-            jatc(natomc(i),i)=j
-          endif
-        enddo
-      enddo
-
-      do iij=nshell(0),1,-1
-        nnps(nuc(iij))=iij
-      enddo
-
-      do iik=nshell(0)+nshell(1),nshell(0)+1,-1
-        nnpp(nuc(iik))=iik
-      enddo
-
-      do iikk=M,nshell(0)+nshell(1)+1,-1
-        nnpd(nuc(iikk))=iikk
-      enddo
-
-      ! get MM pointers in g2g
-      ! call g2g_mm_init(nsol,r,pc)
+	call neighbor_list_2e() ! Para hacer lineal la integral de 2 electrone con lista de vecinos. Nano
 
 
 ! -Create integration grid for XC here
@@ -369,6 +318,8 @@
         E1=E1+RMM(k)*RMM(M11+k-1)
       enddo
       call g2g_timer_sum_stop('1-e Fock')
+
+
 !
 ! Diagonalization of S matrix, after this is not needed anymore
 ! S = YY^T ; X = (Y^-1)^T
@@ -377,35 +328,37 @@
       docholesky=.true.
       call g2g_timer_start('cholesky')
       call g2g_timer_sum_start('Overlap decomposition')
-      IF (docholesky) THEN
-#ifdef magma
+	allocate(Y(M,M))
+      call overlap_diag(docholesky, M5, M13, fockbias, dovv, Y)
+!      IF (docholesky) THEN
+!#ifdef magma
         ! ESTO SIGUE USANDO Smat EN RMM(M5)
         ! CAMBIARLO CUANDO SE SIGA PROBANDO MAGMA
-        PRINT*,'DOING MAGMA-CHOLESKY'
+!        PRINT*,'DOING MAGMA-CHOLESKY'
 
-        ALLOCATE(Y(M,M),Ytrans(M,M))
-        DO iii=1,M;DO jjj=1,M
-          Y(iii,jjj)=0
-          IF (jjj.LE.iii) THEN
-            iiindex=iii+(2*M-jjj)*(jjj-1)/2
-            Y(iii,jjj)=RMM(M5+iiindex-1)
-          ENDIF
-        ENDDO;ENDDO
+!        ALLOCATE(Y(M,M),Ytrans(M,M))
+!        DO iii=1,M;DO jjj=1,M
+!          Y(iii,jjj)=0
+!          IF (jjj.LE.iii) THEN
+!            iiindex=iii+(2*M-jjj)*(jjj-1)/2
+!            Y(iii,jjj)=RMM(M5+iiindex-1)
+!          ENDIF
+!        ENDDO;ENDDO
 
-        CALL MAGMAF_DPOTRF('L',M,Y,M,ErrID)
+!        CALL MAGMAF_DPOTRF('L',M,Y,M,ErrID)
 
-        Ytrans= transpose(Y)
-        ALLOCATE(Xtrans(M,M))
-        Xtrans=Y
-        CALL MAGMAF_DTRTRI('L','N',M,Xtrans,M,ErrID)
-        if(ErrID.ne.0) STOP ('Error in cholesky decomp.')
-        xnano= transpose(Xtrans)
-        do i=1,M;doj=1,M
-          X(i,j)=Xnano(i,j)
-        enddo;enddo
-        PRINT*,'CHOLESKY MAGMA'
+!        Ytrans= transpose(Y)
+!        ALLOCATE(Xtrans(M,M))
+!        Xtrans=Y
+!        CALL MAGMAF_DTRTRI('L','N',M,Xtrans,M,ErrID)
+!        if(ErrID.ne.0) STOP ('Error in cholesky decomp.')
+!        xnano= transpose(Xtrans)
+!        do i=1,M;doj=1,M
+!          X(i,j)=Xnano(i,j)
+!        enddo;enddo
+!        PRINT*,'CHOLESKY MAGMA'
 
-#else
+!#else
 
 ! FFR: Cholesky Decomposition of Overlap
 !--------------------------------------------------------------------!
@@ -417,23 +370,23 @@
 !
 ! Magma option should be introduced INSIDE of che call
 !
-         call sdcmp_cholesky(Smat,Dvec,Vmat,Ymat,Xtrp,Ytrp,Xmat)
+!         call sdcmp_cholesky(Smat,Dvec,Vmat,Ymat,Xtrp,Ytrp,Xmat)
 
-         allocate (Y(M,M),Ytrans(M,M),Xtrans(M,M))
-         do iii=1,M
-         do jjj=1,M
-           X(iii,jjj)=Xmat(iii,jjj)
-         enddo
-         enddo
-         Y=Ymat
-         Xtrans=Xtrp
-         Ytrans=Ytrp
-         do kk=1,M
-           RMM(M13+kk-1)=0.0d0
-         enddo
-
-#endif
-      ELSE
+!         allocate (Y(M,M),Ytrans(M,M),Xtrans(M,M))
+!         do iii=1,M
+!         do jjj=1,M
+!           X(iii,jjj)=Xmat(iii,jjj)
+!         enddo
+!         enddo
+!         Y=Ymat
+!         Xtrans=Xtrp
+!         Ytrans=Ytrp
+!         do kk=1,M
+!           RMM(M13+kk-1)=0.0d0
+!         enddo
+!
+!#endif
+!      ELSE
 
 ! FFR: Canonical Diagonalization of Overlap
 !--------------------------------------------------------------------!
@@ -441,37 +394,39 @@
 ! by the much nicer Ymat,Ytrp,Xtrp (and X by Xmat). Also, copy
 ! into RMM.
 !
-         call sdiag_canonical(Smat,Dvec,Vmat,Xmat,Xtrp,Ymat,Ytrp)
-         sqsm=matmul(Vmat,Ytrp)
+!         call sdiag_canonical(Smat,Dvec,Vmat,Xmat,Xtrp,Ymat,Ytrp)
+!         sqsm=matmul(Vmat,Ytrp)
 
 
-         if (dovv.eqv..true.) then
-          fockbias=0.0d0
+!         if (dovv.eqv..true.) then
+!          fockbias=0.0d0
 
-          weight=0.195d0
-          call vector_selection(1,orb_group,orb_selection)
-          call fterm_biaspot(M,sqsm,orb_selection,weight,fockbias)
+!          weight=0.195d0
+!          call vector_selection(1,orb_group,orb_selection)
+!          call fterm_biaspot(M,sqsm,orb_selection,weight,fockbias)
 
-          weight=-weight
-          call vector_selection(2,orb_group,orb_selection)
-          call fterm_biaspot(M,sqsm,orb_selection,weight,fockbias)
-         endif
+!          weight=-weight
+!          call vector_selection(2,orb_group,orb_selection)
+!          call fterm_biaspot(M,sqsm,orb_selection,weight,fockbias)
+!         endif
 
-         allocate (Y(M,M),Ytrans(M,M),Xtrans(M,M))
-         do iii=1,M
-         do jjj=1,M
-           X(iii,jjj)=Xmat(iii,jjj)
-         enddo
-         enddo
-         Y=Ymat
-         Xtrans=Xtrp
-         Ytrans=Ytrp
-         do kk=1,M
-           RMM(M13+kk-1)=Dvec(kk)
-         enddo
+!         allocate (Y(M,M),Ytrans(M,M),Xtrans(M,M))
+!         do iii=1,M
+!         do jjj=1,M
+!           X(iii,jjj)=Xmat(iii,jjj)
+!         enddo
+!         enddo
+!         Y=Ymat
+!         Xtrans=Xtrp
+!         Ytrans=Ytrp
+!         do kk=1,M
+!           RMM(M13+kk-1)=Dvec(kk)
+!         enddo
 
-      ENDIF
+!      ENDIF
       call g2g_timer_stop('cholesky')
+
+
 !! CUBLAS ---------------------------------------------------------------------!
 #ifdef CUBLAS
             call CUBLAS_INIT()
@@ -1756,3 +1711,187 @@
       return
       end
 !  -------------------------
+
+
+	SUBROUTINE neighbor_list_2e()
+! Para hacer lineal la integral de 2 electrone con lista de vecinos. Nano
+        USE garcha_mod, ONLY : natom, natomc, r, d, jatc, rmax, nshell, atmin, nnps, nnpp, nnpd, M, nuc
+	IMPLICIT NONE
+	INTEGER :: i,j, iij, iik, iikk
+	REAL*8 :: zij, ti, tj, alf, rexp
+          do i=1,natom
+          natomc(i)=0
+            do j=1,natom
+              d(i,j)=(r(i,1)-r(j,1))**2+(r(i,2)-r(j,2))**2+ &
+                 (r(i,3)-r(j,3))**2
+
+              zij=atmin(i)+atmin(j)
+              ti=atmin(i)/zij
+              tj=atmin(j)/zij
+              alf=atmin(i)*tj
+              rexp=alf*d(i,j)
+              if (rexp.lt.rmax) then
+                natomc(i)=natomc(i)+1
+                jatc(natomc(i),i)=j
+              endif
+            enddo
+          enddo
+
+          do iij=nshell(0),1,-1
+            nnps(nuc(iij))=iij
+          enddo
+
+          do iik=nshell(0)+nshell(1),nshell(0)+1,-1
+            nnpp(nuc(iik))=iik
+          enddo
+
+          do iikk=M,nshell(0)+nshell(1)+1,-1
+            nnpd(nuc(iikk))=iikk
+          enddo
+        END SUBROUTINE neighbor_list_2e
+
+	SUBROUTINE overlap_diag(docholesky, M5, M13, fockbias, dovv, Y)
+! Diagonalization of S matrix, after this is not needed anymore
+! S = YY^T ; X = (Y^-1)^T
+! => (X^T)SX = 1
+      USE garcha_mod, ONLY : M, RMM, Smat, X, nuc, natom
+      USE general_module, ONLY : sdiag_canonical, vector_selection, read_list, atmorb, sdcmp_cholesky
+
+
+
+
+	IMPLICIT NONE
+	LOGICAL, INTENT(IN) :: docholesky, dovv
+	INTEGER, INTENT(IN) :: M5, M13
+	INTEGER :: iii, jjj, iiindex, kk
+	INTEGER :: ErrID
+       REAL*8, dimension (:,:), allocatable :: Ytrans, Xtrans
+!       REAL*8, dimension(*) :: Y
+       real*8,dimension(:,:),allocatable :: sqsm
+	real*8,dimension(M,M) :: fockbias
+       real*8,dimension(:,:),allocatable :: Vmat
+       real*8,dimension(:),  allocatable :: Dvec
+	real*8,dimension(:,:),allocatable :: Ytrp, Ymat, Xmat, Xtrp
+       real*8,dimension(M,M), intent(inout) :: Y
+       integer,allocatable :: orb_group(:)
+       integer,allocatable :: orb_selection(:)
+       integer,allocatable :: atom_group(:)
+	real*8 :: weight
+
+       allocate(Vmat(M,M),Dvec(M))
+       allocate(sqsm(M,M))
+       allocate(Ytrp(M,M), Ymat(M,M), Xmat(M,M), Xtrp(M,M))
+
+       if (dovv.eqv..true.) then
+
+        if (.not.allocated(atom_group)) then
+          allocate(atom_group(natom))
+          call read_list('atomgroup',atom_group)
+        endif
+        if (.not.allocated(orb_group)) then
+          allocate(orb_group(M))
+          call atmorb(atom_group,nuc,orb_group)
+        endif
+        if (.not.allocated(orb_selection)) then
+          allocate(orb_selection(M))
+        endif
+       endif
+
+
+
+      IF (docholesky) THEN
+#ifdef magma
+        ! ESTO SIGUE USANDO Smat EN RMM(M5)
+        ! CAMBIARLO CUANDO SE SIGA PROBANDO MAGMA
+        PRINT*,'DOING MAGMA-CHOLESKY'
+
+        ALLOCATE(Ytrans(M,M))
+        DO iii=1,M;DO jjj=1,M
+          Y(iii,jjj)=0
+          IF (jjj.LE.iii) THEN
+            iiindex=iii+(2*M-jjj)*(jjj-1)/2
+            Y(iii,jjj)=RMM(M5+iiindex-1)
+          ENDIF
+        ENDDO;ENDDO
+
+        CALL MAGMAF_DPOTRF('L',M,Y,M,ErrID)
+
+        Ytrans= transpose(Y)
+        ALLOCATE(Xtrans(M,M))
+        Xtrans=Y
+        CALL MAGMAF_DTRTRI('L','N',M,Xtrans,M,ErrID)
+        if(ErrID.ne.0) STOP ('Error in cholesky decomp.')
+        xnano= transpose(Xtrans)
+        do i=1,M;doj=1,M
+          X(i,j)=Xnano(i,j)
+        enddo;enddo
+        PRINT*,'CHOLESKY MAGMA'
+
+#else
+
+! FFR: Cholesky Decomposition of Overlap
+!--------------------------------------------------------------------!
+! I am keeping Y,Ytrans and Xtrans but they should be replaced
+! by the much nicer Ymat,Ytrp,Xtrp (and X by Xmat). The outputs
+! Dvec and Vmat don't have the same meaning as in the diagona-
+! lization (they are not eigenvalues or eigenvectors. No S1/2
+! matrix can be obtained.
+!
+! Magma option should be introduced INSIDE of che call
+!
+         call sdcmp_cholesky(Smat,Dvec,Vmat,Ymat,Xtrp,Ytrp,Xmat)
+
+         allocate (Ytrans(M,M),Xtrans(M,M))
+         do iii=1,M
+         do jjj=1,M
+           X(iii,jjj)=Xmat(iii,jjj)
+         enddo
+         enddo
+         Y=Ymat
+         Xtrans=Xtrp
+         Ytrans=Ytrp
+         do kk=1,M
+           RMM(M13+kk-1)=0.0d0
+         enddo
+
+#endif
+      ELSE
+! FFR: Canonical Diagonalization of Overlap
+!--------------------------------------------------------------------!
+! I am keeping Y,Ytrans and Xtrans but they should be replaced
+! by the much nicer Ymat,Ytrp,Xtrp (and X by Xmat). Also, copy
+! into RMM.
+!
+         call sdiag_canonical(Smat,Dvec,Vmat,Xmat,Xtrp,Ymat,Ytrp)
+         sqsm=matmul(Vmat,Ytrp)
+
+
+         if (dovv.eqv..true.) then
+          fockbias=0.0d0
+
+          weight=0.195d0
+          call vector_selection(1,orb_group,orb_selection)
+          call fterm_biaspot(M,sqsm,orb_selection,weight,fockbias)
+
+          weight=-weight
+          call vector_selection(2,orb_group,orb_selection)
+          call fterm_biaspot(M,sqsm,orb_selection,weight,fockbias)
+         endif
+
+         allocate (Ytrans(M,M),Xtrans(M,M))
+         do iii=1,M
+         do jjj=1,M
+           X(iii,jjj)=Xmat(iii,jjj)
+         enddo
+         enddo
+         Y=Ymat
+         Xtrans=Xtrp
+         Ytrans=Ytrp
+         do kk=1,M
+           RMM(M13+kk-1)=Dvec(kk)
+         enddo
+
+      ENDIF
+
+
+	END SUBROUTINE overlap_diag
