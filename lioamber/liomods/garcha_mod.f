@@ -10,7 +10,7 @@
      > converge,ndiis,NGEO,nang,timedep,ntdstep,propagator,NBCH 
       integer restart_freq, energy_freq
       real*8 GOLD, TOLD, qmmmcut, dgtrig
-      parameter (nng=100)
+!      parameter (nng=100)
       character*65 title
       character*20 basis,whatis,stdbas
       character*40 basis_set, fitting_set
@@ -22,22 +22,24 @@
       logical exists,MEMO,predcoef
       logical done(ntq),used,NORM,OPEN,ATRHO,DIRECT,VCINP,SHFT,DIIS
       logical done_fit(ntq)
-      logical TMP1,TMP2,dens,EXTR,write1,SVD,ANG,field1
-      logical Coul,Scf1,Prop,GRAD,BSSE,integ,SVD1,sol,tipe
-      logical exter,exter1,resp1,popf,primera,writexyz,intsoldouble
+      logical TMP1,TMP2,dens,EXTR,SVD,field1
+!write1
+      logical Coul,GRAD,BSSE,integ,SVD1,sol,tipe
+!Prop,GRAD,BSSE,integ,SVD1,sol,tipe
+      logical exter,exter1,resp1,primera,writexyz,intsoldouble
       logical OPEN1
       logical dens1,integ1,sol1,free,free1, field, extern
 
       logical tdrestart, writedens
+      logical writeforces
 
-      logical cubegen_only,cube_dens,cube_orb,cube_elec
+      logical cubegen_only,cube_dens,cube_orb,cube_elec, cube_sqrt_orb
       integer cube_res,cube_sel
       character*20 cube_dens_file,cube_orb_file,cube_elec_file
 
 
       dimension OCC(40),oc2(400),ATCOEF(100*ng0),ighost(ntq),
      > ighost1(ntq)
-      dimension ncf(nng),lt(nng)
       real*8 e_(50,3),wang(50),e_2(116,3),wang2(116),e3(194,3), ! intg1 e intg2
      > wang3(194)                                               !
       integer Nr(0:54),Nr2(0:54)
@@ -45,19 +47,19 @@
 
       real*8, dimension (:,:), ALLOCATABLE :: r,v,rqm,d
       real*8, dimension (:), ALLOCATABLE ::  Em, Rm, pc
-       integer, dimension (:), ALLOCATABLE :: Iz, nnat
+      integer, dimension (:), ALLOCATABLE :: Iz, nnat
 
       dimension isotop(54)!,Pm(nt)
       dimension Rm2(0:54), STR(880,0:21), FAC(0:16)
       dimension alpha(nss)
 c Everything is dimensioned for 2 basis, normal and density
 c ncf, lt,at,ct parameters for atomic basis sets
-      dimension at(nng),ct(nng),nshell(0:4)
+      dimension nshell(0:4)
       dimension Num(0:3),nlb(ng),nld(ngd),nshelld(0:4)
        integer iconst1,idip1,ipop1,ispin1,
      > icharge1,Nsol1,natsol1,Ll(3)
       
-        real*8, dimension (:), ALLOCATABLE :: af
+       real*8, dimension (:), ALLOCATABLE :: af
        real*8, dimension (:,:), ALLOCATABLE :: c,a,cx,ax,cd,ad,B
        integer, dimension (:), ALLOCATABLE :: Nuc,ncont,Nucx,ncontx,Nucd
      >  ,ncontd
@@ -89,7 +91,7 @@ c      common /index/ ii,iid
 c
       Data Num /1,3,6,10/
       dimension jatom(2,100),coef(100),dist(100,3),distt(100)
-      integer ndis,nsteps
+      integer ndis
       real*8 kjar,xini,xfinal   
 
       integer, dimension(:), ALLOCATABLE :: natomc,nnps,nnpp,nnpd,nns
@@ -130,9 +132,33 @@ c      parameter rmintsol=16.0D0
       double precision :: good_cut
       double precision :: Etold
 
-!-Variables for library reading
+!-Variables for library reading.
       logical :: omit_bas
-!-Variables for outout format
+!-Variables for outout format.
       logical :: style, allnml
+!-Variables for property calculations.
+      logical :: fukui, dipole, lowdin, mulliken, print_coeffs
+
+!     parameter (nng=100)
+      integer :: nng, max_func
+      integer, allocatable, dimension(:) :: ncf, lt
+      real*8, allocatable, dimension(:) :: at, ct
+     
+!      dimension ncf(nng),lt(nng)
+!      dimension at(nng),ct(nng)
+
+! GPU OPTIONS
+      logical :: assign_all_functions, remove_zero_weights, 
+     >              energy_all_iterations
+      real*8  :: free_global_memory, sphere_radius, little_cube_size
+      integer :: min_points_per_cube, max_function_exponent
+
+! Energy contributions
+      real*8 :: Enucl
+      real*8,dimension(:)  ,allocatable :: Eorbs
+! need this for lowdin
+      real*8,dimension(:,:),allocatable :: sqsm
+      
+
        end module
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!

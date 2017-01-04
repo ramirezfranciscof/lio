@@ -27,11 +27,11 @@
 # compiling.
 #
 ######################################################################
-objects += liomain.o SCF.o SCFop.o SCF_in.o TD.o cubegen.o
-objects += dip.o dipmem.o jarz.o magnus.o predictor.o mulliken.o
+objects += SCF.o SCFop.o SCF_exter.o TD.o cubegen.o liomain.o
+objects += dip.o dipmem.o jarz.o magnus.o predictor.o 
 objects += dft_get_mm_forces.o dft_get_qm_forces.o
 objects += matmuldiag.o fock_commuts.o
-objects += init.o init_amber.o lio_init.o lio_finalize.o
+objects += init_lio.o lio_finalize.o input_read.o
 objects += drive.o func.o grid.o
 objects += int1.o int1G.o int2.o int2G.o
 objects += int3lu.o int3mem.o  int3G.o
@@ -47,9 +47,10 @@ objects += readECP.o
 objects += intECP.o
 objects += density.o
 objects += extras.o
-objects += fterm_biaspot.o lowdinpop.o
+objects += fterm_biaspot.o
 objects += elec.o
 objects += calcDSM.o
+objects += properties.o write_output.o
 #
 #
 #     Trying a new way of makefile organization: put every important
