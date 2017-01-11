@@ -10,18 +10,27 @@
 !%% SCF_in %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 ! Performs SCF setup and routine calls from AMBER.                             !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-      subroutine SCF_in(E,qmcoords,clcoords,nsolin,dipxyz)
+      subroutine SCF_in(E,qmcoords,qmvels,clcoords,nsolin,dipxyz)
       use garcha_mod, only : r, v, Em, Rm, pc, natom, ntatom, nsol, rqm, &
+                             nucpos, nucvel, RealRho, Smat, atom_mass, &
+                             M, &
                              writexyz, Iz
       use ehrenfest
 
           implicit none
           real*8 , intent(in) :: qmcoords(3,natom), clcoords(4,nsolin)
+          real*8 , intent(in) :: qmvels(3,natom)
           integer, intent(in) :: nsolin
 
           real*8 :: E, dipxyz(3)
           integer :: i, j, n
+          integer :: ii, kk
 
+          do ii=1,natom
+          do kk=1,3
+            write(888,*) qmvels(kk,ii)
+          enddo
+          enddo
           nsol = nsolin ; ntatom = nsol + natom ;
 
           call g2g_timer_sum_start("Total")
@@ -65,9 +74,12 @@
           do kk=1,3
             ! velocity units in angstrom per 1/20.455 pico-second, and must go 
             ! to atomic units
+            write(888,*) qmvels(kk,ii)
             nucpos(kk,ii) = r(ii,kk)
-            nucvel(kk,ii) = qmvels(kk,ii)*(20.455)*(2.418884326505E-5)
-            nucvel(kk,ii) = nucvel(kk,ii)/(0.529177d0)
+            nucvel(kk,ii) = qmvels(kk,ii)
+            nucvel(kk,ii) = nucvel(kk,ii)*(20.455d0)
+            nucvel(kk,ii) = nucvel(kk,ii)*(2.418884326505E-5)*(1.889725989d0)
+            write(888,*) qmvels(kk,ii), nucvel(kk,ii)
           enddo
           enddo
 

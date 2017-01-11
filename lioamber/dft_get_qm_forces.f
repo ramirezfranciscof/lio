@@ -1,10 +1,10 @@
-!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
        subroutine dft_get_qm_forces(dxyzqm)
-!--------------------------------------------------------------------!
+!------------------------------------------------------------------------------!
 !
 !
 !
-!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
        use garcha_mod,only: natom, nsol, cubegen_only, do_ehrenfest
      >                    , first_step, fix_nuclei
      >                    , qm_forces_ds, qm_forces_total
@@ -15,10 +15,11 @@
        integer            :: fileunit,kk,ii,jj,igpu
        logical            :: print_forces
 
-!--------------------------------------------------------------------!
+!------------------------------------------------------------------------------!
        if(cubegen_only) return
        call g2g_timer_sum_start('Forces')
        allocate(ff1G(natom,3),ffSG(natom,3),ff3G(natom,3))
+
 
        call g2g_timer_start('int1G')
        ff1G=0.0d0
@@ -40,27 +41,12 @@
        call g2g_timer_sum_start('Overlap gradients')
        ffSG=0.0d0
        call intSG(ffSG)
-       do ii=1,natom
-       do jj=1,3
-!          write(667,*) ffSG(ii,jj)
-!          write(669,*) ffSG(ii,jj)-qm_forces_ds(jj,ii), ffSG(ii,jj),
-!     >                 qm_forces_ds(jj,ii)
-       enddo
-       enddo
-!       write(667,*) '-------------'
        if (do_ehrenfest) then
          ffSG=-transpose(qm_forces_ds)
        endif
-       do ii=1,natom
-       do jj=1,3
-!          write(668,*) ffSG(ii,jj)
-       enddo
-       enddo
-!       write(668,*) '-------------'
-
-
        call g2g_timer_stop('intSG')
        call g2g_timer_sum_stop('Overlap gradients')
+
 
        call g2g_timer_start('int3G')
        call g2g_timer_sum_start('Coulomb+Exchange-correlation')
@@ -76,14 +62,22 @@ c       factor=627.509391D0/0.5291772108D0
        do ii=1,3
          dxyzqm(ii,kk)=ff1G(kk,ii)+ffSG(kk,ii)+ff3G(kk,ii)
          dxyzqm(ii,kk)=dxyzqm(ii,kk)*factor
-         ! NULL FORCES: NUCLEOS FIJOS
-!         dxyzqm(ii,kk)=0.0d0
        enddo
        enddo
 
        if ( fix_nuclei ) dxyzqm(:,:)=0.0d0
-!--------------------------------------------------------------------!
-       print_forces=.false.
+
+       if (do_ehrenfest) then
+         qm_forces_total=qm_forces_ds
+         qm_forces_total=qm_forces_total-transpose(ff1G)
+         qm_forces_total=qm_forces_total-transpose(ff3G)
+       endif
+       if (first_step) first_step=.false.
+
+!------------------------------------------------------------------------------!
+
+
+       print_forces=.true.
        if (print_forces) then
          fileunit=3242
          open(unit=fileunit,file='Forces.log',access='APPEND')
@@ -121,16 +115,8 @@ c       factor=627.509391D0/0.5291772108D0
          call g2g_timer_clear()
        endif
 
-       if (do_ehrenfest) then
-         qm_forces_total=qm_forces_ds
-         qm_forces_total=qm_forces_total-transpose(ff1G)
-         qm_forces_total=qm_forces_total-transpose(ff3G)
-       endif
-       if (first_step) first_step=.false.
-
-
-!--------------------------------------------------------------------!
+!------------------------------------------------------------------------------!
        deallocate(ff1G,ffSG,ff3G)
  200   format(1X,A4,1X,I4,3(2X,E14.7))
-       return;end subroutine
-!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+       end subroutine
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!

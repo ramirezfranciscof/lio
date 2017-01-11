@@ -41,8 +41,6 @@ subroutine lio_defaults()
                            verbose_ECP, Cnorm, FOCK_ECP_read, FOCK_ECP_write,  &
                            Fulltimer_ECP, cut2_0, cut3_0
 
-    use basis_data, only:basis_data_set
-
     implicit none
 
 !   Names of files used for input and output.
@@ -127,8 +125,15 @@ subroutine init_lio_common(natomin, Izin, nclatom, charge, callfrom)
                            allnml, style, free_global_memory, little_cube_size,&
                            assign_all_functions, energy_all_iterations,        &
                            remove_zero_weights, min_points_per_cube,           &
+
+                           RhoSaveA, RhoSaveB, timedep, M,                     &
+                           first_step, fix_nuclei, do_ehrenfest, nshell,       &
+
                            max_function_exponent, sphere_radius                          
+
     use ECP_mod,    only : Cnorm, ecpmode
+
+    use basis_data, only: basis_data_set
 
     implicit none
     integer , intent(in) :: charge, nclatom, natomin, Izin(natomin), callfrom
@@ -137,7 +142,8 @@ subroutine init_lio_common(natomin, Izin, nclatom, charge, callfrom)
 !    call g2g_timer_start('lio_init')
 
     if (callfrom.eq.1) then
-        natom  = natomin          ;  Iz = Izin  ;
+        natom  = natomin          ;
+        if (.not.(allocated(Iz))) allocate(Iz(natom));  Iz = Izin  ;
         ntatom = natom + nclatom  ;
         allocate(r(ntatom,3), rqm(natom,3), pc(ntatom))
     endif
@@ -207,10 +213,6 @@ subroutine init_lio_common(natomin, Izin, nclatom, charge, callfrom)
     end if
 
     call basis_data_set(nshell(0),nshell(1),nshell(2),nuc,ncont,a,c)
-!   time units transform 1/20.455 ps to atomic units
-!   ( AU = 2.418884326505 x 10e-17 s )
-!    tdstep=(dt_i)/((20.455)*(2.418884326505E-5))
-    tdstep=(dt_i)/(2.418884326505E-5)
 !==============================================================================!
 
     return 
@@ -260,6 +262,7 @@ subroutine init_lio_amber(natomin, Izin, nclatom, charge, basis_i              &
            , DENS_i , IGRID_i, IGRID2_i , timedep_i , tdstep_i                 &
            , ntdstep_i, field_i, exter_i, a0_i, epsilon_i, Fx_i, Fy_i          &
            , Fz_i, NBCH_i, propagator_i, writedens_i, tdrestart_i              &
+           , dt_i                                                              &
            )
 
     use garcha_mod, only : basis, output, fmulliken, fcoord, OPEN, NMAX,     &
@@ -291,7 +294,7 @@ subroutine init_lio_amber(natomin, Izin, nclatom, charge, basis_i              &
                          IGRID2_i, timedep_i, ntdstep_i, NBCH_i, propagator_i, &
                          dummy
     real*8            :: GOLD_i, told_i, rmax_i, rmaxs_i, dgtrig_i, tdstep_i,  &
-                         a0_i, epsilon_i, Fx_i, Fy_i, Fz_i
+                         a0_i, epsilon_i, Fx_i, Fy_i, Fz_i, dt_i
 
     ! Gives default values to variables.       
     call lio_defaults()
@@ -321,6 +324,14 @@ subroutine init_lio_amber(natomin, Izin, nclatom, charge, basis_i              &
     Fz             = Fz_i           ; NBCH          = NBCH_i         ;
     propagator     = propagator_i   ; writedens     = writedens_i    ;
     tdrestart      = tdrestart_i
+
+!==============================================================================!
+! FFR - Ehrenfest
+!   time units transform 1/20.455 ps to atomic units
+!   ( AU = 2.418884326505 x 10e-17 s )
+    tdstep = ( (dt_i) / (20.455) ) * (2.418884326505E-5)
+!    tdstep=(dt_i)/(2.418884326505E-5)
+!==============================================================================!
 
     ! Initializes LIO. The last argument indicates LIO is not being used alone.
     call init_lio_common(natomin, Izin, nclatom, charge, 1) 

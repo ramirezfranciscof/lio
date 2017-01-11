@@ -10,6 +10,7 @@
 subroutine liomain(E, dipxyz)
     use garcha_mod, only : M, Smat, RealRho, OPEN, writeforces, energy_freq,   &
                            restart_freq, npas, sqsm, mulliken, lowdin, dipole, &
+                           do_ehrenfest, first_step, nucpos, &
                            Eorbs, fukui, print_coeffs
     use ecp_mod   , only : ecpmode, IzECP
     use ehrenfest

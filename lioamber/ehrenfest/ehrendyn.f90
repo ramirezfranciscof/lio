@@ -50,6 +50,7 @@
 !------------------------------------------------------------------------------!
   do ii=1,natom
   do kk=1,3
+    write(889,*) nucvel(kk,ii)
     nucvel(kk,ii)=nucvel(kk,ii)+(1.5)*dt*qm_forces_total(kk,ii)/atom_mass(ii)
   enddo
   enddo
