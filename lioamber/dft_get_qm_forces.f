@@ -72,7 +72,6 @@ c       factor=627.509391D0/0.5291772108D0
          qm_forces_total=qm_forces_total-transpose(ff1G)
          qm_forces_total=qm_forces_total-transpose(ff3G)
        endif
-       if (first_step) first_step=.false.
 
 !------------------------------------------------------------------------------!
 
@@ -80,7 +79,11 @@ c       factor=627.509391D0/0.5291772108D0
        print_forces=.true.
        if (print_forces) then
          fileunit=3242
-         open(unit=fileunit,file='Forces.log',access='APPEND')
+         if (first_step) then
+            open(unit=fileunit,file='Forces.log')
+         else
+            open(unit=fileunit,file='Forces.log',access='APPEND')
+         endif
 
          write(fileunit,'(A)')
      >   '------------------------------------------------------------'
@@ -115,6 +118,8 @@ c       factor=627.509391D0/0.5291772108D0
          call g2g_timer_clear()
        endif
 
+
+       if (first_step) first_step=.false.
 !------------------------------------------------------------------------------!
        deallocate(ff1G,ffSG,ff3G)
  200   format(1X,A4,1X,I4,3(2X,E14.7))

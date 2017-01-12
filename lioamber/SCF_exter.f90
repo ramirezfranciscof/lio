@@ -74,12 +74,10 @@
           do kk=1,3
             ! velocity units in angstrom per 1/20.455 pico-second, and must go 
             ! to atomic units
-            write(888,*) qmvels(kk,ii)
             nucpos(kk,ii) = r(ii,kk)
             nucvel(kk,ii) = qmvels(kk,ii)
             nucvel(kk,ii) = nucvel(kk,ii)*(20.455d0)
             nucvel(kk,ii) = nucvel(kk,ii)*(2.418884326505E-5)*(1.889725989d0)
-            write(888,*) qmvels(kk,ii), nucvel(kk,ii)
           enddo
           enddo
 
