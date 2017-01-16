@@ -5,9 +5,8 @@
 ! RhoSaveA and RhoSaveB are stored in ON basis, except for the first step
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-  use garcha_mod, only: M, rmm, natom, tdstep, total_time &
-                      , first_step, atom_mass, nucpos, nucvel &
-                      , qm_forces_ds, qm_forces_total &
+  use garcha_mod, only: M, natom, tdstep, total_time, first_step, atom_mass    &
+                      , nucpos, nucvel, qm_forces_ds, qm_forces_total          &
                       , RhoSaveA, RhoSaveB
   implicit none
   real*8,intent(inout) :: Energy,DipMom(3)
@@ -21,7 +20,6 @@
   real*8                                :: dt
   real*8                                :: ux,uy,uz
   integer                               :: ii,jj,kk,idx
-
 
 
 ! Preliminaries

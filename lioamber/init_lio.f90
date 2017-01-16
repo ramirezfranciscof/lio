@@ -294,7 +294,9 @@ subroutine init_lio_amber(natomin, Izin, nclatom, charge, basis_i              &
                          IGRID2_i, timedep_i, ntdstep_i, NBCH_i, propagator_i, &
                          dummy
     real*8            :: GOLD_i, told_i, rmax_i, rmaxs_i, dgtrig_i, tdstep_i,  &
-                         a0_i, epsilon_i, Fx_i, Fy_i, Fz_i, dt_i
+                         a0_i, epsilon_i, Fx_i, Fy_i, Fz_i
+    real*8,intent(in) :: dt_i
+
 
     ! Gives default values to variables.       
     call lio_defaults()
@@ -327,14 +329,16 @@ subroutine init_lio_amber(natomin, Izin, nclatom, charge, basis_i              &
 
 !==============================================================================!
 ! FFR - Ehrenfest
-!   time units transform 1/20.455 ps to atomic units
+!   Amber should have time units in 1/20.455 ps, but apparently it has time
+!   in ps. Just have to transform to atomic units
 !   ( AU = 2.418884326505 x 10e-17 s )
-    tdstep = ( (dt_i) / (20.455) ) * (2.418884326505E-5)
-!    tdstep=(dt_i)/(2.418884326505E-5)
+!
+!    tdstep = (dt_i) / ( (20.455) * (2.418884326505E-5) )
+    tdstep = (dt_i) * (41341.3733366)
 !==============================================================================!
 
     ! Initializes LIO. The last argument indicates LIO is not being used alone.
-    call init_lio_common(natomin, Izin, nclatom, charge, 1) 
+    call init_lio_common(natomin, Izin, nclatom, charge, 1)
 
     return
 end subroutine init_lio_amber

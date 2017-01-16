@@ -1529,6 +1529,8 @@ c
 ! FFR - Ehrenfest
 !==============================================================================!
        if (first_step) then
+         call spunpack('L',M,RMM(M1),RealRho)
+         call fixrho(M,RealRho)
 !         RealRho=matmul(RealRho,Ymat)
 !         RealRho=matmul(Ytrp,RealRho)
          RhoSaveA=DCMPLX(RealRho)
