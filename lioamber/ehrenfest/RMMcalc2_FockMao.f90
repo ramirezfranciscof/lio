@@ -22,14 +22,16 @@
 
   real*8   :: FieldNow(3)
   real*8   :: factor, g, Qc
-  real*8   :: alpha, timeof_pert, timeof_peak
-  real*8   :: time_gaus, dip_times_field, strange_term
+  real*8   :: dip_times_field, strange_term
   integer  :: kk,idx0
   integer  :: MM,MMd,igpu
   logical  :: MEMO
 
+  logical  :: external_field_is_present
   logical  :: laser_is_on
-  real*8   :: efield_shape, laser_freq, laser_long
+  real*8   :: laser_freq, laser_long
+  real*8   :: alpha, timeof_pert, timeof_peak
+  real*8   :: efield_shape, shapeshift
   
 !
 !
@@ -61,7 +63,7 @@
   endif
 
 !
-! Calculate unfixed Fock in RMM
+! Calculate unfixed Fock in RMM - int3lu and solve_groups
 !--------------------------------------------------------------------!
   call rmmput_dens(DensMao)
   call g2g_timer_start('g2g-solve + int3lu')
@@ -69,23 +71,47 @@
   call g2g_solve_groups(0,Energy_Exchange,0)
   call g2g_timer_stop('g2g-solve + int3lu')
 
-  Energy_Efield = 0.0d0
-  alpha       = 0.2 / ( tdstep * 0.0241888 )**2
-  timeof_peak =  50 * ( tdstep * 0.0241888 )
-  timeof_pert = 100 * ( tdstep * 0.0241888 )
-  if ( field .and. ( total_time <= timeof_pert ) ) then
+!
+! Calculate unfixed Fock in RMM - electric field
+!--------------------------------------------------------------------!
+!  if ( field ) external_field_is_present = .true.
+  external_field_is_present = .true.
+
+  if ( external_field_is_present ) then
+    g = 1.0d0
+    factor = 2.54d0
+    efield_shape = 1.0d0
+
     Qc=-2*NCO+Nunp
     do kk=1,natom
       Qc=Qc+Iz(kk)
     end do
 
-    g = 1.0d0
-    factor = 2.54d0
-    time_gaus = exp( (-alpha) * ( total_time - timeof_peak )**2 )
-    FieldNow(1) = Fx * time_gaus
-    FieldNow(2) = Fy * time_gaus
-    FieldNow(3) = Fz * time_gaus
-    write(999,*) ' ==> ', FieldNow
+!!! Time Gaussian Shape (time in fs)
+!    timeof_peak =  50 * ( tdstep * 0.0241888 )
+!    timeof_pert = 100 * ( tdstep * 0.0241888 )
+    timeof_peak = 25
+    timeof_pert = 50
+    alpha       = 0.2 / ( tdstep * 0.0241888 )**2
+    shapeshift  = exp( (-alpha) * ( total_time - timeof_peak )**2 )
+    if ( total_time <= timeof_pert ) then
+       efield_shape = efield_shape * shapeshift
+    end if
+
+!!! Laser shape
+    laser_is_on = .true.
+!    laser_long = 139.3 !nm
+    laser_long = 93.22 !nm
+    laser_freq = (6.28318530718) * (299.792458) / (laser_long)
+!   [freq fs-1] = [2pi] * [c in nm/fs] / [long]
+    shapeshift = sin( laser_freq * total_time )
+    if ( laser_is_on ) then
+       efield_shape = efield_shape * shapeshift
+    endif
+
+    FieldNow(1) = Fx * efield_shape
+    FieldNow(2) = Fy * efield_shape
+    FieldNow(3) = Fz * efield_shape
 
     call dip( DipMom(1), DipMom(2), DipMom(3) )
     call intfld( g, FieldNow(1), FieldNow(2), FieldNow(3) )
@@ -95,39 +121,12 @@
     dip_times_field = dip_times_field + FieldNow(3) * DipMom(3)
     strange_term = (0.5d0) * (1.0d0 - 1.0d0/epsilon) * Qc**2 / a0
 
+    Energy_Efield = 0.0d0
     Energy_Efield = Energy_Efield - g * dip_times_field / factor
     Energy_Efield = Energy_Efield - strange_term
   end if
 
-  laser_is_on = .true.
-  laser_long = 139.3 !nm
-  laser_freq = (6.28318530718) * (299.792458) / (laser_long)
-  ! [freq fs-1] = [2pi] * [c in nm/fs] / [long]
-  if ( laser_is_on ) then
-    Qc=-2*NCO+Nunp
-    do kk=1,natom
-      Qc=Qc+Iz(kk)
-    end do
 
-    g = 1.0d0
-    factor = 2.54d0
-    efield_shape = sin( laser_freq * total_time )
-    FieldNow(1) = Fx * efield_shape
-    FieldNow(2) = Fy * efield_shape
-    FieldNow(3) = Fz * efield_shape
-    print*,'Doing laser: ',FieldNow
-
-    call dip( DipMom(1), DipMom(2), DipMom(3) )
-    call intfld( g, FieldNow(1), FieldNow(2), FieldNow(3) )
-    dip_times_field = 0.0d0
-    dip_times_field = dip_times_field + FieldNow(1) * DipMom(1)
-    dip_times_field = dip_times_field + FieldNow(2) * DipMom(2)
-    dip_times_field = dip_times_field + FieldNow(3) * DipMom(3)
-    strange_term = (0.5d0) * (1.0d0 - 1.0d0/epsilon) * Qc**2 / a0
-
-    Energy_Efield = Energy_Efield - g * dip_times_field / factor
-    Energy_Efield = Energy_Efield - strange_term
-  endif
 !
 ! Calculate Energy
 !--------------------------------------------------------------------!

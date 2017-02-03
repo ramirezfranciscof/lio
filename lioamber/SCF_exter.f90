@@ -26,11 +26,6 @@
           integer :: i, j, n
           integer :: ii, kk
 
-          do ii=1,natom
-          do kk=1,3
-            write(888,*) qmvels(kk,ii)
-          enddo
-          enddo
           nsol = nsolin ; ntatom = nsol + natom ;
 
           call g2g_timer_sum_start("Total")

@@ -25,9 +25,9 @@ subroutine liomain(E, dipxyz)
 
 !------------------------------------------------------------------------------!
 ! FFR - Ehrenfest
-    if (do_ehrenfest) then
-        if (first_step) call SCF(E,dipxyz)
-        call ehrendyn(E,dipxyz)
+    if ( do_ehrenfest ) then
+        if ( first_step ) call SCF( E, dipxyz )
+        call ehrendyn( E, dipxyz )
     else
 !------------------------------------------------------------------------------!
 ! FFR - Normal Code

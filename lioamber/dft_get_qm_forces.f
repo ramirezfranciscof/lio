@@ -40,9 +40,10 @@
        call g2g_timer_start('intSG')
        call g2g_timer_sum_start('Overlap gradients')
        ffSG=0.0d0
-       call intSG(ffSG)
        if (do_ehrenfest) then
          ffSG=-transpose(qm_forces_ds)
+       else
+         call intSG(ffSG)
        endif
        call g2g_timer_stop('intSG')
        call g2g_timer_sum_stop('Overlap gradients')

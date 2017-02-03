@@ -45,6 +45,7 @@
   call calc_forceDS_dss(Natoms,Nbasis,nucpos,nucvel,InputMat,Bmat,fterm1)
   Btrp=transpose(Bmat)
 
+
   MatTrp=matmul(DensMao,Btrp)
   MatTrp=matmul(MatTrp,Sinv)
   MatTrp=MatTrp*dcmplx(0.0d0, 1.0d0)
@@ -59,6 +60,7 @@
   MatDir=DensMao*dcmplx(0.0d0, 1.0d0)
   InputMat=transpose(MatTrp)+MatDir
   call calc_forceDS_dds(Natoms,Nbasis,nucpos,nucvel,InputMat,fterm3)
+
 
   forceDS=dble(real(fterm1+fterm2+fterm3))
 

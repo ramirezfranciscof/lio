@@ -22,6 +22,7 @@
   integer    :: pi(3),pj(3)
   integer    :: atomi,atomj
   integer    :: ii,jj,ni,nj,ki,kj
+
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 
   fterm=dcmplx(0.0d0,0.0d0)
@@ -87,7 +88,7 @@
          endif
 
          term0=term1+term2+term3+term4
-         fterm(kj,atomj)=fterm(kj,atomj)+Mat0(ii,jj)*vel(ki,ni)*term0
+         fterm(kj,atomj)=fterm(kj,atomj)+Mat0(ii,jj)*vel(ki,atomi)*term0
       enddo
       enddo
 

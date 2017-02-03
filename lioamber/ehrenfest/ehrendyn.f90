@@ -21,7 +21,6 @@
   real*8                                :: ux,uy,uz
   integer                               :: ii,jj,kk,idx
 
-
 ! Preliminaries
 !------------------------------------------------------------------------------!
   call g2g_timer_start('ehrendyn step')
@@ -30,7 +29,6 @@
   allocate(Fock(M,M),FockInt(M,M))
   allocate(RhoOld(M,M),RhoMid(M,M),RhoNew(M,M))
   allocate(Bmat(M,M),Dmat(M,M),Tmat(M,M))
-
 
   if (.not.allocated(qm_forces_total)) then
     allocate(qm_forces_total(3,natom))
