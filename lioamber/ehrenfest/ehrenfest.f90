@@ -6,6 +6,13 @@
 ! INCLUDE FILES WITH HEADERS:
 !--------------------------------------------------------------------!
   implicit none
+  integer :: step_number = 0
+  integer :: save_lapse  = 100
+  integer :: last_step   = 1+120
+  integer :: rstinp_unit = 654321
+  integer :: rstout_unit = 123456
+  logical :: save_step   = .false.
+  logical :: restart_dyn = .false.
   include 'calc_Dmat_h.f90'
   contains
 !
@@ -21,6 +28,7 @@
 
   include 'calc_Dmat_cholesky.f90'
 
+  include 'ehrenrst.f90'
   include 'ehren_cholesky.f90'
   include 'ehren_magnus.f90'
   include 'ehren_verlet_e.f90'

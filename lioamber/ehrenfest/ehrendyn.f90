@@ -23,12 +23,13 @@
 
 ! Preliminaries
 !------------------------------------------------------------------------------!
+  step_number = step_number + 1
   call g2g_timer_start('ehrendyn step')
-  allocate(Smat(M,M),Sinv(M,M))
-  allocate(Lmat(M,M),Umat(M,M),Linv(M,M),Uinv(M,M))
-  allocate(Fock(M,M),FockInt(M,M))
-  allocate(RhoOld(M,M),RhoMid(M,M),RhoNew(M,M))
-  allocate(Bmat(M,M),Dmat(M,M),Tmat(M,M))
+  allocate( Smat(M,M), Sinv(M,M) )
+  allocate( Lmat(M,M), Umat(M,M), Linv(M,M), Uinv(M,M) )
+  allocate( Fock(M,M), FockInt(M,M) )
+  allocate( RhoOld(M,M), RhoMid(M,M), RhoNew(M,M) )
+  allocate( Bmat(M,M), Dmat(M,M), Tmat(M,M) )
 
   if (.not.allocated(qm_forces_total)) then
     allocate(qm_forces_total(3,natom))
@@ -41,6 +42,14 @@
   endif
 
   dt=tdstep
+
+  if ( first_step .and. restart_dyn ) then
+     open( unit=rstinp_unit, file="ehren_rstinp" )
+     print*,'Using restart'
+     call rstload( rstinp_unit, Natom, qm_forces_total, M, RhoSaveA, RhoSaveB )
+     close( unit=rstinp_unit )
+  end if
+
 
 ! Update velocities
 !------------------------------------------------------------------------------!
@@ -86,6 +95,22 @@
   RhoSaveA=RhoMid
   RhoSaveB=RhoNew
 
+
+! Saving restart
+!------------------------------------------------------------------------------!
+  if ( modulo(step_number,save_lapse) == 1 ) then
+     save_step = .true.
+  else
+     save_step = .false.
+  end if
+
+  if ( step_number == last_step ) save_step = .true.
+
+  if ( save_step ) then
+     open( unit=rstout_unit, file="ehren_rstout" )
+     call rstsave( rstout_unit, Natom, qm_forces_total, M, RhoSaveA, RhoSaveB )
+     close( unit=rstout_unit )
+  end if
 
 ! Calculation of the dipole moment
 !------------------------------------------------------------------------------!

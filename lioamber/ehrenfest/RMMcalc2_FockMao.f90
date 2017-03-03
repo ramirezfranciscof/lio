@@ -32,7 +32,6 @@
   real*8   :: laser_freq, laser_long
   real*8   :: alpha, timeof_pert, timeof_peak
   real*8   :: efield_shape, shapeshift
-  
 !
 !
 ! Calculate fixed-parts of fock
@@ -90,18 +89,24 @@
 !!! Time Gaussian Shape (time in fs)
 !    timeof_peak =  50 * ( tdstep * 0.0241888 )
 !    timeof_pert = 100 * ( tdstep * 0.0241888 )
-    timeof_peak = 25
+!    alpha       = 0.2 / ( tdstep * 0.0241888 )**2
+
+    timeof_peak = 20
     timeof_pert = 50
-    alpha       = 0.2 / ( tdstep * 0.0241888 )**2
-    shapeshift  = exp( (-alpha) * ( total_time - timeof_peak )**2 )
-    if ( total_time <= timeof_pert ) then
-       efield_shape = efield_shape * shapeshift
-    end if
+!    alpha       = 0.1E-7 / ( tdstep * 0.0241888 )**2
+    alpha       = 0.1E-7 / ( 2.06706875E-002 * 0.0241888 )**2
+
+    shapeshift   = exp( (-alpha) * ( total_time - timeof_peak )**2 )
+    efield_shape = efield_shape * shapeshift
+!    if ( total_time <= timeof_pert ) then
+!       efield_shape = efield_shape * shapeshift
+!    end if
 
 !!! Laser shape
     laser_is_on = .true.
 !    laser_long = 139.3 !nm
-    laser_long = 93.22 !nm
+    laser_long = 83.22 !nm
+!    laser_long =123.22 !nm
     laser_freq = (6.28318530718) * (299.792458) / (laser_long)
 !   [freq fs-1] = [2pi] * [c in nm/fs] / [long]
     shapeshift = sin( laser_freq * total_time )
@@ -124,6 +129,8 @@
     Energy_Efield = 0.0d0
     Energy_Efield = Energy_Efield - g * dip_times_field / factor
     Energy_Efield = Energy_Efield - strange_term
+
+    write(666,*) total_time, efield_shape, Energy_Efield
   end if
 
 
