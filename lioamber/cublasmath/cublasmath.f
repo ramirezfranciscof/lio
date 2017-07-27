@@ -3,6 +3,7 @@
 !--------------------------------------------------------------------!
 ! INCLUDE FILES WITH HEADERS:
 !--------------------------------------------------------------------!
+       use faint_cpu77, only: int3lu, intfld
 c       implicit none
        include 'cuconmut_h.f'
        include 'cumagnusfac_h.f'

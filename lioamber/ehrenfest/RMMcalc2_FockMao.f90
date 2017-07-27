@@ -5,6 +5,7 @@
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
   use maskrmm
+  use faint_cpu77, only: intsol, int2, int3mem, int3lu, intfld
   use garcha_mod, only:M,Md,RMM,kkind,kkinds,cool,cools,igrid2, &
                      & total_time,field,Fx,Fy,Fz,epsilon,a0,    &
                      & natom,tdstep,Iz,NCO,Nunp

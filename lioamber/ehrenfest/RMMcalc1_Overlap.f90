@@ -4,7 +4,8 @@
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
   use maskrmm
-  use garcha_mod, only:M
+  use faint_cpu77, only: int1
+  use garcha_mod,  only: M
   implicit none
   real*8,intent(out) :: Smat(M,M)
   real*8,intent(out) :: Energy

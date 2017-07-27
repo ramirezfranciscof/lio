@@ -18,6 +18,7 @@
       Eorbs, kkind,kkinds,cool,cools,NMAX,Dbug, idip                                   &
       , doing_ehrenfest, first_step, RealRho, tdstep, total_time 
 !      use mathsubs
+      use faint_cpu77, only: int1, int2, intsol, int3mem, int3lu
       use ECP_mod, only : ecpmode, term1e, VAAA, VAAB, VBAC, &
        FOCK_ECP_read,FOCK_ECP_write,IzECP
 !      use general_module 

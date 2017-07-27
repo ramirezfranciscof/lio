@@ -13,12 +13,13 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
  
 subroutine liomain(E, dipxyz)
-    use garcha_mod, only : M, Smat, RealRho, OPEN, writeforces, energy_freq,   &
+    use garcha_mod,  only: M, Smat, RealRho, OPEN, writeforces, energy_freq,   &
                            restart_freq, npas, sqsm, mulliken, lowdin, dipole, &
                            doing_ehrenfest, first_step,                        &
                            Eorbs, fukui, print_coeffs, steep, idip
-    use ecp_mod   , only : ecpmode, IzECP
-    use ehrenfest,  only : ehrendyn
+    use ecp_mod   ,  only: ecpmode, IzECP
+    use ehrenfest,   only: ehrendyn
+    use faint_cpu77, only: int1
  
     implicit none
     REAL*8, intent(inout) :: dipxyz(3), E
