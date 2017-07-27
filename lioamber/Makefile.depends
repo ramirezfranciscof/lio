@@ -78,7 +78,7 @@ $(tmplist:%.o=$(OBJPATH)/%.o) : $(OBJPATH)/esp_funct.mod
 
 
 OBJECTS += liokeys.o
-tmplist := ehrenfest.o
+tmplist := ehrensubs.o
 $(tmplist:%.o=$(OBJPATH)/%.o) : $(OBJPATH)/liokeys.mod
 
 
@@ -91,20 +91,26 @@ $(tmplist:%.o=$(OBJPATH)/%.o) : $(OBJPATH)/build_info.mod
 
 
 ################################################################################
-# Ehrenfest
-include ehrenfest.mk
-OBJECTS += ehrenfest.o
+include ehrensubs/ehrensubs.mk
+SRCDIRS += ehrensubs
+OBJECTS += ehrensubs.o
+OBJECTS += ehrendata.o
 
 tmplist :=
 tmplist += SCF.o SCF_exter.o init_lio.o liomain.o
-$(tmplist:%.o=$(OBJPATH)/%.o) : $(OBJPATH)/ehrenfest.mod
+$(tmplist:%.o=$(OBJPATH)/%.o) : $(OBJPATH)/ehrensubs.mod
 
-
+tmplist :=
+tmplist += ehrensubs.o init_lio.o
+$(tmplist:%.o=$(OBJPATH)/%.o) : $(OBJPATH)/ehrendata.mod
+#
+#
+#
 ################################################################################
 OBJECTS += basis_data.o
 
 tmplist :=
-tmplist += ehrenfest.o init_lio.o
+tmplist += ehrensubs.o init_lio.o
 $(tmplist:%.o=$(OBJPATH)/%.o) : $(OBJPATH)/basis_data.mod
 
 
@@ -115,10 +121,11 @@ SRCDIRS += faint_cpu77
 OBJECTS += faint_cpu77.o
 #
 modusrs :=
-modusrs += cublasmath.o ehrenfest.o liomain.o maskrmm.o
+modusrs += cublasmath.o ehrensubs.o liomain.o maskrmm.o
 modusrs += predictor.o SCF.o SCFop.o TD.o
 modusrs += dft_get_mm_forces.o dft_get_qm_forces.o
 $(modusrs:%.o=$(OBJPATH)/%.o) : ${OBJPATH}/faint_cpu77.mod
+#
 #
 #
 ################################################################################
@@ -128,6 +135,7 @@ OBJECTS += faint_cpu.o
 #
 modusrs :=
 $(modusrs:%.o=$(OBJPATH)/%.o) : ${OBJPATH}/faint_cpu.mod
+#
 #
 #
 ################################################################################
@@ -210,7 +218,7 @@ SRCDIRS += maskrmm
 OBJECTS += maskrmm.o
 
 tmplist :=
-tmplist += ehrenfest.o
+tmplist += ehrensubs.o
 $(tmplist:%.o=$(OBJPATH)/%.o) : $(OBJPATH)/maskrmm.mod
 
 

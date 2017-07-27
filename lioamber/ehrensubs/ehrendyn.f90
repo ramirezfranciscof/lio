@@ -6,11 +6,15 @@
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
   use garcha_mod, &
-  &  only: M, natom, tdstep, total_time, first_step, atom_mass                 &
-  &      , nucpos, nucvel, qm_forces_ds, qm_forces_total
+  &   only: M, natom, tdstep, total_time, first_step, atom_mass                &
+  &       , nucpos, nucvel, qm_forces_ds, qm_forces_total
 
   use liokeys, &
-  &  only: ndyn_steps, rst_filei, rst_fileo, rst_nfreq
+  &   only: ndyn_steps, rst_filei, rst_fileo, rst_nfreq
+
+  use ehrendata, &
+  &   only: stored_energy, step_number, rstinp_unit, rstout_unit              &
+          , RhoSaveA, RhoSaveB
 
   implicit none
   real*8,intent(inout) :: Energy_o, DipMom_o(3)
@@ -137,8 +141,8 @@
   endif
 
   DipMom_o = DipMom
-  Energy_o = StoredEnergy
-  StoredEnergy = Energy
+  Energy_o = stored_energy
+  stored_energy = Energy
 
   deallocate( Smat, Sinv )
   deallocate( Lmat, Umat, Linv, Uinv )
