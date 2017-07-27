@@ -40,14 +40,18 @@ module liokeys
 !
 !  Restarting information
 !------------------------------------------------------------------------------!
-!     If (rst_filei != ""), the program will use the information there to
-!  restart the calculations. If (rst_nfreq != 0), the program will save all
-!  the necesary information to restart calculations every rstfreq steps in
-!  "rst_fileo".
+!     If (rstinp), the program will use the information inside the file set
+!  in (rstinp_fname) to load the restart information for the dynamic.
+!     On the other hand, if (rstout), the program will save all the necesary
+!  information to restart calculations every (rstout_nfreq) steps and at the 
+!  last step inside of (rstout_fname).
 !
-   character(len=80) :: rst_filei = ""
-   character(len=80) :: rst_fileo = "liorst.out"
-   integer           :: rst_nfreq = 0
+   logical           :: rstinp = .false.
+   character(len=80) :: rstinp_fname = "liorst.in"
+
+   logical           :: rstout = .false.
+   integer           :: rstout_nfreq = 0
+   character(len=80) :: rstout_fname = "liorst.out"
 !
 !
 !  External Electrical Field
@@ -72,7 +76,7 @@ module liokeys
 !------------------------------------------------------------------------------!
    namelist /lionml/ &
    &  ndyn_steps, edyn_steps, nullify_forces                                   &
-   &, rst_filei, rst_fileo, rst_nfreq                                          &
+   &, rstinp, rstinp_fname, rstout, rstout_nfreq, rstout_fname                 &
    &, eefld_stepi, eefld_stepf, eefld_timeamp, eefld_wavelen                   &
    &, eefld_ampx, eefld_ampy, eefld_ampz
 !

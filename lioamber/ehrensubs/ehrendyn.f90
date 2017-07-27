@@ -10,11 +10,12 @@
   &       , nucpos, nucvel, qm_forces_ds, qm_forces_total
 
   use liokeys, &
-  &   only: ndyn_steps, rst_filei, rst_fileo, rst_nfreq
+  &   only: ndyn_steps                                                         &
+  &       , rstinp, rstinp_fname, rstout, rstout_nfreq, rstout_fname
 
   use ehrendata, &
-  &   only: stored_energy, step_number, rstinp_unit, rstout_unit              &
-          , RhoSaveA, RhoSaveB
+  &   only: stored_energy, step_number, rstinp_funit, rstout_funit             &
+  &       , RhoSaveA, RhoSaveB
 
   implicit none
   real*8,intent(inout) :: Energy_o, DipMom_o(3)
@@ -56,11 +57,11 @@
   dt=tdstep
 
   if ( first_step ) then
-  if ( trim(adjustl(rst_filei)) .ne. "" ) then
-     open( unit=rstinp_unit, file=rst_filei )
+  if ( rstinp ) then
+     open( unit=rstinp_funit, file=rstinp_fname )
      print*,'Using restart'
-     call rstload( rstinp_unit, Natom, qm_forces_total, M, RhoSaveA, RhoSaveB )
-     close( unit=rstinp_unit )
+     call rstload( rstinp_funit, Natom, qm_forces_total, M, RhoSaveA, RhoSaveB )
+     close( unit=rstinp_funit )
   end if
   end if
 
@@ -113,23 +114,25 @@
 ! Saving restart
 !------------------------------------------------------------------------------!
   save_this_step = .false.
-  if ( rst_nfreq > 0 ) then
-     if ( modulo(step_number,rst_nfreq) == 1 ) save_this_step = .true.
+  if ( rstout ) then
+     if ( rstout_nfreq > 0 ) then
+        if ( modulo(step_number,rstout_nfreq) == 1 ) save_this_step = .true.
+     end if
+     if ( step_number == (ndyn_steps+1) ) save_this_step = .true.
   end if
-  if ( step_number == (ndyn_steps+1) ) save_this_step = .true.
 
   if ( save_this_step ) then
-     open( unit=rstout_unit, file=rst_filei )
-     call rstsave( rstout_unit, Natom, qm_forces_total, M, RhoSaveA, RhoSaveB )
-     close( unit=rstout_unit )
+     open( unit=rstout_funit, file=rstout_fname )
+     call rstsave( rstout_funit, Natom, qm_forces_total, M, RhoSaveA, RhoSaveB )
+     close( unit=rstout_funit )
   end if
 
 ! Calculation of the dipole moment
 !------------------------------------------------------------------------------!
-  if (first_step) then
-    call write_dipole(dipxyz, 0, 134, .true.)
-    total_time=0.0d0
-  else
+   if (first_step) then
+      call write_dipole(dipxyz, 0, 134, .true.)
+      total_time=0.0d0
+   else
    call dip(dipxyz)
    dipole_norm = sqrt(dipxyz(1)**2 + dipxyz(2)**2 + dipxyz(3)**2)
    call write_dipole(dipxyz, dipole_norm, 134, .false.)  
