@@ -35,7 +35,7 @@
 ################################################################################
 FFLAGS += -fPIC $(DEFINE)
 
-LFLAGS += -fPIC -shared
+LFLAGS += -fPIC -shared -Wl,--no-undefined
 LFLAGS += -Wl,-rpath='$$ORIGIN/'
 LFLAGS += -Wl,-rpath='$$ORIGIN/../g2g'
 
@@ -86,7 +86,7 @@ ifeq ($(intel),0)
   LC      = gfortran
   FFLAGS += -cpp -I$(OBJPATH) -J$(OBJPATH)
   LFLAGS += -L/usr/lib
-  LIBS   += -llapack
+  LIBS   += -lblas -llapack
 
   DEBUG01 = -g -Wtabs -fcheck=all
   DEBUG02 = -g -Wall -Wextra -fcheck=all -fbacktrace -pedantic
@@ -98,7 +98,7 @@ else ifeq ($(intel),1)
   LC      = ifort
   FFLAGS += -fpp -module $(OBJPATH)
   LFLAGS += -L/usr/lib
-  LIBS   += -llapack
+  LIBS   += -lblas -llapack
   LIBS   += -liomp5 -lpthread
 
   DEBUG01 = -g -check bounds -traceback
@@ -111,7 +111,8 @@ else ifeq ($(intel),2)
   LC      = ifort
   FFLAGS += -fpp -module $(OBJPATH)
   LFLAGS += -L$(MKLROOT)/lib/intel64 -I$(MKLROOT)/include
-  LIBS   += -lmkl_lapack95_lp64 -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core
+  LIBS   += -lmkl_blas95_lp64 -lmkl_lapack95_lp64
+  LIBS   += -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core
   LIBS   += -liomp5 -lpthread
 
   DEBUG01 = -g -check bounds -traceback

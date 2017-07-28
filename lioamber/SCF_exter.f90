@@ -76,7 +76,8 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 subroutine ehren_in( qmcoords, qmvels, clcoords, nsolin, dipxyz, E)
 
-   use garcha_mod, only: M, natom, nucpos, nucvel, RealRho, Smat, atom_mass, Iz
+   use garcha_mod, only: M, natom, nucpos, nucvel, RealRho, Smat, atom_mass, Iz&
+                      &, tdstep
    use ehrensubs,  only: ehren_masses 
 
    implicit none
@@ -88,6 +89,17 @@ subroutine ehren_in( qmcoords, qmvels, clcoords, nsolin, dipxyz, E)
    real*8,  intent(inout) :: E
 
    integer :: ii, kk
+
+   if (allocated(nucpos)) then
+      do ii=1,natom
+      do kk=1,3
+         write(666,*) &
+              & ( nucpos(kk,ii) - qmcoords(kk,ii) / 0.529177D0 ) / tdstep,  &
+              & qmvels(kk,ii)*(20.455d0)*(2.418884326505E-5)*(1.889725989d0)
+      enddo
+      enddo
+      write(666,*); write(666,*)
+   endif
 
    if (allocated(nucpos)) deallocate(nucpos)
    if (allocated(nucvel)) deallocate(nucvel)

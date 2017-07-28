@@ -352,10 +352,9 @@ subroutine init_lioamber_ehren(natomin, Izin, nclatom, charge, basis_i         &
            , Fz_i, NBCH_i, propagator_i, writedens_i, tdrestart_i, dt_i        &
            )
 
-   use garcha_mod, only: M, timedep, first_step, doing_ehrenfest               &
-                      &, nshell, nuc, ncont, a, c, tdstep
-
-   use ehrendata,  only: RhoSaveA, RhoSaveB
+   use garcha_mod, only: Natom, M, timedep, first_step, doing_ehrenfest        &
+                      &, nshell, nuc, ncont, a, c, tdstep                      &
+                      &, qm_forces_total, qm_forces_ds
 
    use basis_data, only: basis_data_set
 
@@ -406,10 +405,15 @@ subroutine init_lioamber_ehren(natomin, Izin, nclatom, charge, basis_i         &
       stop
    end if
 
-   if (allocated(RhoSaveA)) deallocate(RhoSaveA)
-   if (allocated(RhoSaveB)) deallocate(RhoSaveB)
-   allocate(RhoSaveA(M,M))
-   allocate(RhoSaveB(M,M))
+   if (.not.allocated(qm_forces_total)) then
+      allocate( qm_forces_total(3,Natom) )
+      qm_forces_total = 0.0d0
+   endif
+
+   if (.not.allocated(qm_forces_ds)) then
+      allocate( qm_forces_ds(3,Natom) )
+      qm_forces_ds = 0.0d0
+   endif
 
    first_step=.true.
 

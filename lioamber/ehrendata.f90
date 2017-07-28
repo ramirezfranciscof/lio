@@ -2,6 +2,9 @@
 module ehrendata
 !------------------------------------------------------------------------------!
    implicit none
+   real*8  :: dt_elec
+   real*8  :: dt_nucl
+
    real*8  :: stored_energy = 0.0d0
    integer :: step_number  = 0
 !   integer :: last_step    = 1+120

@@ -36,6 +36,7 @@ module liokeys
 !  ndyn /= 0 & edyn /= 0   =>   Ehrenfest dynamic
 !
    logical :: nullify_forces = .false.
+   integer :: verbose_levels = 0
 !
 !
 !  Restarting information

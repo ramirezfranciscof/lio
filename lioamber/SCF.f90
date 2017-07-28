@@ -644,7 +644,7 @@
       if (doing_ehrenfest) then
          call spunpack('L',M,RMM(M1),RealRho)
          call fixrho(M,RealRho)
-         call ehrensetup(M,RealRho)
+         call ehrensetup( Natom, M, RealRho, tdstep )
       endif
 
 ! TODO: have a separate module handle the dipole moment

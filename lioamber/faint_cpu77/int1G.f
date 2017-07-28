@@ -1849,7 +1849,7 @@ c     do i=1,natom
 c      write(*,*) i,ff(i,1),ff(i,2),ff(i,3)
 c     enddo
       return
-      end
+      end subroutine
 c-------------------------------------------------------------------
 
 

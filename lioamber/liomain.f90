@@ -18,8 +18,7 @@ subroutine liomain(E, dipxyz)
                            doing_ehrenfest, first_step,                        &
                            Eorbs, fukui, print_coeffs, steep, idip
     use ecp_mod   ,  only: ecpmode, IzECP
-    use ehrenfest,   only: ehrendyn
-    use faint_cpu77, only: int1
+    use ehrensubs,   only: ehrendyn
  
     implicit none
     REAL*8, intent(inout) :: dipxyz(3), E
@@ -145,6 +144,8 @@ subroutine do_population_analysis()
    use garcha_mod, only : RMM, Smat, RealRho, M, Enucl, Nuc, Iz, natom, &
                           mulliken, lowdin, sqsm
    use ECP_mod   , only : ecpmode, IzECP
+   use faint_cpu77, only: int1
+
 
    implicit none
    integer :: M1, M5, IzUsed(natom), kk
