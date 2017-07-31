@@ -28,6 +28,7 @@ c       USE latom
        USE garcha_mod
        use ECP_mod, only : ecpmode, term1e, VAAA, VAAB, VBAC
        use mathsubs
+       use faint_cpu77, only: int1, intsol, int3mem, intfld, int3lu
 #ifdef CUBLAS
         use cublasmath
 #endif

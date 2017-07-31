@@ -20,6 +20,7 @@
 !      use mathsubs
       use ECP_mod, only : ecpmode, term1e, VAAA, VAAB, VBAC, &
        FOCK_ECP_read,FOCK_ECP_write,IzECP
+      use faint_cpu77, only: int1, int2, intsol, int3mem, int3lu
 !      use general_module 
 !#ifdef  CUBLAS
 !      use cublasmath 
