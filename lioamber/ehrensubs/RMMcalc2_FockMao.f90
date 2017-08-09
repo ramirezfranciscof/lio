@@ -8,7 +8,7 @@ subroutine RMMcalc2_FockMao( FockMao, Energy )
 
    use faint_cpu77, only: intsol, int2, int3mem
 
-   use garcha_mod,  only: M, Md, RMM, kkind, kkinds, cool, cools, igrid2
+   use garcha_mod,  only: M, Md, RMM, kkind, kkinds, cool, cools, igrid2, MEMO
 
    implicit none
    real*8,intent(out)    :: FockMao(M,M)
@@ -20,7 +20,6 @@ subroutine RMMcalc2_FockMao( FockMao, Energy )
 
    integer  :: kk, idx0
    integer  :: MM, MMd, igpu
-   logical  :: MEMO
 !
 !
 !  Initializations
