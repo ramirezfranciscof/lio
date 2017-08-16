@@ -111,6 +111,16 @@ $(tmplist:%.o=$(OBJPATH)/%.o) : $(OBJPATH)/ehrendata.mod
 
 
 ################################################################################
+include debug_tools/debug_tools.mk
+OBJECTS += debug_tools.o
+SRCDIRS += debug_tools
+
+tmplist :=
+tmplist += SCF.o SCF_exter.o liomain.o
+$(tmplist:%.o=$(OBJPATH)/%.o) : $(OBJPATH)/debug_tools.mod
+
+
+################################################################################
 OBJECTS += basis_data.o
 
 tmplist :=
