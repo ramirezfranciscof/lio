@@ -116,6 +116,7 @@ c      parameter rmintsol=16.0D0
        real*8,allocatable,dimension(:)   :: atom_mass
        real*8,allocatable,dimension(:,:) :: nucpos, nucvel
        real*8                            :: total_time
+       real*8                            :: time_step
        real*8,allocatable,dimension(:,:) :: qm_forces_ds
        real*8,allocatable,dimension(:,:) :: qm_forces_total
 !------------------------------------------------------------------------------!

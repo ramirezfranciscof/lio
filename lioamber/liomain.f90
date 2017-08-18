@@ -13,10 +13,10 @@
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
  
 subroutine liomain(E, dipxyz)
-    use garcha_mod, only : M, Smat, RealRho, OPEN, writeforces, energy_freq,   &
-                           restart_freq, npas, sqsm, mulliken, lowdin, dipole, &
-                           doing_ehrenfest, first_step,                        &
-                           Eorbs, fukui, print_coeffs, steep, idip
+    use garcha_mod, only : M, Smat, RealRho, OPEN, writeforces, energy_freq    &
+                       & , restart_freq, npas, sqsm, mulliken, lowdin, dipole  &
+                       & , doing_ehrenfest                                     &
+                       & , Eorbs, fukui, print_coeffs, steep, idip
     use ecp_mod   , only : ecpmode, IzECP
     use ehrensubs,  only : ehrendyn
  
@@ -41,7 +41,6 @@ subroutine liomain(E, dipxyz)
 !------------------------------------------------------------------------------!
 ! FFR - Option to do ehrenfest
     if ( doing_ehrenfest ) then
-       if ( first_step ) call SCF( E, dipxyz )
        call ehrendyn( E, dipxyz )
     else
        if(OPEN) then

@@ -46,7 +46,7 @@ subroutine ehrenstep( propagator_id, time, dt, nbasis, natoms,                  
    dens_mao = dens_mid
    dens_mao = matmul(dens_mao, Linv)
    dens_mao = matmul(Uinv, dens_mao)
-   call ehren_setfld( time, elec_field )
+   call ehrenaux_setfld( time, elec_field )
    call RMMcalc3_FockMao( dens_mao, elec_field, fock_mid, dipmom, energy)
    call calc_forceDS( natoms, nbasis, nucpos, nucvel, dens_mao, fock_mid, Sinv,&
                     & Bmat, qm_forces_ds )

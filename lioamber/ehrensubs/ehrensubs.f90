@@ -9,6 +9,10 @@ contains
 #  include "ehrenstep.f90"
 #  include "ehrensetup.f90"
 
+#  include "ehrenaux_updatevels.f90"
+#  include "ehrenaux_setfld.f90"
+
+
 #  include "setim.f90"
 #  include "calc_forceDS.f90"
 #  include "calc_forceDS_dss.f90"
@@ -17,7 +21,6 @@ contains
 #  include "calc_Dmat_cholesky.f90"
 
 #  include "ehrenrst.f90"
-#  include "ehren_setfld.f90"
 #  include "ehren_cholesky.f90"
 #  include "ehren_magnus.f90"
 #  include "ehren_verlet.f90"

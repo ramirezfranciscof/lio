@@ -353,7 +353,7 @@ subroutine init_lioamber_ehren(natomin, Izin, nclatom, charge, basis_i         &
            )
 
    use garcha_mod, only: M, timedep, first_step, doing_ehrenfest               &
-                      &, nshell, nuc, ncont, a, c, tdstep
+                      &, nshell, nuc, ncont, a, c, time_step
 
    use basis_data, only: basis_data_set
 
@@ -411,8 +411,8 @@ subroutine init_lioamber_ehren(natomin, Izin, nclatom, charge, basis_i         &
 
    call basis_data_set(nshell(0),nshell(1),nshell(2),nuc,ncont,a,c)
 
-   tdstep = (dt_i) * (41341.3733366d0)
-!  tdstep = (dt_i) / ( (20.455d0) * (2.418884326505E-5) )
+   time_step = (dt_i) * (41341.3733366d0)
+!  time_step = (dt_i) / ( (20.455d0) * (2.418884326505E-5) )
 !
 !  Amber should have time units in 1/20.455 ps, but apparently it has time
 !  in ps. Just have to transform to atomic units
