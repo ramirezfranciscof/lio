@@ -26,7 +26,7 @@ c-----------------------------------------------------------------
        subroutine int3mem()
 
        use liotemp   , only: FUNCT
-       use garcha_mod, only: RMM, ll, cool, cools, kkind, kkinds
+       use garcha_mod, only: ll, cool, cools, kkind, kkinds
      >                     , nuc, nucd, a, c, d, r, ad, cd, natomc
      >                     , nns, nnp, nnd, nnps, nnpp, nnpd, jatc
      >                     , ncont, ncontd, nshell, nshelld, M, Md

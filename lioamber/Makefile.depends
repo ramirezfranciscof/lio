@@ -394,7 +394,7 @@ $(tmplist:%.o=$(OBJPATH)/%.o) : $(OBJPATH)/maskrmm.mod
 OBJECTS += tmpaux_SCF.o
 
 tmplist :=
-tmplist += SCF.o
+tmplist += SCF.o maskrmm.o
 $(tmplist:%.o=$(OBJPATH)/%.o) : $(OBJPATH)/tmpaux_SCF.mod
 
 ################################################################################
