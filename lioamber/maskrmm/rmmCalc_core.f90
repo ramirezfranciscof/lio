@@ -14,7 +14,7 @@ subroutine rmmCalc_core( Smat, Hmat, Enn, Ens, do_raw, do_ecp, do_sol )
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 
-   use garcha_mod,  only: M, Md, igrid2, RMM
+   use garcha_mod,  only: M, Md, igrid2, RMM, nsol
 
    use faint_cpu77, only: int1, intsol
 
@@ -36,9 +36,9 @@ subroutine rmmCalc_core( Smat, Hmat, Enn, Ens, do_raw, do_ecp, do_sol )
 !
 !
 !------------------------------------------------------------------------------!
-   Enn = 0.0d0
    if (do_raw) then
       call g2g_timer_start('rmmCalc_core Hraw')
+      Enn = 0.0d0
       call int1( Enn )
       call g2g_timer_stop('rmmCalc_core Hraw')
    else
@@ -83,9 +83,10 @@ subroutine rmmCalc_core( Smat, Hmat, Enn, Ens, do_raw, do_ecp, do_sol )
 !
 !
 !------------------------------------------------------------------------------!
-   Ens = 0.0d0
    call aint_query_gpu_level(igpu)
    if (do_sol) then
+   if ( (nsol.gt.0) .or. (igpu.ge.4) ) then
+      Ens = 0.0d0
       if (igpu.le.1) then
          call g2g_timer_start('rmmCalc_core Hsol fort')
          call intsol( E1s, Ens, .true. )
@@ -95,6 +96,7 @@ subroutine rmmCalc_core( Smat, Hmat, Enn, Ens, do_raw, do_ecp, do_sol )
          call aint_qmmm_fock( E1s, Ens )
          call g2g_timer_stop('rmmCalc_core Hsol aint')
       end if
+   end if
    end if
 !
 !

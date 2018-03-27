@@ -60,7 +60,7 @@ subroutine SCF(E)
    use converger_subs, only: converger_init, conver
    use mask_cublas   , only: cublas_setmat, cublas_release
    use typedef_operator, only: operator !Testing operator
-   use maskrmm       , only: rmmCalc_init
+   use maskrmm       , only: rmmCalc_init, rmmCalc_core
 #  ifdef  CUBLAS
       use cublasmath , only: cumxp_r
 #  endif
@@ -113,6 +113,9 @@ subroutine SCF(E)
    real*8, allocatable :: Dvec(:)
    real*8, allocatable :: sqsmat(:,:)
    real*8, allocatable :: tmpmat(:,:)
+
+   real*8, allocatable :: Hcore(:,:), Smat_i(:,:)
+   real*8, allocatable :: Hraw(:,:), Hecp(:,:), Hsol(:,:)
 
    real*8              :: dipxyz(3)
 
@@ -296,53 +299,58 @@ subroutine SCF(E)
 !
 !
 !  Initializations and calculations that only depend on the nuclear positions
+!  Contributions to the core fock matrix are calculated separatedly for each
+!  nuclei, ecp and solvent, and then summed together and stored into RMM in
+!  the last call to rmmCalc_core
 !------------------------------------------------------------------------------!
        call rmmCalc_init()
 
+       if (allocated(Smat_i)) deallocate(Smat_i)
+       if (allocated(Hcore))  deallocate(Hcore)
+       if (allocated(Hraw))   deallocate(Hraw)
+       if (allocated(Hecp))   deallocate(Hecp)
+       if (allocated(Hsol))   deallocate(Hsol)
+
+       allocate( Smat_i(M,M) )
+       allocate( Hcore(M,M) )
+       allocate( Hraw(M,M) )
+       allocate( Hecp(M,M) )
+       allocate( Hsol(M,M) )
+
+       Hraw(:,:) = 0.0d0
+       Hecp(:,:) = 0.0d0
+       Hsol(:,:) = 0.0d0
+
+       call rmmCalc_core( Smat_i, Hraw, En, Ens, .true., .false., .false. )
+       call rmmCalc_core( Smat_i, Hecp, En, Ens, .false., .true., .false. )
+       call rmmCalc_core( Smat_i, Hsol, En, Ens, .false., .false., .true. )
+
+       Hcore(:,:) = Hraw(:,:) + Hecp(:,:) + Hsol(:,:)
+
+       call rmmCalc_core( Smat_i, Hcore, En, Ens, .false., .false., .false. )
+!
+!
+!------------------------------------------------!
+!  Unknown stuff: should it stay or should it go?
+!------------------------------------------------!
 
       if (predcoef.and.npas.gt.3) then
         write(*,*) 'no devería estar aca!'
       endif
 
-! Calculate 1e part of F here (kinetic/nuc in int1, MM point charges
-! in intsol)
-!
-      call g2g_timer_sum_start('1-e Fock')
-      call g2g_timer_sum_start('Nuclear attraction')
-      call int1(En)
-
-      call ECP_fock( MM, RMM(M11) )
-
-! Other terms
-!
-      call g2g_timer_sum_stop('Nuclear attraction')
-      call aint_query_gpu_level(igpu)
-      if(nsol.gt.0.or.igpu.ge.4) then
-          call g2g_timer_sum_start('QM/MM')
-       if (igpu.le.1) then
-          call g2g_timer_start('intsol')
-          call intsol(E1s,Ens,.true.)
-          call g2g_timer_stop('intsol')
-        else
-          call aint_qmmm_init(nsol,r,pc)
-          call g2g_timer_start('aint_qmmm_fock')
-          call aint_qmmm_fock(E1s,Ens)
-          call g2g_timer_stop('aint_qmmm_fock')
-        endif
-          call g2g_timer_sum_stop('QM/MM')
-      endif
-
-
 ! test
 ! TODO: test? remove or sistematize
-!
+
       E1=0.D0
       do kk=1,MM
         E1=E1+RMM(kk)*RMM(M11+kk-1)
       enddo
-      call g2g_timer_sum_stop('1-e Fock')
 
-
+!------------------------------------------------!
+!
+!
+!
+!
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 ! OVERLAP DIAGONALIZATION
 ! TODO: Simplify, this has too much stuff going on...

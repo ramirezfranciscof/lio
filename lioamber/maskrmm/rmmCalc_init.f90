@@ -12,7 +12,7 @@ subroutine rmmCalc_init( qmpos )
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
    use garcha_mod , only: M, igrid2, nuc, natom, natomc, d, r, atmin &
                        &, rmax, jatc, nnps, nnpp, nnpd, nshell, MEMO &
-                       &, kkind, kkinds, cool, cools
+                       &, kkind, kkinds, cool, cools, nsol, pc
    use faint_cpu77, only: int2, int3mem
    use tmpaux_SCF , only: neighbor_list_2e
 
@@ -106,6 +106,7 @@ subroutine rmmCalc_init( qmpos )
    call g2g_timer_start('rmmCalc_init aint')
    call aint_query_gpu_level( igpu )
    if (igpu.gt.1) call aint_new_step()
+   if (igpu.gt.1) call aint_qmmm_init( nsol, r, pc)
    if (igpu.gt.2) call aint_coulomb_init()
    call g2g_timer_stop('rmmCalc_init aint')
 
