@@ -29,13 +29,14 @@ subroutine rmmCalc_init( qmpos )
    call g2g_timer_start('rmmCalc_init unknown')
 
    if ( present(qmpos) ) then
-   do ii=1,natom
-      r(ii,1) = qmpos(1,ii)
-      r(ii,2) = qmpos(2,ii)
-      r(ii,3) = qmpos(3,ii)
-   end do
+      do ii=1,natom
+         r(ii,1) = qmpos(1,ii)
+         r(ii,2) = qmpos(2,ii)
+         r(ii,3) = qmpos(3,ii)
+      end do
    end if
 
+   if (.false.) then
    do ii=1,natom
       natomc(ii)=0
       do jj=1,natom
@@ -67,6 +68,8 @@ subroutine rmmCalc_init( qmpos )
       nnpd(nuc(ii))=ii
    enddo
 
+   end if
+
 ! Nano: calculating neighbour list helps to make 2 electrons integral scale
 ! linearly with natoms/basis.
    call neighbor_list_2e()
@@ -96,15 +99,15 @@ subroutine rmmCalc_init( qmpos )
    call g2g_reload_atom_positions( igrid2 )
    call g2g_timer_stop('rmmCalc_init g2g')
 
+   call g2g_timer_start('rmmCalc_init densfit')
+   call int2()
+   call g2g_timer_stop('rmmCalc_init densfit')
+
    call g2g_timer_start('rmmCalc_init aint')
    call aint_query_gpu_level( igpu )
    if (igpu.gt.1) call aint_new_step()
    if (igpu.gt.2) call aint_coulomb_init()
    call g2g_timer_stop('rmmCalc_init aint')
-
-   call g2g_timer_start('rmmCalc_init densfit')
-   call int2()
-   call g2g_timer_stop('rmmCalc_init densfit')
 
    if (igpu.eq.5) MEMO = .false.
    if (MEMO) then

@@ -60,6 +60,7 @@ subroutine SCF(E)
    use converger_subs, only: converger_init, conver
    use mask_cublas   , only: cublas_setmat, cublas_release
    use typedef_operator, only: operator !Testing operator
+   use maskrmm       , only: rmmCalc_init
 #  ifdef  CUBLAS
       use cublasmath , only: cumxp_r
 #  endif
@@ -291,31 +292,13 @@ subroutine SCF(E)
       enddo
       Qc=Qc-Nel
       Qc2=Qc**2
-
-
+!
+!
+!
+!  Initializations and calculations that only depend on the nuclear positions
 !------------------------------------------------------------------------------!
-! TODO: this whole part which calculates the non-electron depending terms of
-!       fock and the overlap matrix should probably be in a separated sub.
-!       (diagonalization of overlap, starting guess, the call to TD, should be taken out)
-!
-! Reformat from here...
+       call rmmCalc_init()
 
-! Nano: calculating neighbour list helps to make 2 electrons integral scale
-! linearly with natoms/basis
-!
-      call neighbor_list_2e()
-
-! -Create integration grid for XC here
-! -Assign points to groups (spheres/cubes)
-! -Assign significant functions to groups
-! -Calculate point weights
-!
-      call g2g_timer_sum_start('Exchange-correlation grid setup')
-      call g2g_reload_atom_positions(igrid2)
-      call g2g_timer_sum_stop('Exchange-correlation grid setup')
-
-      call aint_query_gpu_level(igpu)
-      if (igpu.gt.1) call aint_new_step()
 
       if (predcoef.and.npas.gt.3) then
         write(*,*) 'no devería estar aca!'
@@ -333,6 +316,7 @@ subroutine SCF(E)
 ! Other terms
 !
       call g2g_timer_sum_stop('Nuclear attraction')
+      call aint_query_gpu_level(igpu)
       if(nsol.gt.0.or.igpu.ge.4) then
           call g2g_timer_sum_start('QM/MM')
        if (igpu.le.1) then
@@ -467,32 +451,27 @@ subroutine SCF(E)
 ! here (S_ij in Dunlap, et al JCP 71(8) 1979) into RMM(M7)
 ! Also, pre-calculate G^-1 if G is not ill-conditioned into RMM(M9)
 !
-      call g2g_timer_sum_start('Coulomb G matrix')
-      call int2()
-      call g2g_timer_sum_stop('Coulomb G matrix')
+!      call g2g_timer_sum_start('Coulomb G matrix')
+!      call int2()
+!      call g2g_timer_sum_stop('Coulomb G matrix')
 !
 ! Precalculate three-index (two in MO basis, one in density basis) matrix
 ! used in density fitting / Coulomb F element calculation here
 ! (t_i in Dunlap)
 !
-      call aint_query_gpu_level(igpu)
-      if (igpu.gt.2) then
-        call aint_coulomb_init()
-      endif
-      if (igpu.eq.5) MEMO = .false.
-      !MEMO=.true.
-      if (MEMO) then
-         call g2g_timer_start('int3mem')
-         call g2g_timer_sum_start('Coulomb precalc')
-!        Large elements of t_i put into double-precision cool here
-!        Size criteria based on size of pre-factor in Gaussian Product Theorem
-!        (applied to MO basis indices)
-         call int3mem()
-!        Small elements of t_i put into single-precision cools here
-!        call int3mems()
-         call g2g_timer_stop('int3mem')
-         call g2g_timer_sum_stop('Coulomb precalc')
-      endif
+!      call aint_query_gpu_level(igpu)
+!      if (igpu.gt.2) then
+!        call aint_coulomb_init()
+!      endif
+
+!      if (igpu.eq.5) MEMO = .false.
+!      if (MEMO) then
+!         call g2g_timer_start('int3mem')
+!         call g2g_timer_sum_start('Coulomb precalc')
+!         call int3mem()
+!         call g2g_timer_stop('int3mem')
+!         call g2g_timer_sum_stop('Coulomb precalc')
+!      endif
 !
 !##########################################################!
 ! TODO: ...to here

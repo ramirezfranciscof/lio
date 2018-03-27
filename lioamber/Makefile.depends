@@ -387,7 +387,7 @@ SRCDIRS += maskrmm
 OBJECTS += maskrmm.o
 
 tmplist :=
-tmplist += ehrensubs.o basis_subs.o
+tmplist += SCF.o ehrensubs.o basis_subs.o
 $(tmplist:%.o=$(OBJPATH)/%.o) : $(OBJPATH)/maskrmm.mod
 
 #
