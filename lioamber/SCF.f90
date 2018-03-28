@@ -15,15 +15,13 @@ subroutine SCF(E)
 ! Nick, 2017
 !
 !------------------------------------------------------------------------------!
-! Header with new format. Added comments on how to proceed with a cleanup of
-! of the subroutines. Other things to do:
-! TODO: change to 3 space indentation.
-! TODO: break at line 80.
-! TODO: change to lowercase (ex: implicit none)
+! * Modified the format to comply to lio current conventions.
+!   (TODO: Almost complete, details pending)
+! * Re-ordered some sections to improve readability.
+! * Externalization of most procedures to dedicated subroutines.
+!   (TODO: This is still in progress)
 !
-! This log can be removed once all improvements have been made.
-!
-! FFR, 01/2018
+! FFR, 03/2018
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
    use ehrensubs , only: ehrendyn_init
@@ -66,8 +64,9 @@ subroutine SCF(E)
 #  endif
    use initial_guess_subs, only: get_initial_guess
 
+!
+!
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-
    implicit none
    integer :: Nel
    integer :: niter
@@ -149,8 +148,7 @@ subroutine SCF(E)
    integer*8          :: dev_Xmat, dev_Ymat
 
 
-
-!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+!------------------------------------------------------------------------------!
 ! TODO : Variables to eliminate...
    real*8, allocatable :: xnano(:,:)
    integer :: MM, MM2, MMd, Md2
@@ -160,19 +158,25 @@ subroutine SCF(E)
    real*8, allocatable :: Ytrans(:,:)
    real*8, allocatable :: Xtrans(:,:)
 
-!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+!------------------------------------------------------------------------------!
 !carlos: Operators for matrices with alpha and beta spins.
    type(operator)      :: rho_aop, fock_aop
    type(operator)      :: rho_bop, fock_bop
 
-!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+!------------------------------------------------------------------------------!
 !carlos: Open shell, variables.
    real*8              :: ocupF
    integer             :: NCOa, NCOb
-!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+
+
    call g2g_timer_start('SCF_full')
-
-
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+!
+!
+! 0) Initialization Procedures: This part should be reviewed and possibly
+!    re-structured. Many options should probably be initialized after the
+!    calculations of the overlap and core matrices.
+!
 !------------------------------------------------------------------------------!
 !DFTB: initialisation of DFTB variables
    allocate (fock_a0(M,M), rho_a0(M,M))
@@ -194,7 +198,7 @@ subroutine SCF(E)
 
    M_in = M
    if (dftb_calc) M_in=MDFTB
-!------------------------------------------------------------------------------!
+
    call ECP_init()
 
    call g2g_timer_start('SCF')
@@ -214,10 +218,10 @@ subroutine SCF(E)
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 !%%%%%%%%%%%%%%%    Distance Restrain     %%%%%%%%%%%%%%%%%%%%%%%%%%%!
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-        IF (number_restr.GT.0) THEN
-          call get_restrain_energy(E_restrain)
-          WRITE(*,*) "DISTANCE RESTRAIN ADDED TO FORCES"
-        END IF
+   IF (number_restr.GT.0) THEN
+      call get_restrain_energy(E_restrain)
+      WRITE(*,*) "DISTANCE RESTRAIN ADDED TO FORCES"
+   END IF
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 
 
@@ -225,36 +229,36 @@ subroutine SCF(E)
 ! TODO: RMM should no longer exist. As a first step, maybe we should
 !       put all these pointers inside the maskrmm module instead of
 !       having them around all subroutines...
-      sq2=sqrt(2.D0)
-      MM=M*(M+1)/2
-      MM2=M**2
-      MMd=Md*(Md+1)/2
-      Md2=2*Md
-      M2=2*M
+   sq2=sqrt(2.D0)
+   MM=M*(M+1)/2
+   MM2=M**2
+   MMd=Md*(Md+1)/2
+   Md2=2*Md
+   M2=2*M
 
 !carlos: ocupation factor
-      ocupF = 2.0d0
+   ocupF = 2.0d0
 !carlos:NCOa works in open shell and close shell
-      NCOa=NCO
-      if (OPEN) then
+   NCOa=NCO
 !Number of OM down
-         NCOb=NCO+Nunp
-         ocupF=1.0d0
-         allocate(rho_b0(M,M),fock_b0(M,M))
-      end if
+   if (OPEN) then
+      NCOb=NCO+Nunp
+      ocupF=1.0d0
+      allocate(rho_b0(M,M),fock_b0(M,M))
+   end if
 
-      M1=1 ! first P
-      M3=M1+MM ! now Pnew
-      M5=M3+MM! now S, F also uses the same position after S was used
-      M7=M5+MM! now G
-      M9=M7+MMd ! now Gm
-      M11=M9+MMd! now H
-      M13=M11+MM! W ( eigenvalues ), also this space is used in least squares
-      M15=M13+M! aux ( vector for ESSl)
-      M17=M15+MM! Least squares
-      M18=M17+MMd! vectors of MO
-      M19=M18+M*NCO! weights (in case of using option )
-      M20 = M19 + natom*50*Nang ! RAM storage of two-electron integrals (if MEMO=T)
+   M1=1 ! first P
+   M3=M1+MM ! now Pnew
+   M5=M3+MM! now S, F also uses the same position after S was used
+   M7=M5+MM! now G
+   M9=M7+MMd ! now Gm
+   M11=M9+MMd! now H
+   M13=M11+MM! W ( eigenvalues ), also this space is used in least squares
+   M15=M13+M! aux ( vector for ESSl)
+   M17=M15+MM! Least squares
+   M18=M17+MMd! vectors of MO
+   M19=M18+M*NCO! weights (in case of using option )
+   M20 = M19 + natom*50*Nang ! RAM storage of two-electron integrals (if MEMO=T)
 
    if (OPEN) then
       M18b=M18+M*NCOa
@@ -265,174 +269,205 @@ subroutine SCF(E)
 
 !------------------------------------------------------------------------------!
 ! TODO: I don't like ending timers inside a conditional...
-       if (cubegen_only) then
-          call cubegen_vecin( M, NCO, MO_coef_at )
-          call g2g_timer_sum_stop('Initialize SCF')
-          call g2g_timer_sum_stop('SCF')
-          return
-       end if
-
-
-!------------------------------------------------------------------------------!
+   if (cubegen_only) then
+      call cubegen_vecin( M, NCO, MO_coef_at )
+      call g2g_timer_sum_stop('Initialize SCF')
+      call g2g_timer_sum_stop('SCF')
+      return
+   end if
+!
+!
 ! TODO: damp and gold should no longer be here??
 ! TODO: Qc should probably be a separated subroutine? Apparently it is only
 !       used in dipole calculation so...it only adds noise to have it here.
 ! TODO: convergence criteria should be set at namelist/keywords setting
-
-      Nel=2*NCO+Nunp
 !
-      good=1.00D0
-      Egood=1.00D0
-      Evieja=0.d0
-
-      niter=0
-      DAMP0=GOLD
-      DAMP=DAMP0
-
-      Qc=0.0D0
-      do ii=1,natom
-         Qc=Qc+Iz(ii)
-      enddo
-      Qc=Qc-Nel
-      Qc2=Qc**2
-!
-!
-!
-!  Initializations and calculations that only depend on the nuclear positions
-!  Contributions to the core fock matrix are calculated separatedly for each
-!  nuclei, ecp and solvent, and then summed together and stored into RMM in
-!  the last call to rmmCalc_core
 !------------------------------------------------------------------------------!
-       call rmmCalc_init()
+   Nel=2*NCO+Nunp
 
-       if (allocated(Smat_i)) deallocate(Smat_i)
-       if (allocated(Hcore))  deallocate(Hcore)
-       if (allocated(Hraw))   deallocate(Hraw)
-       if (allocated(Hecp))   deallocate(Hecp)
-       if (allocated(Hsol))   deallocate(Hsol)
+   good=1.00D0
+   Egood=1.00D0
+   Evieja=0.d0
 
-       allocate( Smat_i(M,M) )
-       allocate( Hcore(M,M) )
-       allocate( Hraw(M,M) )
-       allocate( Hecp(M,M) )
-       allocate( Hsol(M,M) )
+   niter=0
+   DAMP0=GOLD
+   DAMP=DAMP0
 
-       Hraw(:,:) = 0.0d0
-       Hecp(:,:) = 0.0d0
-       Hsol(:,:) = 0.0d0
-
-       call rmmCalc_core( Smat_i, Hraw, En, Ens, .true., .false., .false. )
-       call rmmCalc_core( Smat_i, Hecp, En, Ens, .false., .true., .false. )
-       call rmmCalc_core( Smat_i, Hsol, En, Ens, .false., .false., .true. )
-
-       Hcore(:,:) = Hraw(:,:) + Hecp(:,:) + Hsol(:,:)
-
-       call rmmCalc_core( Smat_i, Hcore, En, Ens, .false., .false., .false. )
+   Qc=0.0D0
+   do ii=1,natom
+      Qc=Qc+Iz(ii)
+   enddo
+   Qc=Qc-Nel
+   Qc2=Qc**2
 !
 !
-!------------------------------------------------!
+!
+!  1) Initializations and calculations for the fock matrix that only depend
+!     on the nuclear positions. In principle, this means the nuclei-electron
+!     interactions and the overlap matrix for the basis, but extra optional
+!     terms may be included. Note that rmmCalc_init will also initialize
+!     many variables later used by the density-dependent calculations of
+!     fock in rmmCalc_fock.
+!
+!     Besides the nuclei-electron interaction in Hraw, the current optional
+!     terms that can be added to the core are:
+!
+!      - Solvent (QMMM) into Hsol.
+!      - Effective Core Potentials into Hecp.
+!      - Atom-centered bias potential into Habp.
+!
+!     Contributions to the core fock matrix are kept separated for the energy
+!     contribution of each and also added together in Hcore and stored into
+!     RMM in the last call to rmmCalc_core.
+!
+!------------------------------------------------------------------------------!
+   if (allocated(Smat_i)) deallocate(Smat_i)
+   if (allocated(Hcore))  deallocate(Hcore)
+   if (allocated(Hraw))   deallocate(Hraw)
+   if (allocated(Hecp))   deallocate(Hecp)
+   if (allocated(Hsol))   deallocate(Hsol)
+
+   allocate( Smat_i(M,M) )
+   allocate( Hcore(M,M) )
+   allocate( Hraw(M,M) )
+   allocate( Hecp(M,M) )
+   allocate( Hsol(M,M) )
+
+   Hraw(:,:) = 0.0d0
+   Hecp(:,:) = 0.0d0
+   Hsol(:,:) = 0.0d0
+
+   call rmmCalc_init()
+   call rmmCalc_core( Smat_i, Hraw, En, Ens, .true., .false., .false. )
+   call rmmCalc_core( Smat_i, Hecp, En, Ens, .false., .true., .false. )
+   call rmmCalc_core( Smat_i, Hsol, En, Ens, .false., .false., .true. )
+
+!  TODO: Add simplified overlap diagonalization here.
+!  TODO: Add the fockbias procedures to the core here.
+!  TODO: It makes sense to have Hraw and Hsol calculations in the same
+!        rmmCalc_core since they are very similar and are very inter-
+!        connected due to g2g/aint subs. However, ECP and fockbias
+!        should probably have particular subroutines.
+
+   Hcore(:,:) = Hraw(:,:) + Hecp(:,:) + Hsol(:,:)
+
+   call rmmCalc_core( Smat_i, Hcore, En, Ens, .false., .false., .false. )
+!
+!
+!
+!  2) Final preparations and initializations for the self consistent cycle.
+!     The basic thing to do is to generate or read the initial guess, but
+!     other options for different kind of SCF calculations/configurations
+!     are available:
+!
+!      - Convergence acceleration setup
+!      - DFTB hybrid calculations
+!
+!     All the initialization for these options should probably be here.
+!------------------------------------------------------------------------------!
+!
+!  TODO: Add the dftb initialization procedures here.
+!  TODO: Add the starting guess generation/read here.
+!
+!
+!
+!------------------------------------------------------------------------------!
 !  Unknown stuff: should it stay or should it go?
 !------------------------------------------------!
 
-      if (predcoef.and.npas.gt.3) then
-        write(*,*) 'no devería estar aca!'
-      endif
+   if (predcoef.and.npas.gt.3) then
+      write(*,*) 'no devería estar aca!'
+   end if
 
 ! test
 ! TODO: test? remove or sistematize
 
-      E1=0.D0
-      do kk=1,MM
-        E1=E1+RMM(kk)*RMM(M11+kk-1)
-      enddo
-
+   E1=0.D0
+   do kk=1,MM
+      E1=E1+RMM(kk)*RMM(M11+kk-1)
+   end do
+!
+!
+!
 !------------------------------------------------!
-!
-!
-!
-!
-!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 ! OVERLAP DIAGONALIZATION
-! TODO: Simplify, this has too much stuff going on...
-! (maybe trans mats are not even necessary?)
-!
-        if (allocated(X_min)) deallocate(X_min)
-        if (allocated(Y_min)) deallocate(Y_min)
-        if (allocated(X_min_trans)) deallocate(X_min_trans)
-        if (allocated(Y_min_trans)) deallocate(Y_min_trans)
+! TODO: Simplify and move, there is just too much
+!       stuff going on here.
+!      (maybe trans mats are not even necessary?)
+!------------------------------------------------!
+   if (allocated(X_min)) deallocate(X_min)
+   if (allocated(Y_min)) deallocate(Y_min)
+   if (allocated(X_min_trans)) deallocate(X_min_trans)
+   if (allocated(Y_min_trans)) deallocate(Y_min_trans)
 
-        allocate(X_min(M,M), Y_min(M,M), X_min_trans(M,M), Y_min_trans(M,M))
+   allocate(X_min(M,M), Y_min(M,M), X_min_trans(M,M), Y_min_trans(M,M))
 
-        if ( allocated(Xmat) ) deallocate(Xmat)
-        if ( allocated(Ymat) ) deallocate(Ymat)
-        allocate(Xmat(M_in,M_in), Ymat(M_in,M_in))
+   if ( allocated(Xmat) ) deallocate(Xmat)
+   if ( allocated(Ymat) ) deallocate(Ymat)
+   allocate(Xmat(M_in,M_in), Ymat(M_in,M_in))
 
-        call overop%Sets_smat( Smat )
-        if (lowdin) then
-!          TODO: inputs insuficient; there is also the symetric orthog using
-!                3 instead of 2 or 1. Use integer for onbasis_id
-           call overop%Gets_orthog_4m( 2, 0.0d0, X_min, Y_min, X_min_trans, Y_min_trans)
-        else
-           call overop%Gets_orthog_4m( 1, 0.0d0, X_min, Y_min, X_min_trans, Y_min_trans)
-        end if
+   call overop%Sets_smat( Smat )
+   if (lowdin) then
+!     TODO: inputs insuficient; there is also the symetric orthog using
+!           3 instead of 2 or 1. Use integer for onbasis_id
+      call overop%Gets_orthog_4m( 2, 0.0d0, X_min, Y_min, X_min_trans, Y_min_trans)
+   else
+      call overop%Gets_orthog_4m( 1, 0.0d0, X_min, Y_min, X_min_trans, Y_min_trans)
+   end if
 
 ! TODO: replace X,Y,Xtrans,Ytrans with Xmat, Ymat, Xtrp, Ytrp
-!        do ii=1,M
-!        do jj=1,M
-!           X(ii,jj)      = Xmat(ii,jj)
-!           Y(ii,jj)      = Ymat(ii,jj)
-!          Xtrans(ii,jj) = Xtrp(ii,jj)
-!          Ytrans(ii,jj) = Ytrp(ii,jj)
-!        end do
-!        end do
 
-        if ( allocated(Dvec) ) deallocate(Dvec)
-        allocate( Dvec(M) )
-        call overop%Gets_eigens_v( 0.0d0, Dvec )
-        do kk = 1, M
-           RMM(M13+kk-1) = Dvec(kk)
-        end do
-
-!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+   if ( allocated(Dvec) ) deallocate(Dvec)
+   allocate( Dvec(M) )
+   call overop%Gets_eigens_v( 0.0d0, Dvec )
+   do kk = 1, M
+      RMM(M13+kk-1) = Dvec(kk)
+   end do
 !
 !
+!
+!------------------------------------------------!
 !  Fockbias setup
-        if ( allocated(sqsmat) ) deallocate(sqsmat)
-        if ( allocated(tmpmat) ) deallocate(tmpmat)
-        allocate( sqsmat(M,M), tmpmat(M,M) )
-        call overop%Gets_orthog_2m( 3, 0.0d0, tmpmat, sqsmat )
-        call fockbias_loads( natom, nuc )
-        call fockbias_setmat( tmpmat )
-        deallocate( sqsmat, tmpmat )
-
-
+   if ( allocated(sqsmat) ) deallocate(sqsmat)
+   if ( allocated(tmpmat) ) deallocate(tmpmat)
+   allocate( sqsmat(M,M), tmpmat(M,M) )
+   call overop%Gets_orthog_2m( 3, 0.0d0, tmpmat, sqsmat )
+   call fockbias_loads( natom, nuc )
+   call fockbias_setmat( tmpmat )
+   deallocate( sqsmat, tmpmat )
+!
+!
+!
+!------------------------------------------------!
 !DFTB: Dimensions of Xmat and Ymat are modified for DFTB.
 !
 ! TODO: this is nasty, a temporary solution would be to have a Msize variable
 !       be assigned M (or, even better, "basis_size") or MDFTB
 !       ("basis_size_dftb") according to the case
 
-       if (dftb_calc) then
+   if (dftb_calc) then
+      call getXY_DFTB(M,X_min,Y_min,Xmat,Ymat)
 
-          call getXY_DFTB(M,X_min,Y_min,Xmat,Ymat)
+   else
+      do jj = 1, M
+      do ii = 1, M
+         Xmat(ii,jj) = X_min(ii,jj)
+         Ymat(ii,jj) = Y_min(ii,jj)
+      enddo
+      enddo
 
-       else
-
-          do jj = 1, M
-          do ii = 1, M
-             Xmat(ii,jj) = X_min(ii,jj)
-             Ymat(ii,jj) = Y_min(ii,jj)
-          enddo
-          enddo
-
-      end if
-
-
+   end if
+!
+!
+!
+!------------------------------------------------!
 ! CUBLAS
    call cublas_setmat( M_in, Xmat, dev_Xmat)
    call cublas_setmat( M_in, Ymat, dev_Ymat)
-
-
+!
+!
+!
+!------------------------------------------------!
 ! Generates starting guess
 !
    if ( (.not.VCINP) .and. primera ) then
@@ -441,55 +476,26 @@ subroutine SCF(E)
                              natom, Iz, nshell, Nuc)
       primera = .false.
    end if
+!
+!
+!
+!------------------------------------------------!
+! TD stuff that should not be here
 
-!##########################################################!
-! TODO: remove from here...
-!##########################################################!
-
-      if ((timedep.eq.1).and.(tdrestart)) then
-        call g2g_timer_sum_start('TD')
-        call TD()
-        call g2g_timer_sum_stop('TD')
-        return
-      endif
-
-
-!----------------------------------------------------------!
-! Precalculate two-index (density basis) "G" matrix used in density fitting
-! here (S_ij in Dunlap, et al JCP 71(8) 1979) into RMM(M7)
-! Also, pre-calculate G^-1 if G is not ill-conditioned into RMM(M9)
-!
-!      call g2g_timer_sum_start('Coulomb G matrix')
-!      call int2()
-!      call g2g_timer_sum_stop('Coulomb G matrix')
-!
-! Precalculate three-index (two in MO basis, one in density basis) matrix
-! used in density fitting / Coulomb F element calculation here
-! (t_i in Dunlap)
-!
-!      call aint_query_gpu_level(igpu)
-!      if (igpu.gt.2) then
-!        call aint_coulomb_init()
-!      endif
-
-!      if (igpu.eq.5) MEMO = .false.
-!      if (MEMO) then
-!         call g2g_timer_start('int3mem')
-!         call g2g_timer_sum_start('Coulomb precalc')
-!         call int3mem()
-!         call g2g_timer_stop('int3mem')
-!         call g2g_timer_sum_stop('Coulomb precalc')
-!      endif
-!
-!##########################################################!
-! TODO: ...to here
-!##########################################################!
+   if ((timedep.eq.1).and.(tdrestart)) then
+      call g2g_timer_sum_start('TD')
+      call TD()
+      call g2g_timer_sum_stop('TD')
+      return
+   endif
 !
 !
 !
-!------------------------------------------------------------------------------!
-! TODO: the following comment is outdated? Also, hybrid_converg switch should
-!       be handled differently.
+!------------------------------------------------!
+! TODO: the following comment is outdated?
+!       Also, hybrid_converg switch should
+!       be handled differently and DFTB should
+!       be elsewhere..
 !
 ! Now, damping is performed on the density matrix
 ! The first 4 iterations ( it may be changed, if necessary)
@@ -498,33 +504,63 @@ subroutine SCF(E)
 ! using the vectors . Since the vectors are not damped,
 ! only at the end of the SCF, the density matrix and the
 ! vectors are 'coherent'
-
-      if (hybrid_converg) DIIS=.true. ! cambio para convergencia damping-diis
-      call g2g_timer_sum_stop('Initialize SCF')
-!------------------------------------------------------------------------------!
+!
+! switch for damping/diis convergence in hybrid
+   if (hybrid_converg) DIIS=.true.
+   call g2g_timer_sum_stop('Initialize SCF')
 
 !DFTB: the density for DFTB is readed from an external file.
-   if (dftb_calc.and.TBload) call read_rhoDFTB(M, MM, RMM(M1), rhoalpha, rhobeta, &
-                                               OPEN)
-
+   if (dftb_calc.and.TBload) &
+   &  call read_rhoDFTB(M, MM, RMM(M1), rhoalpha, rhobeta, OPEN)
+!
+!
+!
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+!
+!  3) SELF CONSISTENT CYCLE:
+!
+!     This is the central part of the SCF calculation. Each of the cycles
+!     consists of the following set of procedures:
+!     
+!      - DESCRIPTION PENDING
+!
+!     All the initialization for these options should probably be here.
 !------------------------------------------------------------------------------!
+!
 ! TODO: Maybe evaluate conditions for loop continuance at the end of loop
 !       and condense in a single "keep_iterating" or something like that.
+!       Also, the WRITE_CONV_STATUS should probably go at the end.
+!
+! TODO: Many sections inside of the cycle should probably be 
+!
+   call g2g_timer_start('Total SCF cycles')
+   do while ((good.ge.told.or.Egood.ge.Etold).and.niter.le.NMAX)
 
-      do 999 while ((good.ge.told.or.Egood.ge.Etold).and.niter.le.NMAX)
-
-        if (verbose) call WRITE_CONV_STATUS(GOOD,TOLD,EGOOD,ETOLD)
-!       Escribe los criterios de convergencia y el valor del paso de dinamica
+       if (verbose) call WRITE_CONV_STATUS(GOOD,TOLD,EGOOD,ETOLD)
+!      Escribe los criterios de convergencia y el valor del paso de dinamica
 
         call g2g_timer_start('Total iter')
         call g2g_timer_sum_start('Iteration')
         call g2g_timer_sum_start('Fock integrals')
         niter=niter+1
         E1=0.0D0
-
-
+!
+!
+!          Calculations that depend on the density matrix
 !------------------------------------------------------------------------------!
-!       Fit density basis to current MO coeff and calculate Coulomb F elements
+           if (OPEN) then
+!             call rmmCalc_fock_os( densa_mao, densb_mao, core_mao             &
+!                                &, focka_mao, fockb_mao, dipole_xyz           &
+!                                &, energy_coul, energy_xc                     &
+!                                &, apply_efield, efield_xyz, energy_field )
+
+           else
+!             call rmmCalc_fock_cs( dens_mao, core_mao                         &
+!                                &, fock_mao, dipole_xyz                       &
+!                                &, energy_coul, energy_xc                     &
+!                                &, apply_efield, efield_xyz, energy_field )
+           end if
+
 !
 ! TODO: Calculation of fock terms should be separated. Also, maybe it would be
 !       convenient to add the NaN checks and the timers inside the subroutine
@@ -761,7 +797,7 @@ subroutine SCF(E)
         enddo
         enddo
 
-    end if!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    end if
 !------------------------------------------------------------------------------!
 !carlos: storing matrices
 !------------------------------------------------------------------------------!
@@ -855,57 +891,64 @@ subroutine SCF(E)
         call g2g_timer_stop('Total iter')
         call g2g_timer_sum_pause('Iteration')
 
- 999  continue
-      call g2g_timer_sum_start('Finalize SCF')
-
-!------------------------------------------------------------------------------!
-!     Checks of convergence
+   end do
+   call g2g_timer_stop('Total SCF cycles')
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
 !
-      if (niter.ge.NMAX) then
-         write(6,*) 'NO CONVERGENCE AT ',NMAX,' ITERATIONS'
-         noconverge=noconverge + 1
-         converge=0
-      else
-         write(6,*) 'CONVERGED AT',niter,'ITERATIONS'
-         noconverge = 0
-         converge=converge+1
-      endif
-
-      if (noconverge.gt.4) then
-         write(6,*)  'stop for not convergion 4 times'
-         stop
-      endif
+!
+!
+!  4) DESCRIPTION PENDING (finalize SCF)
+!     
 !------------------------------------------------------------------------------!
+   call g2g_timer_sum_start('Finalize SCF')
+
+
+!  Checks of convergence
+   if (niter.ge.NMAX) then
+      write(6,*) 'NO CONVERGENCE AT ',NMAX,' ITERATIONS'
+      noconverge=noconverge + 1
+      converge=0
+   else
+      write(6,*) 'CONVERGED AT',niter,'ITERATIONS'
+      noconverge = 0
+      converge=converge+1
+   endif
+
+   if (noconverge.gt.4) then
+      write(6,*)  'stop for not convergion 4 times'
+      stop
+   endif
+
 
 !DFTB: Mulliken analysis of TB part
+   if (dftb_calc) then
 
-  if (dftb_calc) then
+      chargeA_TB=MTB
+      chargeB_TB=MTB
+      do ii=1, MTB
+         chargeA_TB=chargeA_TB-rho_a(ii,ii)
+         chargeB_TB=chargeB_TB-rho_a(MTB+M+ii,MTB+M+ii)
+      end do
 
-    chargeA_TB=MTB
-    chargeB_TB=MTB
-    do ii=1, MTB
-       chargeA_TB=chargeA_TB-rho_a(ii,ii)
-       chargeB_TB=chargeB_TB-rho_a(MTB+M+ii,MTB+M+ii)
-    end do
+      if (OPEN) then
+         do ii=1,MTB
+            chargeA_TB=chargeA_TB-rho_b(ii,ii)
+            chargeB_TB=chargeB_TB-rho_b(MTB+M+ii,MTB+M+ii)
+         end do
+      end if
 
-    if (OPEN) then
-       do ii=1,MTB
-          chargeA_TB=chargeA_TB-rho_b(ii,ii)
-          chargeB_TB=chargeB_TB-rho_b(MTB+M+ii,MTB+M+ii)
-       end do
-    end if
+      open(unit=6800,file='TB_Mulliken')
+      write(6800,*) "Mulliken charge of part A", chargeA_TB
+      write(6800,*) "Mulliken charge of part B", chargeB_TB
 
-    open(unit=6800,file='TB_Mulliken')
+   end if
 
-    write(6800,*) "Mulliken charge of part A", chargeA_TB
-    write(6800,*) "Mulliken charge of part B", chargeB_TB
-
-  end if
 
 !DFTB: The last rho is stored in an output as a restart.
    if (dftb_calc.and.TBsave) call write_rhoDFTB(M_in, OPEN)
-
-!------------------------------------------------------------------------------!
+!
+!
+!
 ! TODO: Comments about a comented sections? Shouldn't it all of this go away?
 !
 !    CH - Why call intsol again here? with the .false. parameter,
@@ -920,151 +963,146 @@ subroutine SCF(E)
 !        call g2g_timer_sum_stop('intsol 2')
 !      endif
 !      call mmsol(natom,Nsol,natsol,Iz,pc,r,Em,Rm,Es)
-      Es=Es+E1s+Ens
+   Es=Es+E1s+Ens
 !     endif
 
 
-      if (MOD(npas,energy_freq).eq.0) then
-      if (GRAD) then
+   if (MOD(npas,energy_freq).eq.0) then
+   if (GRAD) then
 
-!       Resolve with last density to get XC energy
-        call g2g_timer_sum_start('Exchange-correlation energy')
-        call g2g_new_grid(igrid)
-        call g2g_solve_groups(1, Exc, 0)
-        call g2g_timer_sum_stop('Exchange-correlation energy')
+!     Resolve with last density to get XC energy
+      call g2g_timer_sum_start('Exchange-correlation energy')
+      call g2g_new_grid(igrid)
+      call g2g_solve_groups(1, Exc, 0)
+      call g2g_timer_sum_stop('Exchange-correlation energy')
 
-!       COmputing the QM/MM contribution to total energy
-!       Total SCF energy =
-!       E1   - kinetic + nuclear attraction + QM/MM interaction + effective
-!              core potential
-!       E2   - Coulomb
-!       En   - nuclear-nuclear repulsion
-!       Ens  - MM point charge - nuclear interaction
-!       Exc  - exchange-correlation
-!       Eecp - Efective core potential
-!       E_restrain - distance restrain
+!     COmputing the QM/MM contribution to total energy
+!     Total SCF energy =
+!     E1   - kinetic + nuclear attraction + QM/MM interaction + effective
+!            core potential
+!     E2   - Coulomb
+!     En   - nuclear-nuclear repulsion
+!     Ens  - MM point charge - nuclear interaction
+!     Exc  - exchange-correlation
+!     Eecp - Efective core potential
+!     E_restrain - distance restrain
 
-!       NucleusQM-CHarges MM
-        Es=Ens
+!     NucleusQM-CHarges MM
+      Es=Ens
 
-!       One electron Kinetic (with aint >3) or Kinetic + Nuc-elec (aint >=3)
-        call int1(En)
+!     One electron Kinetic (with aint >3) or Kinetic + Nuc-elec (aint >=3)
+      call int1(En)
 
-!       Computing the E1-fock without the MM atoms
-        if (nsol.gt.0.and.igpu.ge.1) then
-          call aint_qmmm_init(0,r,pc)
-          call aint_qmmm_fock(E1s,Etrash)
-          call aint_qmmm_init(nsol,r,pc)
-        endif
+!     Computing the E1-fock without the MM atoms
+      if (nsol.gt.0.and.igpu.ge.1) then
+        call aint_qmmm_init(0,r,pc)
+        call aint_qmmm_fock(E1s,Etrash)
+        call aint_qmmm_init(nsol,r,pc)
+      endif
 
-!       E1s (here) is the 1e-energy without the MM contribution
-        E1s=0.D0
-        do kk=1,MM
-          E1s=E1s+RMM(kk)*RMM(M11+kk-1)
-        enddo
+!     E1s (here) is the 1e-energy without the MM contribution
+      E1s=0.D0
+      do kk=1,MM
+        E1s=E1s+RMM(kk)*RMM(M11+kk-1)
+      enddo
 
-!       Es is the QM/MM energy computated as total 1e - E1s + QMnuc-MMcharges
-        Es=Es+E1-E1s
+!     Es is the QM/MM energy computated as total 1e - E1s + QMnuc-MMcharges
+      Es=Es+E1-E1s
 
-!       Part of the QM/MM contrubution are in E1
-        E=E1+E2+En+Ens+Exc+E_restrain
-
-
-
-!       Write Energy Contributions
-        if (npas.eq.1) npasw = 0
-
-        if (npas.gt.npasw) then
-           call ECP_energy( MM, RMM(M1), Eecp, Es )
-           call WriteEnergies(E1,E2,En,Ens,Eecp,Exc,ecpmode,E_restrain)
-           npasw=npas+10
-        end if
-
-      endif ! GRAD
-      endif ! npas
+!     Part of the QM/MM contrubution are in E1
+      E=E1+E2+En+Ens+Exc+E_restrain
 
 
-!------------------------------------------------------------------------------!
+
+!     Write Energy Contributions
+      if (npas.eq.1) npasw = 0
+
+      if (npas.gt.npasw) then
+         call ECP_energy( MM, RMM(M1), Eecp, Es )
+         call WriteEnergies(E1,E2,En,Ens,Eecp,Exc,ecpmode,E_restrain)
+         npasw=npas+10
+      end if
+
+   endif ! GRAD
+   endif ! npas
+!
+!
 ! calculation of energy weighted density matrix
 !
 ! TODO: this should be a separated subroutine...
 !
-      call g2g_timer_sum_start('energy-weighted density')
-      kkk=0
-      do jj=1,M
-      do ii=jj,M
-         kkk=kkk+1
-         RMM(M15+kkk-1)=0.D0
+   call g2g_timer_sum_start('energy-weighted density')
+   kkk=0
+   do jj=1,M
+   do ii=jj,M
+      kkk=kkk+1
+      RMM(M15+kkk-1)=0.D0
 !
-         if (ii.eq.jj) then
-            factor=2.D0
-         else
-            factor=4.D0
-         endif
+      if (ii.eq.jj) then
+         factor=2.D0
+      else
+         factor=4.D0
+      endif
 
-         do kk=1,NCO
-            RMM(M15+kkk-1)= &
-            RMM(M15+kkk-1)-RMM(M13+kk-1)*factor*X(ii,M2+kk)*X(jj,M2+kk)
-         enddo
+      do kk=1,NCO
+         RMM(M15+kkk-1)= &
+         RMM(M15+kkk-1)-RMM(M13+kk-1)*factor*X(ii,M2+kk)*X(jj,M2+kk)
       enddo
-      enddo
+   enddo
+   enddo
 
-      call g2g_timer_sum_stop('energy-weighted density')
+   call g2g_timer_sum_stop('energy-weighted density')
 
-!     Variables needed for further calculations (Populations, Dip, etc).
-      Enucl = En
-      do kkk=1, M
-          Eorbs(kkk) = RMM(M13+kkk-1)
-      enddo
+!  Variables needed for further calculations (Populations, Dip, etc).
+   Enucl = En
+   do kkk=1, M
+       Eorbs(kkk) = RMM(M13+kkk-1)
+   enddo
 
-      call cubegen_matin( M, X )
-
-
-!------------------------------------------------------------------------------!
+   call cubegen_matin( M, X )
+!
+!
 ! TODO: have ehrendyn call SCF and have SCF always save the resulting rho in
 !       a module so that ehrendyn can retrieve it afterwards.
 !       Remove all of this.
 !
-      if (doing_ehrenfest) then
-         call spunpack('L',M,RMM(M1),RealRho)
-         call fixrho(M,RealRho)
-         call ehrendyn_init(natom, M, RealRho)
-      endif
-
-
-!------------------------------------------------------------------------------!
+   if (doing_ehrenfest) then
+      call spunpack('L',M,RMM(M1),RealRho)
+      call fixrho(M,RealRho)
+      call ehrendyn_init(natom, M, RealRho)
+   endif
+!
+!
 ! TODO: Deallocation of variables that should be removed
 ! TODO: MEMO should be handled differently...
-
-      if (MEMO) then
-        deallocate(kkind,kkinds)
-        deallocate(cool,cools)
-      endif
-
-
-!------------------------------------------------------------------------------!
+   if (MEMO) then
+     deallocate(kkind,kkinds)
+     deallocate(cool,cools)
+   endif
+!
+!
 ! TODO: Why is TD being called again?? In any case have TD call SCF as a first
 !       step to obtain the first density...
 !
-      if (timedep.eq.1) then
-        call g2g_timer_sum_start('TD')
-        call TD()
-        call g2g_timer_sum_stop('TD')
-      endif
-
-
-!------------------------------------------------------------------------------!
+   if (timedep.eq.1) then
+     call g2g_timer_sum_start('TD')
+     call TD()
+     call g2g_timer_sum_stop('TD')
+   endif
+!
+!
 ! TODO: Cublas should be handled differently. Hidden behind SOP type and an
 !       interface or general endstep call that takes care of cublas_shutdown
 !       and all other similar stuff.
 !
-      call cublas_release( dev_Xmat )
-      call cublas_release( dev_Ymat )
-      call cublas_release( )
+   call cublas_release( dev_Xmat )
+   call cublas_release( dev_Ymat )
+   call cublas_release( )
 
-      call g2g_timer_stop('SCF')
-      call g2g_timer_sum_stop('Finalize SCF')
-      call g2g_timer_sum_stop('SCF')
-      call g2g_timer_stop('SCF_full')
-      end subroutine SCF
+   call g2g_timer_stop('SCF')
+   call g2g_timer_sum_stop('Finalize SCF')
+   call g2g_timer_sum_stop('SCF')
+
+   call g2g_timer_stop('SCF_full')
+end subroutine SCF
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
