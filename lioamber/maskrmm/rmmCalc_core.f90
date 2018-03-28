@@ -41,8 +41,10 @@ subroutine rmmCalc_core( Smat, Hmat, Enn, Ens, do_raw, do_ecp, do_sol )
       Enn = 0.0d0
       call int1( Enn )
       call g2g_timer_stop('rmmCalc_core Hraw')
+
    else
       call rmmput_core( Hmat )
+
    end if
 !
 !
@@ -68,9 +70,9 @@ subroutine rmmCalc_core( Smat, Hmat, Enn, Ens, do_raw, do_ecp, do_sol )
       call WRITE_POST(1)
 
       write(*,*) "Modifying Fock Matrix with ECP terms"
-      MM=M*(M+1)/2
-      MMd=Md*(Md+1)/2
-      idx0=3*MM+2*MMd
+      MM   = M*(M+1)/2
+      MMd  = Md*(Md+1)/2
+      idx0 = 3*MM+2*MMd
       do kk = 1, MM
 !        Backups 1e terms and modifies fock
          term1e( kk )   = RMM( idx0+kk )

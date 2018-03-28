@@ -206,6 +206,16 @@ end subroutine converger_init
 ! the newly constructed damped matrix is stored, for next iteration
 ! in fock_damped
 !
+! comment from SCF:
+!
+! "Now, damping is performed on the density matrix
+! The first 4 iterations ( it may be changed, if necessary)
+! when the density is evaluated on the grid, the density
+! matrix is used ( slower), after that it is calculated
+! using the vectors . Since the vectors are not damped,
+! only at the end of the SCF, the density matrix and the
+! vectors are 'coherent'."
+!
 !------------------------------------------------------------------------------!
     if (.not.hagodiis) then
 

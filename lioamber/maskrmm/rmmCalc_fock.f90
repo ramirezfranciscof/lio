@@ -32,9 +32,9 @@ subroutine rmmCalc_fock_xx( dipole_xyz, energy_coul, energy_xc                 &
    call g2g_timer_start('rmmcalc3-solve3lu')
    call rmmCheckNaNs( "Start" )
    call int3lu( energy_coul )
-   call rmmCheckNaNs( "Coulomb" )
+   call rmmCheckNaNs( "Post Coulomb" )
    call g2g_solve_groups( 0, energy_xc, 0 )
-   call rmmCheckNaNs( "Ex-Corr" )
+   call rmmCheckNaNs( "Post Ex-Corr" )
    call g2g_timer_stop('rmmcalc3-solve3lu')
 !
 !
@@ -74,10 +74,39 @@ end subroutine rmmCalc_fock_xx
 !
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-subroutine rmmCalc_fock_cs( dens_mao, core_mao                                 &
-                         &, fock_mao, dipole_xyz                               &
-                         &, energy_coul, energy_xc                             &
-                         &, apply_efield, efield_xyz, energy_field )
+subroutine rmmCalc_fock_cs_d( dens_mao, core_mao                               &
+                           &, fock_mao, dipole_xyz                             &
+                           &, energy_coul, energy_xc                           &
+                           &, apply_efield, efield_xyz, energy_field )
+!------------------------------------------------------------------------------!
+   use garcha_mod  , only: M
+   implicit none
+   real*8    , intent(in)    :: dens_mao(M,M)
+   real*8    , intent(in)    :: core_mao(M,M)
+   real*8    , intent(out)   :: fock_mao(M,M)
+   real*8    , intent(out)   :: dipole_xyz(3)
+   real*8    , intent(out)   :: energy_coul
+   real*8    , intent(out)   :: energy_xc
+
+   logical   , intent(in)    :: apply_efield
+   real*8    , intent(in)    :: efield_xyz(3)
+   real*8    , intent(inout) :: energy_field
+
+   call rmmput_core( core_mao )
+   call rmmput_dens( dens_mao )
+   call rmmCalc_fock_xx( dipole_xyz, energy_coul, energy_xc     &
+                      &, apply_efield, efield_xyz, energy_field )
+   call rmmget_fock( fock_mao )
+
+end subroutine rmmCalc_fock_cs_d
+!
+!
+!
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+subroutine rmmCalc_fock_cs_z( dens_mao, core_mao                               &
+                           &, fock_mao, dipole_xyz                             &
+                           &, energy_coul, energy_xc                           &
+                           &, apply_efield, efield_xyz, energy_field )
 !------------------------------------------------------------------------------!
    use garcha_mod  , only: M
    implicit none
@@ -98,15 +127,46 @@ subroutine rmmCalc_fock_cs( dens_mao, core_mao                                 &
                       &, apply_efield, efield_xyz, energy_field )
    call rmmget_fock( fock_mao )
 
-end subroutine rmmCalc_fock_cs
+end subroutine rmmCalc_fock_cs_z
 !
 !
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
-subroutine rmmCalc_fock_os( densa_mao, densb_mao, core_mao                     &
-                         &, focka_mao, fockb_mao, dipole_xyz                   &
-                         &, energy_coul, energy_xc                             &
-                         &, apply_efield, efield_xyz, energy_field )
+subroutine rmmCalc_fock_os_d( densa_mao, densb_mao, core_mao                   &
+                           &, focka_mao, fockb_mao, dipole_xyz                 &
+                           &, energy_coul, energy_xc                           &
+                           &, apply_efield, efield_xyz, energy_field )
+!------------------------------------------------------------------------------!
+   use garcha_mod  , only: M
+   implicit none
+   real*8    , intent(in)    :: densa_mao(M,M)
+   real*8    , intent(in)    :: densb_mao(M,M)
+   real*8    , intent(in)    :: core_mao(M,M)
+   real*8    , intent(out)   :: focka_mao(M,M)
+   real*8    , intent(out)   :: fockb_mao(M,M)
+   real*8    , intent(out)   :: dipole_xyz(3)
+   real*8    , intent(out)   :: energy_coul
+   real*8    , intent(out)   :: energy_xc
+
+   logical   , intent(in)    :: apply_efield
+   real*8    , intent(in)    :: efield_xyz(3)
+   real*8    , intent(inout) :: energy_field
+
+   call rmmput_core( core_mao )
+   call rmmput_dens( densa_mao, densb_mao )
+   call rmmCalc_fock_xx( dipole_xyz, energy_coul, energy_xc     &
+                      &, apply_efield, efield_xyz, energy_field )
+   call rmmget_fock( focka_mao, fockb_mao )
+
+end subroutine rmmCalc_fock_os_d
+!
+!
+!
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
+subroutine rmmCalc_fock_os_z( densa_mao, densb_mao, core_mao                   &
+                           &, focka_mao, fockb_mao, dipole_xyz                 &
+                           &, energy_coul, energy_xc                           &
+                           &, apply_efield, efield_xyz, energy_field )
 !------------------------------------------------------------------------------!
    use garcha_mod  , only: M
    implicit none
@@ -129,7 +189,7 @@ subroutine rmmCalc_fock_os( densa_mao, densb_mao, core_mao                     &
                       &, apply_efield, efield_xyz, energy_field )
    call rmmget_fock( focka_mao, fockb_mao )
 
-end subroutine rmmCalc_fock_os
+end subroutine rmmCalc_fock_os_z
 !
 !
 !

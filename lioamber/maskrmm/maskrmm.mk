@@ -1,6 +1,8 @@
 ######################################################################
 # INTERNAL DEPENDENCIES
 INCLUDES :=
+INCLUDES += rmmgen_Write.f90
+
 INCLUDES += rmmput_dens.f90
 INCLUDES += rmmget_dens.f90
 INCLUDES += rmmput_densos.f90

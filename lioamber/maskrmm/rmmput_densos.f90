@@ -13,8 +13,8 @@ subroutine rmmput_densos_r( DensMao_a, DensMao_b )
       RMM(idx) = rhoalpha(idx) + rhobeta(idx)
       do ii = jj+1, M
          idx = ii + (2*M-jj) * (jj-1) / 2
-         rhoalpha(idx) = DensMao_a(jj,jj) * 2
-         rhobeta(idx)  = DensMao_b(jj,jj) * 2
+         rhoalpha(idx) = DensMao_a(ii,jj) * 2.0d0
+         rhobeta(idx)  = DensMao_b(ii,jj) * 2.0d0
          RMM(idx) = rhoalpha(idx) + rhobeta(idx)
       enddo
    enddo
@@ -37,8 +37,8 @@ subroutine rmmput_densos_d( DensMao_a, DensMao_b )
       RMM(idx) = rhoalpha(idx) + rhobeta(idx)
       do ii = jj+1, M
          idx = ii + (2*M-jj) * (jj-1) / 2
-         rhoalpha(idx) = DensMao_a(jj,jj) * 2
-         rhobeta(idx)  = DensMao_b(jj,jj) * 2
+         rhoalpha(idx) = DensMao_a(ii,jj) * 2.0d0
+         rhobeta(idx)  = DensMao_b(ii,jj) * 2.0d0
          RMM(idx) = rhoalpha(idx) + rhobeta(idx)
       enddo
    enddo
@@ -61,8 +61,8 @@ subroutine rmmput_densos_c( DensMao_a, DensMao_b )
       RMM(idx) = rhoalpha(idx) + rhobeta(idx)
       do ii = jj+1, M
          idx = ii + (2*M-jj) * (jj-1) / 2
-         rhoalpha(idx) = REAL(DensMao_a(jj,jj)) * 2
-         rhobeta(idx)  = REAL(DensMao_b(jj,jj)) * 2
+         rhoalpha(idx) = REAL(DensMao_a(ii,jj)) * 2.0d0
+         rhobeta(idx)  = REAL(DensMao_b(ii,jj)) * 2.0d0
          RMM(idx) = rhoalpha(idx) + rhobeta(idx)
       enddo
    enddo
@@ -85,8 +85,8 @@ subroutine rmmput_densos_z( DensMao_a, DensMao_b )
       RMM(idx) = rhoalpha(idx) + rhobeta(idx)
       do ii = jj+1, M
          idx = ii + (2*M-jj) * (jj-1) / 2
-         rhoalpha(idx) = REAL(DensMao_a(jj,jj)) * 2
-         rhobeta(idx)  = REAL(DensMao_b(jj,jj)) * 2
+         rhoalpha(idx) = REAL(DensMao_a(ii,jj)) * 2.0d0
+         rhobeta(idx)  = REAL(DensMao_b(ii,jj)) * 2.0d0
          RMM(idx) = rhoalpha(idx) + rhobeta(idx)
       enddo
    enddo

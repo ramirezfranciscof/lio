@@ -48,8 +48,22 @@ module maskrmm
    end interface rmmput_core
 
 
+!------------------------------------------------------------------------------!
+   interface  rmmCalc_fock_cs
+      module procedure rmmCalc_fock_cs_d
+      module procedure rmmCalc_fock_cs_z
+   end interface rmmCalc_fock_cs
+
+   interface  rmmCalc_fock_os
+      module procedure rmmCalc_fock_os_d
+      module procedure rmmCalc_fock_os_z
+   end interface rmmCalc_fock_os
+
+
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%!
    contains
+#     include "rmmgen_Write.f90"
+
 #     include "rmmput_dens.f90"
 #     include "rmmput_densos.f90"
 #     include "rmmget_dens.f90"
