@@ -1,4 +1,7 @@
 &lio
+Dbug=.true.
+OPEN=.true.
+nunp=0
 !lowdin=.true.
 nsol=0
 natom=3

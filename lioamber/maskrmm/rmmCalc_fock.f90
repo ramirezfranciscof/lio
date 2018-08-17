@@ -33,7 +33,10 @@ subroutine rmmCalc_fock_xx( dipole_xyz, energy_coul, energy_xc                 &
    call rmmCheckNaNs( "Start" )
    call int3lu( energy_coul )
    call rmmCheckNaNs( "Post Coulomb" )
+   print*, "solve_groups i"
+   call rmmgen_Write( 666, 0 )
    call g2g_solve_groups( 0, energy_xc, 0 )
+   print*, "solve_groups o"
    call rmmCheckNaNs( "Post Ex-Corr" )
    call g2g_timer_stop('rmmcalc3-solve3lu')
 !
@@ -152,11 +155,13 @@ subroutine rmmCalc_fock_os_d( densa_mao, densb_mao, core_mao                   &
    real*8    , intent(in)    :: efield_xyz(3)
    real*8    , intent(inout) :: energy_field
 
+   print*, "inside rmmCalc_fock_os_d"
    call rmmput_core( core_mao )
    call rmmput_dens( densa_mao, densb_mao )
    call rmmCalc_fock_xx( dipole_xyz, energy_coul, energy_xc     &
                       &, apply_efield, efield_xyz, energy_field )
    call rmmget_fock( focka_mao, fockb_mao )
+   print*, "ending rmmCalc_fock_os_d"
 
 end subroutine rmmCalc_fock_os_d
 !
@@ -183,6 +188,7 @@ subroutine rmmCalc_fock_os_z( densa_mao, densb_mao, core_mao                   &
    real*8    , intent(in)    :: efield_xyz(3)
    real*8    , intent(inout) :: energy_field
 
+   print*, "in rmmCalc_fock_os_z"
    call rmmput_core( core_mao )
    call rmmput_dens( densa_mao, densb_mao )
    call rmmCalc_fock_xx( dipole_xyz, energy_coul, energy_xc     &

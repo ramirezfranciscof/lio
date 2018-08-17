@@ -536,8 +536,11 @@ subroutine SCF(E)
       call field_calc_all( field_vec(1), field_vec(2), field_vec(3), 0.0d0 )
 
       if (OPEN) then
+         print*, "Calc fock OS in"
          call rmmCalc_fock_os( rho_a0, rho_b0, Hcore, fock_a0, fock_b0, dipxyz &
                             &, E2, Ex, field, field_vec, E_fld )
+         print*, "Calc fock OS out"
+
       else
          call rmmCalc_fock_cs( rho_a0, Hcore, fock_a0, dipxyz                  &
                             &, E2, Ex, field, field_vec, E_fld )
