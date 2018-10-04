@@ -1,0 +1,20 @@
+git diff --name-status 1ff4fb2 ehrendev
+
+M	lioamber/Makefile.depends
+M	lioamber/SCF.f90
+M	lioamber/converger_subs.f90
+M	lioamber/faint_cpu77/subm_int3mem.f
+M	lioamber/maskrmm/maskrmm.f90
+M	lioamber/maskrmm/maskrmm.mk
+A	lioamber/maskrmm/rmmCalc_core.f90
+A	lioamber/maskrmm/rmmCalc_ener.f90
+A	lioamber/maskrmm/rmmCalc_fock.f90
+A	lioamber/maskrmm/rmmCalc_init.f90
+A	lioamber/maskrmm/rmmCheck_NaNs.f90
+A	lioamber/maskrmm/rmmgen_Write.f90
+A	lioamber/maskrmm/rmmget_core.f90
+M	lioamber/maskrmm/rmmget_fock.f90
+A	lioamber/maskrmm/rmmput_core.f90
+M	lioamber/maskrmm/rmmput_dens.f90
+A	lioamber/maskrmm/rmmput_densos.f90
+M	test/0_aguaGPU/agua_mod.in
