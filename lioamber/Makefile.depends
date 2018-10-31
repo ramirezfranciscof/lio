@@ -54,13 +54,27 @@ OBJECTS += intECP.o
 OBJECTS += fterm_biaspot.o
 OBJECTS += elec.o
 OBJECTS += properties.o
-OBJECTS += errlog.o
 OBJECTS += field_subs.o
 
 
 ################################################################################
 # GENERIC DEPENDENCIES
 TD.o : properties.o
+
+
+################################################################################
+# TIER 0 PROCEDURES
+
+t0_objs =
+t0_objs += liokinds.o
+t0_objs += error_log.o
+
+t0_deps =
+t0_deps +=
+
+OBJECTS += $(t0_objs)
+$(t0_deps:%.o=$(OBJPATH)/%.o) : $(t0_objs:%.o=$(OBJPATH)/%.o)
+
 
 ################################################################################
 tmplist := SCF.o readECP.o drive.o intECP.o init.o init_lio.o
