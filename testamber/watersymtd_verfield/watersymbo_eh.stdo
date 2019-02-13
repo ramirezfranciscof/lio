@@ -1,0 +1,81 @@
+<====== Initializing G2G ======>
+GPU Device used: GeForce GTX 680
+Kernels: gpu
+Kernels: cpu
+Using 3 CPU Threads and 1 GPU Threads
+ JOB STARTED NOW
+Tue Sep 19 09:51:54 ART 2017
+<======= GPU Code Initialization ========>
+atoms: 3
+max atoms: 3
+number of gaussians: 19
+do_forces: false
+s: 7 p: 2 d: 1
+m: 19 nco: 5
+ nco: 5
+density basis: s: 15 p: 3 d: 3
+density basis: m: 42
+Using device 0 for analytic integral calculations
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 2026110
+Particion 1: 2013880
+Particion 2: 2002110
+Relacion max / min = 1.011987
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -11.8393
+XC energy: -11.8393
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -7.21941
+XC energy: -7.21941
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -7.41764
+XC energy: -7.41764
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.7358
+XC energy: -9.7358
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.4081
+XC energy: -9.4081
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24642
+XC energy: -9.24642
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.21005
+XC energy: -9.21005
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2012
+XC energy: -9.2012
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.19954
+XC energy: -9.19954
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.19949
+XC energy: -9.19949
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.19949
+XC energy: -9.19949
+ CONVERGED AT          11 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.19949
+
+    ╔════════════════════════════════════════════╗
+    ║        ENERGY CONTRIBUTIONS IN A.U.        ║
+    ╠══════════════════╦═════════════════════════╣
+    ║   ONE ELECTRON   ║      -122.4315702       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   COULOMB        ║        46.4159702       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   NUCLEAR        ║         8.8623566       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   EXC. - CORR.   ║        -9.1994866       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   TOTAL          ║       -76.3527300       ║
+    ╚══════════════════╩═════════════════════════╝
+

@@ -1,0 +1,234 @@
+
+          -------------------------------------------------------
+          Amber 14 SANDER                              2014
+          -------------------------------------------------------
+
+| Run on 09/19/2017 at 09:51:54
+
+|   Executable path: /home/francisco/Programs/amber14eh2/bin/sander
+| Working directory: /home/francisco/Programs/lio-ehren/testamber/watersymtd_verfield
+|          Hostname: Unknown
+  [-O]verwriting output
+
+File Assignments:
+|  MDIN: watersymbo_eh.in                                                      
+| MDOUT: watersymbo_eh.out                                                     
+|INPCRD: watersymbo_xx.rst7                                                    
+|  PARM: watersymbo_xx.prmtop                                                  
+|RESTRT: watersymbo_eh.rst7                                                    
+|  REFC: refc                                                                  
+| MDVEL: watersymbo_eh.mdvel                                                   
+| MDFRC: watersymbo_eh.mdfrz                                                   
+|  MDEN: mden                                                                  
+| MDCRD: watersymbo_eh.mdcrd                                                   
+|MDINFO: mdinfo                                                                
+|  MTMD: mtmd                                                                  
+|INPDIP: inpdip                                                                
+|RSTDIP: rstdip                                                                
+|INPTRA: inptraj                                                               
+
+ 
+ Here is the input file:
+ 
+Production QMMM PBE dynamics                                                   
+                                                                               
+&cntrl                                                                         
+   imin=0,                                                                     
+   ntx=5, irest=1,                                                             
+   ntt=0, ifqnt=1,                                                             
+   dt = 2.0E-3,                                                                
+   nstlim = 1,                                                                 
+   cut=10.0,                                                                   
+   ioutfm=0,                                                                   
+   ntpr=100, ntwf=100,                                                         
+   ntwx=100, ntwv=100,                                                         
+   ntb=0, ntc=1, ntf=1,                                                        
+&end                                                                           
+                                                                               
+&qmmm                                                                          
+   qm_theory='EXTERN',                                                         
+   qmmask=':1'                                                                 
+   qmcharge=0,                                                                 
+   qmcut=15.0,                                                                 
+&end                                                                           
+                                                                               
+&lio                                                                           
+   timedep = 3,                                                                
+   idip=0,                                                                     
+   field = .false.,                                                            
+   exter = .false.,                                                            
+   fx = 0.00,                                                                  
+   fy = 0.00,                                                                  
+   fz = 0.00,                                                                  
+!   diis=.false.,                                                              
+!   gold=50.0,                                                                 
+!   told=1E-11,                                                                
+&end                                                                           
+                                                                               
+
+--------------------------------------------------------------------------------
+   1.  RESOURCE   USE: 
+--------------------------------------------------------------------------------
+
+| Flags:                                                                        
+|    NONPERIODIC   ntb=0 and igb=0: Setting up nonperiodic simulation
+|  *** cutoff > system size, list only builds once
+|Largest sphere to fit in unit cell has radius =    30.000
+| New format PARM file being parsed.
+| Version =    1.000 Date = 10/26/15 Time = 16:24:32
+ NATOM  =       3 NTYPES =       2 NBONH =       3 MBONA  =       0
+ NTHETH =       0 MTHETA =       0 NPHIH =       0 MPHIA  =       0
+ NHPARM =       0 NPARM  =       0 NNB   =       4 NRES   =       1
+ NBONA  =       0 NTHETA =       0 NPHIA =       0 NUMBND =       2
+ NUMANG =       0 NPTRA  =       0 NATYP =       2 NPHB   =       1
+ IFBOX  =       0 NMXRS  =       3 IFCAP =       0 NEXTRA =       0
+ NCOPY  =       0
+
+
+|     Memory Use     Allocated
+|     Real                1935
+|     Hollerith             12
+|     Integer            20077
+|     Max Pairs              3
+|     nblistReal            36
+|     nblist Int        321345
+|       Total             1349 kbytes
+
+| Note: 1-4 EEL scale factors are being read from the topology file.
+
+| Note: 1-4 VDW scale factors are being read from the topology file.
+| Duplicated    0 dihedrals
+| Duplicated    0 dihedrals
+LOADING THE QUANTUM ATOMS AS GROUPS
+     Mask :1; matches     3 atoms
+
+--------------------------------------------------------------------------------
+   2.  CONTROL  DATA  FOR  THE  RUN
+--------------------------------------------------------------------------------
+
+TP3                                                                             
+
+General flags:
+     imin    =       0, nmropt  =       0
+
+Nature and format of input:
+     ntx     =       5, irest   =       1, ntrx    =       1
+
+Nature and format of output:
+     ntxo    =       1, ntpr    =     100, ntrx    =       1, ntwr    =     500
+     iwrap   =       0, ntwx    =     100, ntwv    =     100, ntwe    =       0
+     ioutfm  =       0, ntwprt  =       0, idecomp =       0, rbornstat=      0
+     ntwf    =     100
+
+Potential function:
+     ntf     =       1, ntb     =       0, igb     =       0, nsnb    =      25
+     ipol    =       0, gbsa    =       0, iesp    =       0
+     dielc   =   1.00000, cut     =  10.00000, intdiel =   1.00000
+
+Frozen or restrained atoms:
+     ibelly  =       0, ntr     =       0
+
+Molecular dynamics:
+     nstlim  =         1, nscm    =      1000, nrespa  =         1
+     t       =   0.00000, dt      =   0.00200, vlimit  =  20.00000
+
+QMMM options:
+             ifqnt = True       nquant =        3
+              qmgb =        0  qmcharge =        0   adjust_q =        2
+              spin =        1     qmcut =  15.0000    qmshake =        1
+          qmmm_int =        1
+     lnk_atomic_no =        1   lnk_dis =   1.0900 lnk_method =        1
+          qm_theory =     EXTERN verbosity =        0
+            qmqmdx = Analytical
+          qm_ewald =        0 qm_pme = False 
+|  INFO: Old style inpcrd file read
+
+
+--------------------------------------------------------------------------------
+   3.  ATOMIC COORDINATES AND VELOCITIES
+--------------------------------------------------------------------------------
+
+TP3                                                                             
+ begin time read from input coords =     0.000 ps
+
+ Number of triangulated 3-point waters found:        0
+
+     Sum of charges from parm topology file =   0.00000000
+     Forcing neutrality...
+|  # of SOLUTE  degrees of freedom (RNDFP):       9.
+|  # of SOLVENT degrees of freedom (RNDFS):       0.
+|  QMSHAKE_NOSHAKEMASK_OVERLAP =      0
+|  NDFMIN =       3.     NUM_NOSHAKE =      0     CORRECTED RNDFP =       3.
+|  TOTAL # of degrees of freedom (RNDF) =       3.
+ ---------------------------------------------------
+
+     eedmeth=4: Setting switch to one everywhere
+
+ ---------------------------------------------------
+| Local SIZE OF NONBOND LIST =          0
+| TOTAL SIZE OF NONBOND LIST =          0
+
+QMMM: Link Atom Information
+QMMM: ------------------------------------------------------------------------
+QMMM: nlink =     0
+QMMM: ------------------------------------------------------------------------
+
+  QMMM: QM Region Cartesian Coordinates (*=link atom) 
+  QMMM: QM_NO.   MM_NO.  ATOM         X         Y         Z
+  QMMM:     1        1      O       -0.0016   -0.0020    0.0000
+  QMMM:     2        2      H        0.9915   -0.0005    0.0000
+  QMMM:     3        3      H       -0.2500    0.9597    0.0000
+
+--------------------------------------------------------------------------------
+  3.1 QM CALCULATION INFO
+--------------------------------------------------------------------------------
+
+| Please also cite the following work for the use of the QM/MM interface:
+
+| A. W. G"otz, M. A. Clark, R. C. Walker
+| "An extensible interface for ab initio QM/MM molecular dynamics simulations
+|  with AMBER"
+| J. Comput. Chem. 35 (2014) 95-108.
+| DOI: 10.1002/jcc.23444
+
+ Constants for unit conversion taken from
+ Mohr, Taylor, Newell, Rev. Mod. Phys. 80 (2008) 633-730
+ and using the thermochemical calorie (1 cal = 4.184 J):
+
+ A_TO_BOHRS  =  1.889726132873E+00
+ AU_TO_KCAL  =  6.2750946943E+02
+ AU_TO_DEBYE =  2.54174623E+00
+
+  >>> Running calculations with Lio <<<
+
+ ---------Lio options-------
+   OPEN  F
+   NMAX          100
+   NUNP            0
+   VCINP  F
+   told   1.000000000000000E-006
+   writexyz  T
+   DIIS  T
+   ndiis           30
+   Iexch            9
+   IGRID            2
+   IGRID2            2
+   timedep            3
+ Runing TDDFT calculation with Lio
+   tdstep   2.000000000000000E-003
+   ntdstep            1
+   field  F
+   exter  F
+   a0    1000.00000000000     
+   epsilon    1.00000000000000     
+   Fx   0.000000000000000E+000
+   Fy   0.000000000000000E+000
+   Fz   0.000000000000000E+000
+   NBCH           10
+   propagator            1
+   writedens  T
+   writedens  F
+ -----end Lio options-------
+
+  >>> Using code in /LioDevelop/Amber14eh2 <<<
+

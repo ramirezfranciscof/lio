@@ -1,0 +1,2856 @@
+<====== Initializing G2G ======>
+GPU Device used: GeForce GTX 680
+Kernels: gpu
+Kernels: cpu
+Using 3 CPU Threads and 1 GPU Threads
+ JOB STARTED NOW
+Wed Sep 27 09:39:22 ART 2017
+<======= GPU Code Initialization ========>
+atoms: 3
+max atoms: 3
+number of gaussians: 13
+do_forces: false
+s: 7 p: 2 d: 0
+m: 13 nco: 5
+ nco: 5
+density basis: s: 15 p: 3 d: 3
+density basis: m: 42
+Using device 0 for analytic integral calculations
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -11.973
+XC energy: -11.973
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -7.47981
+XC energy: -7.47981
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -7.53144
+XC energy: -7.53144
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.20503
+XC energy: -9.20503
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.13373
+XC energy: -9.13373
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.17287
+XC energy: -9.17287
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23451
+XC energy: -9.23451
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23753
+XC energy: -9.23753
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23749
+XC energy: -9.23749
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23751
+XC energy: -9.23751
+ CONVERGED AT          10 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2375
+
+    ╔════════════════════════════════════════════╗
+    ║        ENERGY CONTRIBUTIONS IN A.U.        ║
+    ╠══════════════════╦═════════════════════════╣
+    ║   ONE ELECTRON   ║      -122.4296625       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   COULOMB        ║        46.5035777       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   NUCLEAR        ║         8.8623566       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   EXC. - CORR.   ║        -9.2375041       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   TOTAL          ║       -76.3012323       ║
+    ╚══════════════════╩═════════════════════════╝
+
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2375
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2375
+XC energy: -9.2375
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2375
+XC energy: -9.2375
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2375
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2375
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23751
+XC energy: -9.23751
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23751
+XC energy: -9.23751
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23751
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23751
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23751
+XC energy: -9.23751
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23751
+XC energy: -9.23751
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23751
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23751
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23751
+XC energy: -9.23751
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23751
+XC energy: -9.23751
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23751
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23751
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23752
+XC energy: -9.23752
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23751
+XC energy: -9.23751
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23751
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23751
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23752
+XC energy: -9.23752
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23752
+XC energy: -9.23752
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23752
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23752
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23753
+XC energy: -9.23753
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23752
+XC energy: -9.23752
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23752
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23752
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23753
+XC energy: -9.23753
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23754
+XC energy: -9.23754
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23754
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23754
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23755
+XC energy: -9.23755
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23753
+XC energy: -9.23753
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23754
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23754
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23754
+XC energy: -9.23754
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23756
+XC energy: -9.23756
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23756
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23756
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23757
+XC energy: -9.23757
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23754
+XC energy: -9.23754
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23755
+
+    ╔════════════════════════════════════════════╗
+    ║        ENERGY CONTRIBUTIONS IN A.U.        ║
+    ╠══════════════════╦═════════════════════════╣
+    ║   ONE ELECTRON   ║      -122.4305063       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   COULOMB        ║        46.5039300       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   NUCLEAR        ║         8.8628833       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   EXC. - CORR.   ║        -9.2375470       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   TOTAL          ║       -76.3012400       ║
+    ╚══════════════════╩═════════════════════════╝
+
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23755
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23756
+XC energy: -9.23756
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23759
+XC energy: -9.23759
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23758
+XC energy: -9.23758
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23757
+XC energy: -9.23757
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23757
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23757
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23758
+XC energy: -9.23758
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23758
+XC energy: -9.23758
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23758
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23758
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23759
+XC energy: -9.23759
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23759
+XC energy: -9.23759
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23759
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23759
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2376
+XC energy: -9.2376
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23761
+XC energy: -9.23761
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23761
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23761
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23762
+XC energy: -9.23762
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23761
+XC energy: -9.23761
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23761
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23761
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23763
+XC energy: -9.23763
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23764
+XC energy: -9.23764
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23764
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23764
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23765
+XC energy: -9.23765
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23763
+XC energy: -9.23763
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23764
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23764
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23765
+XC energy: -9.23765
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23768
+XC energy: -9.23768
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23767
+XC energy: -9.23767
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23766
+XC energy: -9.23766
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23766
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23766
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23768
+XC energy: -9.23768
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23768
+XC energy: -9.23768
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23768
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23768
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2377
+XC energy: -9.2377
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23769
+XC energy: -9.23769
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23769
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23769
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23771
+XC energy: -9.23771
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23772
+XC energy: -9.23772
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23772
+
+    ╔════════════════════════════════════════════╗
+    ║        ENERGY CONTRIBUTIONS IN A.U.        ║
+    ╠══════════════════╦═════════════════════════╣
+    ║   ONE ELECTRON   ║      -122.4334440       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   COULOMB        ║        46.5055552       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   NUCLEAR        ║         8.8643661       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   EXC. - CORR.   ║        -9.2377164       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   TOTAL          ║       -76.3012390       ║
+    ╚══════════════════╩═════════════════════════╝
+
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23772
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23774
+XC energy: -9.23774
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23772
+XC energy: -9.23772
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23772
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23772
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23774
+XC energy: -9.23774
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23776
+XC energy: -9.23776
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23776
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23776
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23778
+XC energy: -9.23778
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23775
+XC energy: -9.23775
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23776
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23776
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23778
+XC energy: -9.23778
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23782
+XC energy: -9.23782
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23781
+XC energy: -9.23781
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23779
+XC energy: -9.23779
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23779
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23779
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23781
+XC energy: -9.23781
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23782
+XC energy: -9.23782
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23782
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23782
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23784
+XC energy: -9.23784
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23783
+XC energy: -9.23783
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23783
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23783
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23786
+XC energy: -9.23786
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23787
+XC energy: -9.23787
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23787
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23787
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23789
+XC energy: -9.23789
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23787
+XC energy: -9.23787
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23787
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23787
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2379
+XC energy: -9.2379
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23793
+XC energy: -9.23793
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23792
+XC energy: -9.23792
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23791
+XC energy: -9.23791
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23791
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23791
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23793
+XC energy: -9.23793
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23794
+XC energy: -9.23794
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23794
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23794
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23797
+XC energy: -9.23797
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23795
+XC energy: -9.23795
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23795
+
+    ╔════════════════════════════════════════════╗
+    ║        ENERGY CONTRIBUTIONS IN A.U.        ║
+    ╠══════════════════╦═════════════════════════╣
+    ║   ONE ELECTRON   ║      -122.4378283       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   COULOMB        ║        46.5077547       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   NUCLEAR        ║         8.8667783       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   EXC. - CORR.   ║        -9.2379548       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   TOTAL          ║       -76.3012501       ║
+    ╚══════════════════╩═════════════════════════╝
+
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23795
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23798
+XC energy: -9.23798
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.238
+XC energy: -9.238
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.238
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.238
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23803
+XC energy: -9.23803
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.238
+XC energy: -9.238
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23801
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23801
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23804
+XC energy: -9.23804
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23806
+XC energy: -9.23806
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23806
+XC energy: -9.23806
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23804
+XC energy: -9.23804
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23804
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23804
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23807
+XC energy: -9.23807
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23808
+XC energy: -9.23808
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23808
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23808
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23811
+XC energy: -9.23811
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2381
+XC energy: -9.2381
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2381
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2381
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23813
+XC energy: -9.23813
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23815
+XC energy: -9.23815
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23814
+XC energy: -9.23814
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23813
+XC energy: -9.23813
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23813
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23813
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23817
+XC energy: -9.23817
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23817
+XC energy: -9.23817
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23817
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23817
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23821
+XC energy: -9.23821
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23819
+XC energy: -9.23819
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23819
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23819
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23823
+XC energy: -9.23823
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23824
+XC energy: -9.23824
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23824
+XC energy: -9.23824
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23823
+XC energy: -9.23823
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23823
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23823
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23827
+XC energy: -9.23827
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23827
+XC energy: -9.23827
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23827
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23827
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23831
+XC energy: -9.23831
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23829
+XC energy: -9.23829
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23829
+
+    ╔════════════════════════════════════════════╗
+    ║        ENERGY CONTRIBUTIONS IN A.U.        ║
+    ╠══════════════════╦═════════════════════════╣
+    ║   ONE ELECTRON   ║      -122.4439578       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   COULOMB        ║        46.5109153       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   NUCLEAR        ║         8.8700759       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   EXC. - CORR.   ║        -9.2382932       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   TOTAL          ║       -76.3012598       ║
+    ╚══════════════════╩═════════════════════════╝
+
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23829
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23833
+XC energy: -9.23833
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23835
+XC energy: -9.23835
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23834
+XC energy: -9.23834
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23833
+XC energy: -9.23833
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23833
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23833
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23837
+XC energy: -9.23837
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23838
+XC energy: -9.23838
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23838
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23838
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23842
+XC energy: -9.23842
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2384
+XC energy: -9.2384
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2384
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2384
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23844
+XC energy: -9.23844
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23846
+XC energy: -9.23846
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23846
+XC energy: -9.23846
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23844
+XC energy: -9.23844
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23844
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23844
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23848
+XC energy: -9.23848
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23849
+XC energy: -9.23849
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23849
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23849
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23853
+XC energy: -9.23853
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23851
+XC energy: -9.23851
+ CONVERGED AT           2 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23851
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23851
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23856
+XC energy: -9.23856
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23858
+XC energy: -9.23858
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23857
+XC energy: -9.23857
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23856
+XC energy: -9.23856
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23856
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23856
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2386
+XC energy: -9.2386
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23861
+XC energy: -9.23861
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23861
+XC energy: -9.23861
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2386
+XC energy: -9.2386
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2386
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2386
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23864
+XC energy: -9.23864
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23865
+XC energy: -9.23865
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23865
+XC energy: -9.23865
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23864
+XC energy: -9.23864
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23864
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23864
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23868
+XC energy: -9.23868
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23869
+XC energy: -9.23869
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23869
+XC energy: -9.23869
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23868
+XC energy: -9.23868
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23868
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23868
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23873
+XC energy: -9.23873
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23873
+XC energy: -9.23873
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23873
+XC energy: -9.23873
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23872
+XC energy: -9.23872
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23872
+
+    ╔════════════════════════════════════════════╗
+    ║        ENERGY CONTRIBUTIONS IN A.U.        ║
+    ╠══════════════════╦═════════════════════════╣
+    ║   ONE ELECTRON   ║      -122.4516693       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   COULOMB        ║        46.5149231       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   NUCLEAR        ║         8.8741985       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   EXC. - CORR.   ║        -9.2387227       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   TOTAL          ║       -76.3012704       ║
+    ╚══════════════════╩═════════════════════════╝
+
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23872
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23877
+XC energy: -9.23877
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23878
+XC energy: -9.23878
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23877
+XC energy: -9.23877
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23876
+XC energy: -9.23876
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23877
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23877
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23881
+XC energy: -9.23881
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23882
+XC energy: -9.23882
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23882
+XC energy: -9.23882
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23881
+XC energy: -9.23881
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23881
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23881
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23886
+XC energy: -9.23886
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23887
+XC energy: -9.23887
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23886
+XC energy: -9.23886
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23885
+XC energy: -9.23885
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23885
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23885
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2389
+XC energy: -9.2389
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23891
+XC energy: -9.23891
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23891
+XC energy: -9.23891
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2389
+XC energy: -9.2389
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2389
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2389
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23894
+XC energy: -9.23894
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23896
+XC energy: -9.23896
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23895
+XC energy: -9.23895
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23894
+XC energy: -9.23894
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23894
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23894
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23899
+XC energy: -9.23899
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.239
+XC energy: -9.239
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.239
+XC energy: -9.239
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23899
+XC energy: -9.23899
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23899
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23899
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23904
+XC energy: -9.23904
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23905
+XC energy: -9.23905
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23904
+XC energy: -9.23904
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23903
+XC energy: -9.23903
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23903
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23903
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23908
+XC energy: -9.23908
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23909
+XC energy: -9.23909
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23909
+XC energy: -9.23909
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23908
+XC energy: -9.23908
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23908
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23908
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23913
+XC energy: -9.23913
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23914
+XC energy: -9.23914
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23914
+XC energy: -9.23914
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23913
+XC energy: -9.23913
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23913
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23913
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23918
+XC energy: -9.23918
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23919
+XC energy: -9.23919
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23919
+XC energy: -9.23919
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23918
+XC energy: -9.23918
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23918
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23918
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23923
+XC energy: -9.23923
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23924
+XC energy: -9.23924
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23923
+XC energy: -9.23923
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23923
+XC energy: -9.23923
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23922
+
+    ╔════════════════════════════════════════════╗
+    ║        ENERGY CONTRIBUTIONS IN A.U.        ║
+    ╠══════════════════╦═════════════════════════╣
+    ║   ONE ELECTRON   ║      -122.4607451       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   COULOMB        ║        46.5196168       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   NUCLEAR        ║         8.8790698       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   EXC. - CORR.   ║        -9.2392246       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   TOTAL          ║       -76.3012830       ║
+    ╚══════════════════╩═════════════════════════╝
+
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23922
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23928
+XC energy: -9.23928
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23929
+XC energy: -9.23929
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23928
+XC energy: -9.23928
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23927
+XC energy: -9.23927
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23927
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23927
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23933
+XC energy: -9.23933
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23934
+XC energy: -9.23934
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23933
+XC energy: -9.23933
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23932
+XC energy: -9.23932
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23932
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23932
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23938
+XC energy: -9.23938
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23939
+XC energy: -9.23939
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23938
+XC energy: -9.23938
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23938
+XC energy: -9.23938
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23937
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23937
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23943
+XC energy: -9.23943
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23944
+XC energy: -9.23944
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23943
+XC energy: -9.23943
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23943
+XC energy: -9.23943
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23942
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23942
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23948
+XC energy: -9.23948
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23949
+XC energy: -9.23949
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23949
+XC energy: -9.23949
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23948
+XC energy: -9.23948
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23948
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23948
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23953
+XC energy: -9.23953
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23954
+XC energy: -9.23954
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23954
+XC energy: -9.23954
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23953
+XC energy: -9.23953
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23953
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23953
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23958
+XC energy: -9.23958
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2396
+XC energy: -9.2396
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23959
+XC energy: -9.23959
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23958
+XC energy: -9.23958
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23958
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23958
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23964
+XC energy: -9.23964
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23965
+XC energy: -9.23965
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23964
+XC energy: -9.23964
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23963
+XC energy: -9.23963
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23963
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23963
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23969
+XC energy: -9.23969
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2397
+XC energy: -9.2397
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2397
+XC energy: -9.2397
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23969
+XC energy: -9.23969
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23969
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23969
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23975
+XC energy: -9.23975
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23976
+XC energy: -9.23976
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23975
+XC energy: -9.23975
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23974
+XC energy: -9.23974
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23974
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23974
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2398
+XC energy: -9.2398
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23981
+XC energy: -9.23981
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23981
+XC energy: -9.23981
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2398
+XC energy: -9.2398
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2398
+
+    ╔════════════════════════════════════════════╗
+    ║        ENERGY CONTRIBUTIONS IN A.U.        ║
+    ╠══════════════════╦═════════════════════════╣
+    ║   ONE ELECTRON   ║      -122.4710539       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   COULOMB        ║        46.5249526       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   NUCLEAR        ║         8.8845996       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   EXC. - CORR.   ║        -9.2397955       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   TOTAL          ║       -76.3012971       ║
+    ╚══════════════════╩═════════════════════════╝
+
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2398
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23985
+XC energy: -9.23985
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23987
+XC energy: -9.23987
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23986
+XC energy: -9.23986
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23985
+XC energy: -9.23985
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23985
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23985
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23991
+XC energy: -9.23991
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23992
+XC energy: -9.23992
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23992
+XC energy: -9.23992
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23991
+XC energy: -9.23991
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23991
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23991
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23997
+XC energy: -9.23997
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23998
+XC energy: -9.23998
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23997
+XC energy: -9.23997
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23996
+XC energy: -9.23996
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23996
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.23996
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24002
+XC energy: -9.24002
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24003
+XC energy: -9.24003
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24003
+XC energy: -9.24003
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24002
+XC energy: -9.24002
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24002
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24002
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24008
+XC energy: -9.24008
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24009
+XC energy: -9.24009
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24009
+XC energy: -9.24009
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24007
+XC energy: -9.24007
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24007
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24007
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24014
+XC energy: -9.24014
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24015
+XC energy: -9.24015
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24014
+XC energy: -9.24014
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24013
+XC energy: -9.24013
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24013
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24013
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24019
+XC energy: -9.24019
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24021
+XC energy: -9.24021
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2402
+XC energy: -9.2402
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24019
+XC energy: -9.24019
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24019
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24019
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24025
+XC energy: -9.24025
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24027
+XC energy: -9.24027
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24026
+XC energy: -9.24026
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24025
+XC energy: -9.24025
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24025
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24025
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24031
+XC energy: -9.24031
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24032
+XC energy: -9.24032
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24032
+XC energy: -9.24032
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24031
+XC energy: -9.24031
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24031
+XC energy: -9.24031
+ CONVERGED AT           5 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24031
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24031
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24037
+XC energy: -9.24037
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24038
+XC energy: -9.24038
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24038
+XC energy: -9.24038
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24036
+XC energy: -9.24036
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24036
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24036
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24043
+XC energy: -9.24043
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24044
+XC energy: -9.24044
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24044
+XC energy: -9.24044
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24042
+XC energy: -9.24042
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24042
+
+    ╔════════════════════════════════════════════╗
+    ║        ENERGY CONTRIBUTIONS IN A.U.        ║
+    ╠══════════════════╦═════════════════════════╣
+    ║   ONE ELECTRON   ║      -122.4824131       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   COULOMB        ║        46.5308405       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   NUCLEAR        ║         8.8906850       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   EXC. - CORR.   ║        -9.2404237       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   TOTAL          ║       -76.3013113       ║
+    ╚══════════════════╩═════════════════════════╝
+
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24042
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24049
+XC energy: -9.24049
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2405
+XC energy: -9.2405
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2405
+XC energy: -9.2405
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24048
+XC energy: -9.24048
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24048
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24048
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24055
+XC energy: -9.24055
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24056
+XC energy: -9.24056
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24056
+XC energy: -9.24056
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24054
+XC energy: -9.24054
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24054
+XC energy: -9.24054
+ CONVERGED AT           5 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24054
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24054
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24061
+XC energy: -9.24061
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24062
+XC energy: -9.24062
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24062
+XC energy: -9.24062
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2406
+XC energy: -9.2406
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2406
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2406
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24067
+XC energy: -9.24067
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24068
+XC energy: -9.24068
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24068
+XC energy: -9.24068
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24066
+XC energy: -9.24066
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24066
+XC energy: -9.24066
+ CONVERGED AT           5 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24066
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24066
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24073
+XC energy: -9.24073
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24074
+XC energy: -9.24074
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24074
+XC energy: -9.24074
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24073
+XC energy: -9.24073
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24073
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24073
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24079
+XC energy: -9.24079
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24081
+XC energy: -9.24081
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2408
+XC energy: -9.2408
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24079
+XC energy: -9.24079
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24079
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24079
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24085
+XC energy: -9.24085
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24087
+XC energy: -9.24087
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24086
+XC energy: -9.24086
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24085
+XC energy: -9.24085
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24085
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24085
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24092
+XC energy: -9.24092
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24093
+XC energy: -9.24093
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24092
+XC energy: -9.24092
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24091
+XC energy: -9.24091
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24091
+XC energy: -9.24091
+ CONVERGED AT           5 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24091
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24091
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24098
+XC energy: -9.24098
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24099
+XC energy: -9.24099
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24099
+XC energy: -9.24099
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24097
+XC energy: -9.24097
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24097
+XC energy: -9.24097
+ CONVERGED AT           5 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24097
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24097
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24104
+XC energy: -9.24104
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24106
+XC energy: -9.24106
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24105
+XC energy: -9.24105
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24104
+XC energy: -9.24104
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24104
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24104
+Weights: [TIMINGS NOT ENABLED]
+Particion 0: 1503730
+Particion 1: 1751600
+Particion 2: 1751450
+Relacion max / min = 1.164837
+--> Thread OMP: 4
+--> Thread CPU: 3
+--> Thread GPU: 1
+--> Correccion de cubos chicos: 250000
+--> Puntos de separacion: 200
+Timer functions: [TIMINGS NOT ENABLED]
+MM point charges: 0
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2411
+XC energy: -9.2411
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24112
+XC energy: -9.24112
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.24111
+XC energy: -9.24111
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2411
+XC energy: -9.2411
+ CONVERGED AT           4 ITERATIONS
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2411
+
+    ╔════════════════════════════════════════════╗
+    ║        ENERGY CONTRIBUTIONS IN A.U.        ║
+    ╠══════════════════╦═════════════════════════╣
+    ║   ONE ELECTRON   ║      -122.4946096       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   COULOMB        ║        46.5371712       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   NUCLEAR        ║         8.8972122       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   EXC. - CORR.   ║        -9.2410988       ║
+    ╠══════════════════╬═════════════════════════╣
+    ║   TOTAL          ║       -76.3013250       ║
+    ╚══════════════════╩═════════════════════════╝
+
+iteracion total: [TIMINGS NOT ENABLED]
+XC energy: -9.2411
+<====== Deinitializing G2G ======>
